@@ -64,6 +64,6 @@ Copy the **B1, A1** Setup Shown in the image below.
 
 ![alt text](https://cdn.discordapp.com/attachments/903492607932518440/938077262027317279/unknown.png "VoiceMeeter Banana Completed Setup")
 
-Your Done! (Hopefully, if everything went as described)
+You're Done! (Hopefully, if everything went as described)
 
 All you have to do now is run **SoundBoard_Main.py** and you should be able to hear something! Fingers Crossed!
