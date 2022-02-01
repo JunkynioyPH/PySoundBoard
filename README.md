@@ -66,4 +66,4 @@ Copy the **B1, A1** Setup Shown in the image below.
 
 Your Done! (Hopefully, if everything went as described)
 
-All you have to do now is run **SoundBoard_Main.py** and you should be able to hear something!
+All you have to do now is run **SoundBoard_Main.py** and you should be able to hear something! Fingers Crossed!
