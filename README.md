@@ -22,7 +22,7 @@ We first have to set these as our default Devices.
 **Right-click** the **sound icon** on your taskbar and click **"Sounds"** (or **Volume Mixer** then click **system sounds icon**)
 
 Click **"Recording"** Tab and set **"VoiceMeeter Output"** as your **Default Microphone**
-![alt text](https://cdn.discordapp.com/attachments/903492607932518440/938078082466730034/unknown.png "Windows Recording Devices")
+![alt text](https://cdn.discordapp.com/attachments/903492607932518440/938089246672158790/unknown.png "Windows Recording Devices")
 
 Once this is done let's move to setting up VoiceMeeter.
 
