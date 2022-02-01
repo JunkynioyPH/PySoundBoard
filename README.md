@@ -10,21 +10,22 @@ Do note that **I do not own ANY OF THE AUDIO FILES** in SoundFiles Folder.
 
 # Pre-Requisites
 This is the default way of making this soundboard to work and it requires 2 things to be installed.
+
 [VoiceMeeter Banana - For routing multiple "mic" inputs to a virtual mic output](https://vb-audio.com/Voicemeeter/banana.htm)
+
 [VB-Cable Audio Device - Virtual Cable for PySoundBoard to output audio to.](https://vb-audio.com/Cable/index.htm)
 
 # Setup VoiceMeeter
 
 We first have to set these as our default Devices.
 **Right-click** the **sound icon** on your taskbar and click **"Sounds"** (or **Volume Mixer** then click **system sounds icon**)
-<!-- Then click the "Playback" Tab and it should look something similar to the image below:
-![alt text](https://cdn.discordapp.com/attachments/903492607932518440/938077957098983504/unknown.png "Windows Playback Devices")
-Right-click "VoiceMeeter Input" and set it as a "Default Device" -->
 
 Click **"Recording"** Tab and set **"VoiceMeeter Output"** as your **Default Microphone**
 ![alt text](https://cdn.discordapp.com/attachments/903492607932518440/938078082466730034/unknown.png "Windows Recording Devices")
 
 Once this is done let's move to setting up VoiceMeeter.
+
+==========================================================
 
 Look for **"HARDWARE INPUT 1"** and click **"Select Input Device"**
 
@@ -34,6 +35,7 @@ Worry not, you can choose any of them, **WDM** or **MME** or **KS**
 
 If it doesn't work, switch to a different one. e.g. You selected **MME** and doesn't work, choose either **WDM** or **KS** if available.
 
+==========================================================
 
 Next is look for **"HARDWARE INPUT 2"** and click **"Select Input Device"**
 
@@ -47,6 +49,7 @@ Worry not, you can choose any of them, **WDM** or **MME** or **KS**
 
 If it doesn't work, switch to a different one. e.g. You selected **MME** and doesn't work, choose either **WDM** or **KS** if available.
 
+==========================================================
 
 Lastly, Below is an image of **MY VoiceMeeter Banana Setup**
 
