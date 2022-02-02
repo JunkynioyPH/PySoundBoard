@@ -141,6 +141,7 @@ def live_update():
     except Exception as Err:
         print(Err)
 
+# Yeah i know that this wont stop already queued tasks but it's just a display and doesn't exactly need to be accurate
 def stop_live_update():
     root.after_cancel(live_update)
     root.after_cancel(AnimatedBar)
