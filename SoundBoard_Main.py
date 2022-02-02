@@ -29,7 +29,7 @@ soundbuttons = ttk.Frame(soundboard, relief=SUNKEN, borderwidth=2)
 soundbuttons.grid(padx=5, pady=5, column=1, row=1, sticky=(N, W, E, S))
 
 controllabel = ttk.Frame(controls, relief=RAISED, borderwidth=2)
-controllabel.grid(column=1, row=1, sticky=(N, W, E, S))
+controllabel.grid(column=1, row=0, sticky=(N, W, E, S))
 
 soundlabel = ttk.Frame(soundboard, relief=RAISED, borderwidth=2)
 soundlabel.grid(column=1, row=0, sticky=(N, W, E, S))
@@ -40,7 +40,7 @@ def Pause():
 
 def Resume():
     pygame.mixer.music.unpause()
-    print("If you have stopped audio, and it's still incrementing the 'Song Position' above 'Toggle Loop'\nYou can Ignore this issue.")
+    print("If you have stopped audio, and it's still incrementing the 'Song Position' above 'Toggle Loop'\nJust ignore it, it does not affect anything.")
 
 def Stop():
     pygame.mixer.music.fadeout(250)
@@ -103,14 +103,14 @@ LoopState = StringVar()
 AnimatedBarText1 = StringVar()
 AnimatedBarText2 = StringVar()
 
+# Since I cant use TTK's Progress Bar and find a working all-rounder AudioVisualizer
+# I made my own Visualiser that shows that something is happening along with the
+# song Position counter
+#
+# Its only purpose is to fill out that space that is existent at the left of the window
 TextContent1 = ""
 TextContent2 = ""
 
-# Since I cant fucking use TTK's Progress Bar and find a working all-rounder AudioVisualizer
-# I made my fucking own Visualiser that shows that something is happening alonng with the
-# song Position counter
-#
-#Its only purpose is to fill out that space that is existent at the left of the window
 def AnimatedBar():
     global TextContent1, TextContent2
     SongPosition = float(pygame.mixer.music.get_pos()/1000)
@@ -197,14 +197,16 @@ except Exception as Err:
     print(Err)
     print("=====================================")
     print(Settings)
-    print("AudioDevice & Volume Settings was Reset due to one of the settings containining Errors.\nSorry for the inconvenience")
+    print("AudioDevice & Volume Settings is reset with the hopes of fixing the issue.\nSorry for the inconvenience")
     UpdateSettings("AudioDevice",DefaultValSettings[0])
     UpdateSettings("Volume",DefaultValSettings[1])
-# initialize GUI placement
+
+# initialize GUI placement and shorten
 btn = ttk.Button
 lb = ttk.Label
-R = 2
+R = 1 # To adjust Y-POS of all buttons and selected labels
 
+# Change the Font of the program
 ttk.Style().configure(".",font=('UD Digi Kyokasho N-B', 10))
 
 # Author and Titles
@@ -218,8 +220,8 @@ SetAudDev_entry.grid(column=3,row=2,sticky=(N,S,E,W))
 btn(header,text="Set Device",command=ChangeAudioDevice).grid(column=4,row=2,sticky=(N,S,E,W))
 
 # Labels and Info
-lb(controllabel, text="Controls").grid(column=1, row=1,sticky=(N,S,E,W))
-lb(soundlabel, text="Sound Board").grid(column=1, row=1,sticky=(N,S,E,W))
+lb(controllabel, text="Controls").grid(column=1, row=0,sticky=(N,S,E,W))
+lb(soundlabel, text="Sound Board").grid(column=1, row=0,sticky=(N,S,E,W))
 
 
 # Audio Controls
@@ -234,6 +236,8 @@ btn(controls,text="Toggle Loop",command=AudioDef.ToggleLoop).grid(column=1,row=R
 lb(controls, text="Next played has").grid(column=1, row=R+7,sticky=S)
 lb(controls, textvariable=LoopState).grid(column=1, row=R+8,sticky=N)
 lb(controls, textvariable=AnimatedBarText1).grid(column=1, row=R+9,sticky=N)
+
+# Dumb Bars below the Audio Controls
 lb(controls, text="]").grid(column=1, row=R+9,sticky=E)
 lb(controls, text="[").grid(column=1, row=R+9,sticky=W)
 lb(controls, textvariable=AnimatedBarText2).grid(column=1, row=R+10,sticky=N)
