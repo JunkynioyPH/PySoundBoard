@@ -10,6 +10,12 @@ Do note that **I do not own ANY OF THE AUDIO FILES** in SoundFiles Folder.
 **Sounds/Music/Audio are owned by their respective owners.**
 
 # Pre-Requisites
+Requires **python** to be installed. **(Python 2.8.x or Python 3.x)**
+
+Requires **pygame** to be installed. **(pip install pygame)**
+
+For **ListAudioDevices.py**, it requires **sounddevice** to be installed. **(pip install sounddevice)** Though this is optional.
+
 This is the default way of making this soundboard to work and it requires 2 things to be installed.
 
 [VoiceMeeter Banana - For routing multiple "mic" inputs to a virtual mic output](https://vb-audio.com/Voicemeeter/banana.htm)
