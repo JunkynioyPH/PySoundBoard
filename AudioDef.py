@@ -45,6 +45,10 @@ def SamsungStartUp():
 def UltraInstinct():
     Play(".\SoundFiles\\ultrainstinct.mp3")
 
+def ZoneAnkha():
+    Play(".\SoundFiles\\zoneankha.mp3")
+
+
 def GiornoThemePiano():
     Play(".\Soundfiles\\giornothemepiano.mp3")
 
