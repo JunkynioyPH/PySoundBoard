@@ -2,7 +2,7 @@
 Soundboard written in python as a hobby project.
 
 I've always wanted a soundboard but I cant find one that is free to use.
-So I made my own!
+So I made my own! Lmao.
 
 # Disclaimer
 Do note that **I do not own ANY OF THE AUDIO FILES** in SoundFiles Folder.
