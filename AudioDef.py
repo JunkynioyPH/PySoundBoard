@@ -15,7 +15,8 @@ def ToggleLoop():
         LoopState = 0
 
 def Play(AudioFile):
-    global LoopState, LoopTextState
+    global LoopState, LoopTextState, AudioPath
+    AudioPath = AudioFile
     pygame.mixer.music.unload()
     pygame.mixer.music.load(AudioFile)
     pygame.mixer.music.play(loops=LoopState)
