@@ -74,7 +74,7 @@ def CheckPath2Settings():
 def UpdateSettings(Variable,Value):
     Settings[Variable] = Value
     UpdateSettings = open("Settings.json","w")
-    print("settings.json is opened")
+    print("\nsettings.json is opened")
     UpdateSettings.write(json.dumps(Settings))
     print("settings.json is updated")
     UpdateSettings.close()
@@ -136,25 +136,19 @@ def live_update():
     try:
         SongPos.set(str(pygame.mixer.music.get_pos()/1000)+"s")
         LoopState.set(AudioDef.LoopTextState)
+        root.title("SoundBoard GUI - File : '"+AudioDef.AudioPath+"' is loaded.")
         root.after(250, AnimatedBar)
         root.after(100, live_update)
     except Exception as Err:
         print(Err)
 
-# Yeah i know that this wont stop already queued tasks but it's just a display and doesn't exactly need to be accurate
-def stop_live_update():
-    root.after_cancel(live_update)
-    root.after_cancel(AnimatedBar)
-
 def ChangeAudioDevice():
     Device = AudioDevice.get()
     try:
-        stop_live_update()
         pygame.quit()
         pygame.mixer.pre_init(devicename=Device)
         pygame.mixer.init()
         pygame.mixer.music.set_volume(0.1)
-        live_update()
         UpdateSettings("AudioDevice",Device)
         print("\n"+AudioDevice.get()+" Found!\nSuccessfully Bound to Device!")
         AudioDef.Play(".\SoundFiles\start.ogg")
