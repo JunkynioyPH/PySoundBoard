@@ -145,10 +145,10 @@ def live_update():
 def ChangeAudioDevice():
     Device = AudioDevice.get()
     try:
-        pygame.quit()
+        pygame.mixer.quit()
         pygame.mixer.pre_init(devicename=Device)
         pygame.mixer.init()
-        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.set_volume(float(Settings["Volume"])/100)
         UpdateSettings("AudioDevice",Device)
         print("\n"+AudioDevice.get()+" Found!\nSuccessfully Bound to Device!")
         AudioDef.Play(".\SoundFiles\start.ogg")
