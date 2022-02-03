@@ -151,7 +151,7 @@ def ChangeAudioDevice():
         pygame.mixer.music.set_volume(float(Settings["Volume"])/100)
         UpdateSettings("AudioDevice",Device)
         print("\n"+AudioDevice.get()+" Found!\nSuccessfully Bound to Device!")
-        AudioDef.Play(".\SoundFiles\start.ogg")
+        AudioDef.Play(".\SoundFiles\start.wav")
     except Exception as err:
         print("\nThere's "+str(err)+"\n"+AudioDevice.get())
         AudioDevice.set(Settings["AudioDevice"])
