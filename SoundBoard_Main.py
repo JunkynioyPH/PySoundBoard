@@ -184,7 +184,7 @@ try:
     pygame.mixer.pre_init(devicename=AudioDevice.get())
     pygame.mixer.init()
     pygame.mixer.music.set_volume(float(Vol.get())/100)
-    AudioDef.Play(".\SoundFiles\start.ogg")
+    AudioDef.Play(".\SoundFiles\start.wav")
 except Exception as Err:
     print("=====================================")
     print("Fatal Error During PygameMixerInit : ")
