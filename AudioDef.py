@@ -49,6 +49,8 @@ def UltraInstinct():
 def ZoneAnkha():
     Play(".\SoundFiles\\zoneankha.mp3")
 
+def GangstaParadise():
+    Play(".\SoundFiles\\gangstaparadise.mp3")
 
 def GiornoThemePiano():
     Play(".\Soundfiles\\giornothemepiano.mp3")

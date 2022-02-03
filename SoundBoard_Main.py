@@ -287,6 +287,7 @@ btn(soundbuttons,  text="SadHarmonica", command=AudioDef.SadHarmonica).grid(colu
 btn(soundbuttons,  text="Bruh", command=AudioDef.Bruh).grid(column=5, row=R,sticky=(N,S,E,W))
 btn(soundbuttons,  text="JebNooo", command=AudioDef.JebNooo).grid(column=5, row=R+1,sticky=(N,S,E,W))
 btn(soundbuttons,  text="ZoneAnkha", command=AudioDef.ZoneAnkha).grid(column=5, row=R+2,sticky=(N,S,E,W))
+btn(soundbuttons,  text="GangstaParadise", command=AudioDef.GangstaParadise).grid(column=5, row=R+3,sticky=(N,S,E,W))
 
 # Show GUI and Enable live_update
 root.resizable(width=False, height=False)
