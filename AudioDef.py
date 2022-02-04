@@ -82,6 +82,12 @@ def Bruh():
 def ChingChengHanji():
     Play('.\SoundFiles\\chingchenghanji.mp3')
 
+def SigmaMindset():
+    Play('.\SoundFiles\\sigmamindset.mp3')
+
+def USSRAnthem():
+    Play('.\SoundFiles\\ussranthem.mp3')
+
 def YouWhat():
     Play('.\SoundFiles\\youwhat.mp3')
 

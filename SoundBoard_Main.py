@@ -289,6 +289,8 @@ btn(soundbuttons,  text="ZoneAnkha", command=AudioDef.ZoneAnkha).grid(column=5, 
 btn(soundbuttons,  text="GangstaParadise", command=AudioDef.GangstaParadise).grid(column=5, row=R+3,sticky=(N,S,E,W))
 btn(soundbuttons,  text="HeartFlatline", command=AudioDef.HeartFlatline).grid(column=5, row=R+4,sticky=(N,S,E,W))
 btn(soundbuttons,  text="近前看其 (?)", command=AudioDef.ChingChengHanji).grid(column=5, row=R+5,sticky=(N,S,E,W))
+btn(soundbuttons,  text="SigmaMindset", command=AudioDef.SigmaMindset).grid(column=5, row=R+6,sticky=(N,S,E,W))
+btn(soundbuttons,  text="USSRAnthem", command=AudioDef.USSRAnthem).grid(column=5, row=R+7,sticky=(N,S,E,W))
 
 # Show GUI and Enable live_update
 root.resizable(width=False, height=False)
