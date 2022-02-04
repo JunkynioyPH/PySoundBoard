@@ -79,6 +79,9 @@ def JebNooo():
 def Bruh():
     Play('.\SoundFiles\\bruh.mp3')
 
+def ChingChengHanji():
+    Play('.\SoundFiles\\chingchenghanji.mp3')
+
 def YouWhat():
     Play('.\SoundFiles\\youwhat.mp3')
 
