@@ -3,6 +3,7 @@ from tkinter import ttk
 from pathlib import Path
 
 import pygame
+import time
 import AudioDef
 import json
 import os
@@ -44,6 +45,10 @@ def Resume():
 
 def Stop():
     pygame.mixer.music.fadeout(250)
+
+# Clear Console
+def clearconsole():
+    os.system('cls' if os.name=='nt' else 'clear')
 
 # Load Settings
 def CheckPath2Settings():
@@ -180,24 +185,34 @@ if int(Settings["Splash"]) == 1:
     UpdateSettings("Splash",0)
 
 # Start audio system
+tries = 0
 def InitializeAudioSystem():
-    try:
-        pygame.mixer.pre_init(devicename=Settings["AudioDevice"])
-        pygame.mixer.init()
-        pygame.mixer.music.set_volume(float(Vol.get())/100)
-        AudioDef.Play("start.wav")
-    except Exception as Err:
-        print("=====================================")
-        print("Error During PygameMixerInit : ")
-        print(Err)
-        print("=====================================")
-        print(Settings)
-        print("AudioDevice & Volume Settings is reset with the hopes of fixing the issue.\nSorry for the inconvenience.\n\nIf this did not fix the issue, please create a 'New Issue' on the github page.\nhttps://github.com/JunkynioyPH/PySoundBoard/issues")
-        UpdateSettings("AudioDevice",DefaultValSettings[0])
-        UpdateSettings("Volume",DefaultValSettings[1])
-        AudioDevice.set(Settings["AudioDevice"])
-        InitializeAudioSystem()
-        SetVol()
+    global tries
+    if tries < 40:
+        try:
+            pygame.mixer.pre_init(devicename=Settings["AudioDevice"])
+            pygame.mixer.init()
+            pygame.mixer.music.set_volume(float(Vol.get())/100)
+            AudioDef.Play("start.wav")
+        except Exception as Err:
+            tries += 1
+            print("=====================================")
+            print("Error During PygameMixerInit : ")
+            print(Err)
+            print("=====================================")
+            print(Settings)
+            print("AudioDevice & Volume Settings is reset with the hopes of fixing the issue.\nSorry for the inconvenience.\n\nIf this did not fix the issue, please create a 'New Issue' on the github page.\nhttps://github.com/JunkynioyPH/PySoundBoard/issues")
+            UpdateSettings("AudioDevice",DefaultValSettings[0])
+            UpdateSettings("Volume",DefaultValSettings[1])
+            AudioDevice.set(Settings["AudioDevice"])
+            InitializeAudioSystem()
+            SetVol()
+    else:
+        os.system('color 0c')
+        print("\n\nMaximum speed-retries Reached. (40 Retries)")
+        time.sleep(5)
+        exit()
+
 
 # Perform Initialization
 InitializeAudioSystem()

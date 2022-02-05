@@ -9,8 +9,8 @@ lb = ttk.Label
 
 def Close():
     root.destroy()
-    
-lb(mframe, text="Note that this program assumes you have \nVoiceMeeter & VB-Audio Virtual Cable\nalready setup.\nUnless you know what you are doing\nif you don't have them setup.").grid(column=2, row=1,sticky=(N,E,W))
+
+lb(mframe, text="Note that this program assumes you have \nVoiceMeeter & VB-Audio Virtual Cable\nalready setup.\n\nUnless you know what you are doing\nYou will have to manually set\nthe audio device in settings.json.\nElse it will just not work.").grid(column=2, row=1,sticky=(N,E,W))
 btn(mframe,text="Continue",command=Close).grid(column=2,row=2,sticky=(N,S,E,W))
 
 root.mainloop()
