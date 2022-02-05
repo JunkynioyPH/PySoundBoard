@@ -60,7 +60,7 @@ def CheckPath2Settings():
             CheckPath2Settings()
             print("settings.json reset complete")
     else:
-        x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":10,"Splash":1}
+        x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":"10","Splash":1}
         DefSettingsDump = open("Settings.json","a")
         print("settings.json is made")
         DefSettingsDump.write(json.dumps(x))
@@ -151,7 +151,7 @@ def ChangeAudioDevice():
         pygame.mixer.music.set_volume(float(Settings["Volume"])/100)
         UpdateSettings("AudioDevice",Device)
         print("\n"+AudioDevice.get()+" Found!\nSuccessfully Bound to Device!")
-        AudioDef.Play(".\SoundFiles\start.wav")
+        AudioDef.Play("start.wav")
     except Exception as err:
         print("\nThere's "+str(err)+"\n"+AudioDevice.get())
         AudioDevice.set(Settings["AudioDevice"])
@@ -182,7 +182,7 @@ if int(Settings["Splash"]) == 1:
 # Start audio system
 def InitializeAudioSystem():
     try:
-        pygame.mixer.pre_init(devicename=AudioDevice.get())
+        pygame.mixer.pre_init(devicename=Settings["AudioDevice"])
         pygame.mixer.init()
         pygame.mixer.music.set_volume(float(Vol.get())/100)
         AudioDef.Play("start.wav")
@@ -192,10 +192,12 @@ def InitializeAudioSystem():
         print(Err)
         print("=====================================")
         print(Settings)
-        print("AudioDevice & Volume Settings is reset with the hopes of fixing the issue.\nSorry for the inconvenience.\nIf this did not fix the issue, please create a 'New Issue' on the github page.\nhttps://github.com/JunkynioyPH/PySoundBoard/issues")
+        print("AudioDevice & Volume Settings is reset with the hopes of fixing the issue.\nSorry for the inconvenience.\n\nIf this did not fix the issue, please create a 'New Issue' on the github page.\nhttps://github.com/JunkynioyPH/PySoundBoard/issues")
         UpdateSettings("AudioDevice",DefaultValSettings[0])
         UpdateSettings("Volume",DefaultValSettings[1])
+        AudioDevice.set(Settings["AudioDevice"])
         InitializeAudioSystem()
+        SetVol()
 
 # Perform Initialization
 InitializeAudioSystem()
