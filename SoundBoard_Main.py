@@ -179,7 +179,7 @@ if int(Settings["Splash"]) == 1:
     os.system('python Splash.py')
     UpdateSettings("Splash",0)
 
-# Start audio system\
+# Start audio system
 def InitializeAudioSystem():
     try:
         pygame.mixer.pre_init(devicename=AudioDevice.get())
@@ -196,6 +196,9 @@ def InitializeAudioSystem():
         UpdateSettings("AudioDevice",DefaultValSettings[0])
         UpdateSettings("Volume",DefaultValSettings[1])
         InitializeAudioSystem()
+
+# Perform Initialization
+InitializeAudioSystem()
 
 # initialize GUI placement and shorten
 btn = ttk.Button
