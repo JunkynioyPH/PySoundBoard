@@ -174,7 +174,7 @@ def SetVol():
         print("\n'"+str(Vol.get())+"' is not a Valid Number between 0-100!")
         Vol.set(pygame.mixer.music.get_volume()*100)
 
-# Show First-Time Execution
+# Show First-Time Execution then turn off pop up
 if int(Settings["Splash"]) == 1:
     os.system('python Splash.py')
     UpdateSettings("Splash",0)
