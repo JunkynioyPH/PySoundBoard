@@ -18,141 +18,144 @@ def Play(AudioFile):
     global LoopState, LoopTextState, AudioPath
     AudioPath = AudioFile
     pygame.mixer.music.unload()
-    pygame.mixer.music.load(AudioFile)
+    pygame.mixer.music.load(".\SoundFiles\\"+AudioFile)
     pygame.mixer.music.play(loops=LoopState)
     pygame.init()
 
 def SmashBroDrillRemix():
-    Play(".\SoundFiles\\smashbrodrillremix.mp3")
+    Play("smashbrodrillremix.mp3")
 
 def VineBoom():
-    Play(".\SoundFiles\\vineboom.mp3")
+    Play("vineboom.mp3")
 
 def DreamTranceMusic():
-    Play(".\SoundFiles\\dreamtrancemusic.mp3")
+    Play("dreamtrancemusic.mp3")
 
 def DSoulsDeath():
-    Play(".\SoundFiles\\dsoulsdeath.mp3")
+    Play("dsoulsdeath.mp3")
 
 def RobloxOof():
-    Play(".\SoundFiles\\robloxoof.mp3")
+    Play("robloxoof.mp3")
 
 def SteveOof():
-    Play(".\SoundFiles\\steveoof.mp3")
+    Play("steveoof.mp3")
 
 def SamsungStartUp():
-    Play(".\SoundFiles\\samsungstartup.mp3")
+    Play("samsungstartup.mp3")
 
 def UltraInstinct():
-    Play(".\SoundFiles\\ultrainstinct.mp3")
+    Play("ultrainstinct.mp3")
 
 def ZoneAnkha():
-    Play(".\SoundFiles\\zoneankha.mp3")
+    Play("zoneankha.mp3")
 
 def GangstaParadise():
-    Play(".\SoundFiles\\gangstaparadise.mp3")
+    Play("gangstaparadise.mp3")
 
 def GiornoThemePiano():
-    Play(".\Soundfiles\\giornothemepiano.mp3")
+    Play("giornothemepiano.mp3")
 
 def SickoModeWaaah():
-    Play(".\SoundFiles\\sickomodewaaah.mp3")
+    Play("sickomodewaaah.mp3")
 
 def DSoulsBossMusic():
-    Play(".\SoundFiles\\dsoulsbossmusic.mp3")
+    Play("dsoulsbossmusic.mp3")
 
 def ArabicRingtone():
-    Play(".\SoundFiles\\arabicringtone.mp3")
+    Play("arabicringtone.mp3")
 
 def IndianMusicMeme():
-    Play(".\SoundFiles\\panjabimc.mp3")
+    Play("panjabimc.mp3")
+
+def OhHarderDaddy():
+    Play("ohharderdaddy.mp3")
 
 def SusBodyReported():
-    Play(".\SoundFiles\\susbodyreported.mp3")
+    Play("susbodyreported.mp3")
 
 def EmotionalDamage():
-    Play(".\SoundFiles\\emotionaldamage.mp3")
+    Play("emotionaldamage.mp3")
 
 def JebNooo():
-    Play(".\SoundFiles\\jebnooo.mp3")
+    Play("jebnooo.mp3")
 
 def Bruh():
-    Play('.\SoundFiles\\bruh.mp3')
+    Play('bruh.mp3')
 
 def ChingChengHanji():
-    Play('.\SoundFiles\\chingchenghanji.mp3')
+    Play('chingchenghanji.mp3')
 
 def SigmaMindset():
-    Play('.\SoundFiles\\sigmamindset.mp3')
+    Play('sigmamindset.mp3')
 
 def MissTheRage():
-    Play('.\SoundFiles\\misstherage.mp3')
+    Play('misstherage.mp3')
 
 def USSRAnthem():
-    Play('.\SoundFiles\\ussranthem.mp3')
+    Play('ussranthem.mp3')
 
 def YouWhat():
-    Play('.\SoundFiles\\youwhat.mp3')
+    Play('youwhat.mp3')
 
 def SusImposterRole():
-    Play(".\SoundFiles\\susimposterrole.mp3")
+    Play("susimposterrole.mp3")
 
 def SadHarmonicaEar():
-    Play(".\SoundFiles\\sadharmonicaEar.mp3")
+    Play("sadharmonicaEar.mp3")
 
 def SadHarmonica():
-    Play(".\SoundFiles\\sadharmonica.mp3")
+    Play("sadharmonica.mp3")
 
 def DJAirhorn():
-    Play(".\SoundFiles\\djairhorn.mp3")
+    Play("djairhorn.mp3")
 
 def ISendU2Jesus():
-    Play(".\SoundFiles\\isendu2jesus.mp3")
+    Play("isendu2jesus.mp3")
 
 def SmileDogMeme():
-    Play(".\SoundFiles\\smiledogmeme.mp3")
+    Play("smiledogmeme.mp3")
 
 def Helicopterx2():
-    Play(".\SoundFiles\\helicopterx2.mp3")
+    Play("helicopterx2.mp3")
 
 def WHATTHEFUCK():
-    Play(".\SoundFiles\\wtf.ogg")
+    Play("wtf.ogg")
 
 def WHAT():
-    Play(".\SoundFiles\\wat.ogg")
+    Play("wat.ogg")
 
 def ToBeContinued():
-    Play(".\SoundFiles\\tbc.mp3")
+    Play("tbc.mp3")
 
 def PHub():
-    Play(".\SoundFiles\\phub.mp3")
+    Play("phub.mp3")
 
 def ThunderStorm():
-    Play(".\SoundFiles\\thunderstorm.mp3")
+    Play("thunderstorm.mp3")
 
 def KahootLobby():
-    Play(".\SoundFiles\\kahootlobby.mp3")
+    Play("kahootlobby.mp3")
 
 def HeartFlatline():
-    Play(".\SoundFiles\\heartflatline.mp3")
+    Play("heartflatline.mp3")
 
 def WhatHow_Meme():
-    Play(".\SoundFiles\\whathowmeme.mp3")
+    Play("whathowmeme.mp3")
 
 def GTAWasted():
-    Play(".\SoundFiles\\gtawasted.mp3")
+    Play("gtawasted.mp3")
 
 def BFGDivision():
-    Play(".\SoundFiles\\bfgdivision.mp3")
+    Play("bfgdivision.mp3")
 
 def WinXPShutDown():
-    Play(".\SoundFiles\\winxpshutdown.wav")
+    Play("winxpshutdown.wav")
 
 def WinXPStartup():
-    Play(".\SoundFiles\\winxpstartup.wav")
+    Play("winxpstartup.wav")
 
 def WinXPCritStop():
-    Play(".\SoundFiles\\winxpcritstop.wav")
+    Play("winxpcritstop.wav")
 
 def WinXPError():
-    Play(".\SoundFiles\\winxperror.wav")
+    Play("winxperror.wav")
