@@ -248,6 +248,7 @@ btn(soundbuttons, text="SamsungStartUp",command=AudioDef.SamsungStartUp).grid(co
 btn(soundbuttons, text="VineBoom",command=AudioDef.VineBoom).grid(column=1,row=R+6,sticky=(N,S,E,W))
 btn(soundbuttons, text="RobloxOof",command=AudioDef.RobloxOof).grid(column=1,row=R+7,sticky=(N,S,E,W))
 btn(soundbuttons, text="SteveOof",command=AudioDef.SteveOof).grid(column=1,row=R+8,sticky=(N,S,E,W))
+btn(soundbuttons, text="OhHarderDaddy",command=AudioDef.OhHarderDaddy).grid(column=1,row=R+9,sticky=(N,S,E,W))
 
 # Audio Files (Col 2)
 btn(soundbuttons,  text="KahootLobby", command=AudioDef.KahootLobby).grid(column=2, row=R,sticky=(N,S,E,W))
