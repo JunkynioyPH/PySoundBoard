@@ -179,21 +179,23 @@ if int(Settings["Splash"]) == 1:
     os.system('python Splash.py')
     UpdateSettings("Splash",0)
 
-# Start audio system
-try:
-    pygame.mixer.pre_init(devicename=AudioDevice.get())
-    pygame.mixer.init()
-    pygame.mixer.music.set_volume(float(Vol.get())/100)
-    AudioDef.Play("start.wav")
-except Exception as Err:
-    print("=====================================")
-    print("Error During PygameMixerInit : ")
-    print(Err)
-    print("=====================================")
-    print(Settings)
-    print("AudioDevice & Volume Settings is reset with the hopes of fixing the issue.\nSorry for the inconvenience.\nIf this did not fix the issue, please create a 'New Issue' on the github page.\nhttps://github.com/JunkynioyPH/PySoundBoard/issues")
-    UpdateSettings("AudioDevice",DefaultValSettings[0])
-    UpdateSettings("Volume",DefaultValSettings[1])
+# Start audio system\
+def InitializeAudioSystem():
+    try:
+        pygame.mixer.pre_init(devicename=AudioDevice.get())
+        pygame.mixer.init()
+        pygame.mixer.music.set_volume(float(Vol.get())/100)
+        AudioDef.Play("start.wav")
+    except Exception as Err:
+        print("=====================================")
+        print("Error During PygameMixerInit : ")
+        print(Err)
+        print("=====================================")
+        print(Settings)
+        print("AudioDevice & Volume Settings is reset with the hopes of fixing the issue.\nSorry for the inconvenience.\nIf this did not fix the issue, please create a 'New Issue' on the github page.\nhttps://github.com/JunkynioyPH/PySoundBoard/issues")
+        UpdateSettings("AudioDevice",DefaultValSettings[0])
+        UpdateSettings("Volume",DefaultValSettings[1])
+        InitializeAudioSystem()
 
 # initialize GUI placement and shorten
 btn = ttk.Button
