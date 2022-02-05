@@ -85,6 +85,9 @@ def ChingChengHanji():
 def SigmaMindset():
     Play('.\SoundFiles\\sigmamindset.mp3')
 
+def MissTheRage():
+    Play('.\SoundFiles\\misstherage.mp3')
+
 def USSRAnthem():
     Play('.\SoundFiles\\ussranthem.mp3')
 
