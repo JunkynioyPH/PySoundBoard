@@ -8,7 +8,7 @@ Please refer to the issues tab.
 # Disclaimer
 Do note that **I do not own ANY OF THE AUDIO FILES** in SoundFiles Folder.
 
-**However**, I made the "start.wav" myself. :)
+**However**, I made the "start.wav" myself. I'm Proud of it! :)
 
 **Sounds/Music/Audio are owned by their respective owners.**
 
