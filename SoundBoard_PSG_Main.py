@@ -23,5 +23,8 @@ layout = [
 window = sg.Window('SoundBoard PySimpleGUI', layout)
 
 # This will create the Window and read window if already exists, make sure to add this in While Main Loop
-event, values = window.read()
-print(values)
+while True:
+    event, values = window.read()
+    print(values)
+    if event == sg.WINDOWCLOSED:
+        break
