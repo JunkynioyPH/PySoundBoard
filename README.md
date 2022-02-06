@@ -17,7 +17,7 @@ Requires **python** to be installed. **(Python 3.10 +)**
 
 Requires **pygame** to be installed. **(pip install pygame)**
 
-Requires **pysimplegui** to be installed **(pip install pysimplegui)** **!!! FOR SoundBoard_PSG_Main.py !!!**
+Requires **pysimplegui** to be installed **(pip install pysimplegui)** **!!!  FOR SoundBoard_PSG_Main.py  !!!**
 
 For **ListAudioDevices.py**, it requires **sounddevice** to be installed. **(pip install sounddevice)** Though this is optional.
 
