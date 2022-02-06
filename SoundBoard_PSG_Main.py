@@ -26,5 +26,5 @@ window = sg.Window('SoundBoard PySimpleGUI', layout)
 while True:
     event, values = window.read()
     print(values)
-    if event == sg.WINDOWCLOSED:
+    if event == sg.WINDOW_CLOSED:
         break
