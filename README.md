@@ -13,9 +13,11 @@ Do note that **I do not own ANY OF THE AUDIO FILES** in SoundFiles Folder.
 **Sounds/Music/Audio are owned by their respective owners.**
 
 # Pre-Requisites
-Requires **python** to be installed. **(Python 3.x)**
+Requires **python** to be installed. **(Python 3.x +)**
 
 Requires **pygame** to be installed. **(pip install pygame)**
+
+Requires **pysimplegui** to be installed **(pip install pysimplegui)** **!!! FOR SoundBoard_PSG_Main.py !!!**
 
 For **ListAudioDevices.py**, it requires **sounddevice** to be installed. **(pip install sounddevice)** Though this is optional.
 
