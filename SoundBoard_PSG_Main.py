@@ -13,11 +13,75 @@ sg.theme('Dark Grey 13')
 # Make this only one time
 sg.popup_ok('Note that this program assumes you have \nVoiceMeeter & VB-Audio Virtual Cable\nalready setup.\n\nUnless you know what you are doing\nYou will have to manually set\nthe audio device in settings.json.\nElse it will just not work.')
 
+Sounds = [
+"SmashBroDrillRemix",
+"UltraInstinct",
+"DSoulsBossMusic",
+"DSoulsDeath",
+"ArabicRingtone",
+"SamsungStartUp",
+"VineBoom",
+"RobloxOof",
+"SteveOof",
+"OhHarderDaddy",
+"KahootLobby",
+"ToBeContinued",
+"SusImposterRole",
+"SusBodyReported",
+"EmotionalDamage",
+"ISendU2Jesus",
+"YouWhat",
+"WHATTHEFUCK",
+"WHAT",
+"ThunderStorm",
+"BFGDivision",
+"SmileDogMeme",
+"Helicopterx2",
+"WinXPShutDown",
+"WinXPStartup",
+"WinXPCritStop",
+"WinXPError",
+"SadHarmonicaEar",
+"PHub",
+"GTAWasted",
+"GiornoThemePiano",
+"SickoModeWaaah",
+"DreamTranceMusic",
+"IndianMusicMeme",
+"DJAirhorn",
+"WhatHow_Meme",
+"SadHarmonica",
+"Bruh",
+"JebNooo",
+"ZoneAnkha",
+"GangstaParadise",
+"HeartFlatline",
+"ChingChengHanji",
+"SigmaMindset",
+"MissTheRage",
+"USSRAnthem"
+]
+
+# shorten
+lb  = sg.Text
+btn = sg.Button
+
 layout = [
     # Top Banner
     [
-    [sg.Text('Soundboard written in Python! - By: Junkynioy#2408')],
-    [sg.Text("AudioDevice "), sg.Input(key='-AUDIODEVICE-')]
+        [lb('Soundboard written in Python! - By: Junkynioy#2408')],
+        [lb("AudioDevice "), sg.Input('CABLE Input (VB-Audio Virtual Cable)',key='-AUDIODEVICE-'), btn('Set Device')]
+    ],
+    # Main Frame
+    [
+        # Control Buttons
+        [
+            lb('Controls'), btn('Stop Playback'), btn('Pause Playback'), btn('Resume Playback'), lb('DURATION'), btn('Toggle Loop'), lb('Next played has'), lb('T/F LOOPING')
+        ],
+        # SoundBoard
+        [
+
+        ]
     ]
 ]
 window = sg.Window('SoundBoard PySimpleGUI', layout)
@@ -26,5 +90,10 @@ window = sg.Window('SoundBoard PySimpleGUI', layout)
 while True:
     event, values = window.read()
     print(values)
-    if event == sg.WINDOW_CLOSED:
-        break
+    match event:
+        case sg.WINDOW_CLOSED:
+            break
+        case 'Set Device':
+            print('set device'+str(values['-AUDIODEVICE-']))
+        case _:
+            print("Something Went Wrong... oops.")

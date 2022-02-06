@@ -13,7 +13,7 @@ Do note that **I do not own ANY OF THE AUDIO FILES** in SoundFiles Folder.
 **Sounds/Music/Audio are owned by their respective owners.**
 
 # Pre-Requisites
-Requires **python** to be installed. **(Python 3.x +)**
+Requires **python** to be installed. **(Python 3.10 +)**
 
 Requires **pygame** to be installed. **(pip install pygame)**
 
