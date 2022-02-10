@@ -282,6 +282,7 @@ btn(soundbuttons,  text="ISendU2Jesus",command=AudioDef.ISendU2Jesus).grid(colum
 btn(soundbuttons,  text="YouWhat", command=AudioDef.YouWhat).grid(column=2, row=R+6,sticky=(N,S,E,W))
 btn(soundbuttons,  text="WHATTHEFUCK", command=AudioDef.WHATTHEFUCK).grid(column=2, row=R+7,sticky=(N,S,E,W))
 btn(soundbuttons,  text="WHAT", command=AudioDef.WHAT).grid(column=2, row=R+8,sticky=(N,S,E,W))
+btn(soundbuttons,  text="Shawty", command=AudioDef.Shawty).grid(column=2, row=R+9,sticky=(N,S,E,W))
 
 # Audio Files (Col 3)
 btn(soundbuttons,  text="ThunderStorm", command=AudioDef.ThunderStorm).grid(column=3, row=R,sticky=(N,S,E,W))

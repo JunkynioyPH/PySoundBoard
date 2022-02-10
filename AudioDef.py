@@ -85,6 +85,9 @@ def Bruh():
 def ChingChengHanji():
     Play('chingchenghanji.mp3')
 
+def Shawty():
+    Play('shawty.mp3')
+
 def SigmaMindset():
     Play('sigmamindset.mp3')
 
