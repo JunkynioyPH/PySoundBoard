@@ -8,6 +8,17 @@ import AudioDef
 import json
 import os
 
+# Console splash
+print('''
+██████╗ ██╗   ██╗███████╗ ██████╗ ██╗   ██╗███╗   ██╗██████╗ ██████╗  ██████╗  █████╗ ██████╗ ██████╗
+██╔══██╗╚██╗ ██╔╝██╔════╝██╔═══██╗██║   ██║████╗  ██║██╔══██╗██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██╔══██╗
+██████╔╝ ╚████╔╝ ███████╗██║   ██║██║   ██║██╔██╗ ██║██║  ██║██████╔╝██║   ██║███████║██████╔╝██║  ██║
+██╔═══╝   ╚██╔╝  ╚════██║██║   ██║██║   ██║██║╚██╗██║██║  ██║██╔══██╗██║   ██║██╔══██║██╔══██╗██║  ██║
+██║        ██║   ███████║╚██████╔╝╚██████╔╝██║ ╚████║██████╔╝██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝
+╚═╝        ╚═╝   ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝
+                    Written By : Junkynioy#2408 - https://github.com/JunkynioyPH
+''')
+
 # Preliminary preparations
 os.system("title SoundBoard Backend")
 root = Tk()
@@ -85,10 +96,11 @@ def UpdateSettings(Variable,Value):
     UpdateSettings.close()
     print(Settings)
 
+# Check and open then load settings
 CheckPath2Settings()
 
 # Show Current Settings
-print("\nSettings")
+print("\nCurrent Settings")
 print(Settings)
 
 # initialize Values
