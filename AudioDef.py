@@ -67,6 +67,12 @@ def ArabicRingtone():
 def IndianMusicMeme():
     Play("panjabimc.mp3")
 
+def ReZeroGigguk():
+    Play("rezerogigguk.mp3")
+
+def Unravel():
+    Play("unravel.mp3")
+
 def OhHarderDaddy():
     Play("ohharderdaddy.mp3")
 

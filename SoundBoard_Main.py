@@ -294,6 +294,7 @@ btn(soundbuttons,  text="WinXPStartup", command=AudioDef.WinXPStartup).grid(colu
 btn(soundbuttons,  text="WinXPCritStop", command=AudioDef.WinXPCritStop).grid(column=3, row=R+6,sticky=(N,S,E,W))
 btn(soundbuttons,  text="WinXPError", command=AudioDef.WinXPError).grid(column=3, row=R+7,sticky=(N,S,E,W))
 btn(soundbuttons,  text="SadHarmonica(!!!)", command=AudioDef.SadHarmonicaEar).grid(column=3, row=R+8,sticky=(N,S,E,W))
+btn(soundbuttons,  text="ReZeroGigguk", command=AudioDef.ReZeroGigguk).grid(column=3, row=R+9,sticky=(N,S,E,W))
 
 # AudioFiles (Col 4)
 btn(soundbuttons,  text="PHub", command=AudioDef.PHub).grid(column=4, row=R,sticky=(N,S,E,W))
@@ -305,6 +306,7 @@ btn(soundbuttons,  text="IndianMusicMeme", command=AudioDef.IndianMusicMeme).gri
 btn(soundbuttons,  text="DJAirhorn", command=AudioDef.DJAirhorn).grid(column=4, row=R+6,sticky=(N,S,E,W))
 btn(soundbuttons,  text="WhatHow_Meme", command=AudioDef.WhatHow_Meme).grid(column=4, row=R+7,sticky=(N,S,E,W))
 btn(soundbuttons,  text="SadHarmonica", command=AudioDef.SadHarmonica).grid(column=4, row=R+8,sticky=(N,S,E,W))
+btn(soundbuttons,  text="Unravel", command=AudioDef.Unravel).grid(column=4, row=R+9,sticky=(N,S,E,W))
 
 # AudioFiles (Col 5)
 btn(soundbuttons,  text="Bruh", command=AudioDef.Bruh).grid(column=5, row=R,sticky=(N,S,E,W))
