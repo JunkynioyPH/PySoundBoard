@@ -52,9 +52,9 @@ def Pause():
 
 def Resume():
     pygame.mixer.music.unpause()
-    print("If you have stopped audio, and it's still incrementing the 'Song Position' above 'Toggle Loop'\nJust ignore it, it does not affect anything.")
 
 def Stop():
+    Resume()
     pygame.mixer.music.fadeout(250)
 
 # Clear Console
