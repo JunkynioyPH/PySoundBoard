@@ -55,6 +55,9 @@ def OsmanthusWine():
 def AnimeGirlAH():
     Play('animegirlah.mp3')
 
+def YTFULying():
+    Play('ytfulying.mp3')
+
 def Yamete():
     Play('yamete.mp3')
 

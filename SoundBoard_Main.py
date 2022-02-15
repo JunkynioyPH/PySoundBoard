@@ -125,29 +125,26 @@ AnimatedBarText2 = StringVar()
 # song Position counter
 #
 # Its only purpose is to fill out that space that is existent at the left of the window
-TextContent1 = ""
-TextContent2 = ""
-
+TextContents = ["","","",""]
 def AnimatedBar():
-    global TextContent1, TextContent2
     SongPosition = float(pygame.mixer.music.get_pos()/1000)
     if SongPosition > 0:
         #print('pos > 0')
-        TextContent1 += "|"
-        AnimatedBarText1.set(TextContent1)
-        AnimatedBarText2.set(TextContent2)
-        if len(TextContent1) > 13:
-            TextContent1 = ""
-            TextContent2 += "|"
-            if len(TextContent2) > 14:
-                TextContent2 = ""
+        TextContents[0] += "|"
+        AnimatedBarText1.set(TextContents[0])
+        AnimatedBarText2.set(TextContents[1])
+        if len(TextContents[0]) > 13:
+            TextContents[0] = ""
+            TextContents[1] += "|"
+            if len(TextContents[1]) > 14:
+                TextContents[1] = ""
                 # i could prolly add somethinng here, i just dont know
     else:
         #print('pos < 0')
-        TextContent1 = ""
-        TextContent2 = ""
-        AnimatedBarText1.set(TextContent1)
-        AnimatedBarText2.set(TextContent2)
+        for i in range(0,len(TextContents)):
+            TextContents[i] = ""
+        AnimatedBarText1.set(TextContents[0])
+        AnimatedBarText2.set(TextContents[1])
 
 def live_update():
     try:
@@ -263,14 +260,20 @@ lb(controls, textvariable=SongPos).grid(column=1, row=R+5,sticky=(N,S))
 btn(controls,text="Toggle Loop",command=AudioDef.ToggleLoop).grid(column=1,row=R+6,sticky=(N,S,E,W))
 lb(controls, text="Next played has").grid(column=1, row=R+7,sticky=S)
 lb(controls, textvariable=LoopState).grid(column=1, row=R+8,sticky=N)
-lb(controls, textvariable=AnimatedBarText1).grid(column=1, row=R+9,sticky=N)
+
 
 # Dumb Bars below the Audio Controls
+lb(controls, textvariable=AnimatedBarText1).grid(column=1, row=R+9,sticky=N)
 lb(controls, text="]").grid(column=1, row=R+9,sticky=E)
 lb(controls, text="[").grid(column=1, row=R+9,sticky=W)
 lb(controls, textvariable=AnimatedBarText2).grid(column=1, row=R+10,sticky=N)
 lb(controls, text="]").grid(column=1, row=R+10,sticky=E)
 lb(controls, text="[").grid(column=1, row=R+10,sticky=W)
+# I want to add something in these, idk what though
+lb(controls, text="").grid(column=1, row=R+11,sticky=W)
+lb(controls, text="").grid(column=1, row=R+12,sticky=W)
+lb(controls, text="").grid(column=1, row=R+13,sticky=W)
+lb(controls, text="").grid(column=1, row=R+14,sticky=W)
 
 # Audio Files (Col 1)
 btn(soundbuttons, text="SmashBroDrillRemix",command=AudioDef.SmashBroDrillRemix).grid(column=1,row=R,sticky=(N,S,E,W))
@@ -284,6 +287,7 @@ btn(soundbuttons, text="RobloxOof",command=AudioDef.RobloxOof).grid(column=1,row
 btn(soundbuttons, text="SteveOof",command=AudioDef.SteveOof).grid(column=1,row=R+8,sticky=(N,S,E,W))
 btn(soundbuttons, text="OhHarderDaddy",command=AudioDef.OhHarderDaddy).grid(column=1,row=R+9,sticky=(N,S,E,W))
 btn(soundbuttons, text="OsmanthusWine",command=AudioDef.OsmanthusWine).grid(column=1,row=R+10,sticky=(N,S,E,W))
+btn(soundbuttons, text="YTFULying",command=AudioDef.YTFULying).grid(column=1,row=R+11,sticky=(N,S,E,W))
 
 # Audio Files (Col 2)
 btn(soundbuttons,  text="KahootLobby", command=AudioDef.KahootLobby).grid(column=2, row=R,sticky=(N,S,E,W))
