@@ -43,8 +43,17 @@ def SteveOof():
 def SamsungStartUp():
     Play("samsungstartup.mp3")
 
+def LionSleepsTonight():
+    Play('lionsleepstonight.mp3')
+
 def UltraInstinct():
     Play("ultrainstinct.mp3")
+
+def OsmanthusWine():
+    Play('osmanthuswine.mp3')
+
+def OsManThuSWinE():
+    Play('ozmenthuswayn.mp3')
 
 def ZoneAnkha():
     Play("zoneankha.mp3")

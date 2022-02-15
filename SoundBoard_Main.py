@@ -283,6 +283,7 @@ btn(soundbuttons, text="VineBoom",command=AudioDef.VineBoom).grid(column=1,row=R
 btn(soundbuttons, text="RobloxOof",command=AudioDef.RobloxOof).grid(column=1,row=R+7,sticky=(N,S,E,W))
 btn(soundbuttons, text="SteveOof",command=AudioDef.SteveOof).grid(column=1,row=R+8,sticky=(N,S,E,W))
 btn(soundbuttons, text="OhHarderDaddy",command=AudioDef.OhHarderDaddy).grid(column=1,row=R+9,sticky=(N,S,E,W))
+btn(soundbuttons, text="OsmanthusWine",command=AudioDef.OsmanthusWine).grid(column=1,row=R+10,sticky=(N,S,E,W))
 
 # Audio Files (Col 2)
 btn(soundbuttons,  text="KahootLobby", command=AudioDef.KahootLobby).grid(column=2, row=R,sticky=(N,S,E,W))
@@ -295,6 +296,7 @@ btn(soundbuttons,  text="YouWhat", command=AudioDef.YouWhat).grid(column=2, row=
 btn(soundbuttons,  text="WHATTHEFUCK", command=AudioDef.WHATTHEFUCK).grid(column=2, row=R+7,sticky=(N,S,E,W))
 btn(soundbuttons,  text="WHAT", command=AudioDef.WHAT).grid(column=2, row=R+8,sticky=(N,S,E,W))
 btn(soundbuttons,  text="Shawty", command=AudioDef.Shawty).grid(column=2, row=R+9,sticky=(N,S,E,W))
+btn(soundbuttons,  text="OsManThuSWinE", command=AudioDef.OsManThuSWinE).grid(column=2, row=R+10,sticky=(N,S,E,W))
 
 # Audio Files (Col 3)
 btn(soundbuttons,  text="ThunderStorm", command=AudioDef.ThunderStorm).grid(column=3, row=R,sticky=(N,S,E,W))
@@ -330,6 +332,7 @@ btn(soundbuttons,  text="ChingChengHanji", command=AudioDef.ChingChengHanji).gri
 btn(soundbuttons,  text="SigmaMindset", command=AudioDef.SigmaMindset).grid(column=5, row=R+6,sticky=(N,S,E,W))
 btn(soundbuttons,  text="MissTheRage", command=AudioDef.MissTheRage).grid(column=5, row=R+7,sticky=(N,S,E,W))
 btn(soundbuttons,  text="USSRAnthem", command=AudioDef.USSRAnthem).grid(column=5, row=R+8,sticky=(N,S,E,W))
+btn(soundbuttons,  text="LionSleepsTonight", command=AudioDef.LionSleepsTonight).grid(column=5, row=R+9,sticky=(N,S,E,W))
 
 # Show GUI and Enable live_update
 root.resizable(width=False, height=False)
