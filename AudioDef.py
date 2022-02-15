@@ -52,6 +52,15 @@ def UltraInstinct():
 def OsmanthusWine():
     Play('osmanthuswine.mp3')
 
+def AnimeGirlAH():
+    Play('animegirlah.mp3')
+
+def Yamete():
+    Play('yamete.mp3')
+
+def YameteKudasai():
+    Play('yametekudasai.mp3')
+
 def OsManThuSWinE():
     Play('ozmenthuswayn.mp3')
 

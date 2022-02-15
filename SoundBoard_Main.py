@@ -309,6 +309,7 @@ btn(soundbuttons,  text="WinXPCritStop", command=AudioDef.WinXPCritStop).grid(co
 btn(soundbuttons,  text="WinXPError", command=AudioDef.WinXPError).grid(column=3, row=R+7,sticky=(N,S,E,W))
 btn(soundbuttons,  text="SadHarmonica(!!!)", command=AudioDef.SadHarmonicaEar).grid(column=3, row=R+8,sticky=(N,S,E,W))
 btn(soundbuttons,  text="ReZeroGigguk", command=AudioDef.ReZeroGigguk).grid(column=3, row=R+9,sticky=(N,S,E,W))
+btn(soundbuttons,  text="AnimeGirlAH~", command=AudioDef.AnimeGirlAH).grid(column=3, row=R+10,sticky=(N,S,E,W))
 
 # AudioFiles (Col 4)
 btn(soundbuttons,  text="PHub", command=AudioDef.PHub).grid(column=4, row=R,sticky=(N,S,E,W))
@@ -321,6 +322,7 @@ btn(soundbuttons,  text="DJAirhorn", command=AudioDef.DJAirhorn).grid(column=4, 
 btn(soundbuttons,  text="WhatHow_Meme", command=AudioDef.WhatHow_Meme).grid(column=4, row=R+7,sticky=(N,S,E,W))
 btn(soundbuttons,  text="SadHarmonica", command=AudioDef.SadHarmonica).grid(column=4, row=R+8,sticky=(N,S,E,W))
 btn(soundbuttons,  text="Unravel", command=AudioDef.Unravel).grid(column=4, row=R+9,sticky=(N,S,E,W))
+btn(soundbuttons,  text="Yamete~", command=AudioDef.Yamete).grid(column=4, row=R+10,sticky=(N,S,E,W))
 
 # AudioFiles (Col 5)
 btn(soundbuttons,  text="Bruh", command=AudioDef.Bruh).grid(column=5, row=R,sticky=(N,S,E,W))
@@ -333,6 +335,7 @@ btn(soundbuttons,  text="SigmaMindset", command=AudioDef.SigmaMindset).grid(colu
 btn(soundbuttons,  text="MissTheRage", command=AudioDef.MissTheRage).grid(column=5, row=R+7,sticky=(N,S,E,W))
 btn(soundbuttons,  text="USSRAnthem", command=AudioDef.USSRAnthem).grid(column=5, row=R+8,sticky=(N,S,E,W))
 btn(soundbuttons,  text="LionSleepsTonight", command=AudioDef.LionSleepsTonight).grid(column=5, row=R+9,sticky=(N,S,E,W))
+btn(soundbuttons,  text="YameteKudasai~", command=AudioDef.YameteKudasai).grid(column=5, row=R+10,sticky=(N,S,E,W))
 
 # Show GUI and Enable live_update
 root.resizable(width=False, height=False)
