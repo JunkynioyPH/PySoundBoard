@@ -25,6 +25,9 @@ def Play(AudioFile):
 def SmashBroDrillRemix():
     Play("smashbrodrillremix.mp3")
 
+def McChallengeGet():
+    Play("mcchallengeget.mp3")
+
 def VineBoom():
     Play("vineboom.mp3")
 
