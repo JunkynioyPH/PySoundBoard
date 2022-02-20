@@ -1,10 +1,5 @@
 import AudioDef as AD
 
-##
-## DisplayName[0] == CommandName[0]
-## 1:1, so make sure they are the in the same position in the list!
-##
-
 ComDispName = [
 ["SmashBroDrillRemix",AD.SmashBroDrillRemix],
 ["UltraInstinct",AD.UltraInstinct],
