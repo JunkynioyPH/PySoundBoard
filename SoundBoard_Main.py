@@ -110,7 +110,7 @@ CheckPath2Settings()
 print("\nCurrent Settings")
 print(Settings)
 
-# initialize Values
+# Initialize Values
 DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)",10]
 
 AudioDevice = StringVar()
@@ -127,11 +127,13 @@ LoopState = StringVar()
 AnimatedBarText1 = StringVar()
 AnimatedBarText2 = StringVar()
 
+#
 # Since I cant use TTK's Progress Bar and find a working all-rounder AudioVisualizer
 # I made my own Visualiser that shows that something is happening along with the
 # song Position counter
 #
 # Its only purpose is to fill out that space that is existent at the left of the window
+#
 TextContents = ["","","",""]
 def AnimatedBar():
     SongPosition = float(pygame.mixer.music.get_pos()/1000)
@@ -268,7 +270,6 @@ btn(controls,text="Toggle Loop",command=AD.ToggleLoop).grid(column=1,row=R+6,sti
 lb(controls, text="Next played has").grid(column=1, row=R+7,sticky=S)
 lb(controls, textvariable=LoopState).grid(column=1, row=R+8,sticky=N)
 
-
 # Dumb Bars below the Audio Controls
 lb(controls, textvariable=AnimatedBarText1).grid(column=1, row=R+9,sticky=N)
 lb(controls, text="]").grid(column=1, row=R+9,sticky=E)
@@ -276,6 +277,7 @@ lb(controls, text="[").grid(column=1, row=R+9,sticky=W)
 lb(controls, textvariable=AnimatedBarText2).grid(column=1, row=R+10,sticky=N)
 lb(controls, text="]").grid(column=1, row=R+10,sticky=E)
 lb(controls, text="[").grid(column=1, row=R+10,sticky=W)
+
 # I want to add something in these, idk what though
 lb(controls, text="").grid(column=1, row=R+11,sticky=W)
 lb(controls, text="").grid(column=1, row=R+12,sticky=W)
@@ -289,9 +291,9 @@ lb(controls, text="").grid(column=1, row=R+14,sticky=W)
 #
 DisplayName = SD.DisplayName
 CommandName = SD.CommandName
-Counter = 0
-RowCounter = 0
-MaxRow = 12
+Counter = 0     # Overall Counter for the amount of sounds
+RowCounter = 0  # Counter that gets resert every MaxRow
+MaxRow = 12     # MaxRows Until adding a new Column
 def RenderSoundBtn():
     global DisplayName, CommandName, Counter, RowCounter, MaxRow
     COL = 1
