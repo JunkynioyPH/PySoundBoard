@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pygame
 import time
-import AudioDef
+import AudioDef as AD
+import SoundDef as SD
 import json
 import os
 
@@ -60,6 +61,12 @@ def Stop():
 # Clear Console
 def clearconsole():
     os.system('cls' if os.name=='nt' else 'clear')
+
+def PrintErr(Where,Err):
+    print("=====================================")
+    print("Error During "+Where)
+    print(Err)
+    print("=====================================")
 
 # Load Settings
 def CheckPath2Settings():
@@ -149,12 +156,12 @@ def AnimatedBar():
 def live_update():
     try:
         SongPos.set(str(pygame.mixer.music.get_pos()/1000)+"s")
-        LoopState.set(AudioDef.LoopTextState)
-        root.title("SoundBoard GUI - File : '"+AudioDef.AudioPath+"' is loaded.")
+        LoopState.set(AD.LoopTextState)
+        root.title("SoundBoard GUI - File : '"+AD.AudioPath+"' is loaded.")
         root.after(250, AnimatedBar)
         root.after(100, live_update)
     except Exception as Err:
-        print(Err)
+        PrintErr("live_update()",Err)
 
 def ChangeAudioDevice():
     Device = AudioDevice.get()
@@ -165,8 +172,9 @@ def ChangeAudioDevice():
         pygame.mixer.music.set_volume(float(Settings["Volume"])/100)
         UpdateSettings("AudioDevice",Device)
         print("\n"+AudioDevice.get()+" Found!\nSuccessfully Bound to Device!")
-        AudioDef.Play("start.wav")
+        AD.Play("start.wav")
     except Exception as err:
+        PrintErr("ChangeAudioDevice()",Err)
         print("\nThere's "+str(err)+"\n"+AudioDevice.get())
         AudioDevice.set(Settings["AudioDevice"])
         ChangeAudioDevice()
@@ -185,6 +193,7 @@ def SetVol():
             Vol.set(pygame.mixer.music.get_volume()*100)
             UpdateSettings("Volume",Vol.get())
     except Exception as err:
+        PrintErr("SetVol()",Err)
         print("\n'"+str(Vol.get())+"' is not a Valid Number between 0-100!")
         Vol.set(pygame.mixer.music.get_volume()*100)
 
@@ -202,13 +211,10 @@ def InitializeAudioSystem():
             pygame.mixer.pre_init(devicename=Settings["AudioDevice"])
             pygame.mixer.init()
             pygame.mixer.music.set_volume(float(Vol.get())/100)
-            AudioDef.Play("start.wav")
+            AD.Play("start.wav")
         except Exception as Err:
             tries += 1
-            print("=====================================")
-            print("Error During PygameMixerInit : ")
-            print(Err)
-            print("=====================================")
+            PrintErr("InitializeAudioSystem()",Err)
             print(Settings)
             print("AudioDevice & Volume Settings is reset with the hopes of fixing the issue.\nSorry for the inconvenience.\n\nIf this did not fix the issue, please create a 'New Issue' on the github page.\nhttps://github.com/JunkynioyPH/PySoundBoard/issues")
             UpdateSettings("AudioDevice",DefaultValSettings[0])
@@ -219,7 +225,8 @@ def InitializeAudioSystem():
     else:
         os.system('color 0c')
         print("\n\nMaximum speed-retries Reached. (40 Retries)")
-        time.sleep(5)
+        print("This could mean you do not have VoiceMeeter Installed.\nChange the AudioDevice in Settings.json")
+        time.sleep(10)
         exit()
 
 
@@ -257,7 +264,7 @@ SetVol_entry = ttk.Entry(controls, width=7, textvariable=Vol)
 SetVol_entry.grid(column=1,row=R+3,sticky=(W, E))
 btn(controls,text="^ SetVolume",command=SetVol).grid(column=1,row=R+4,sticky=(N,S,E,W))
 lb(controls, textvariable=SongPos).grid(column=1, row=R+5,sticky=(N,S))
-btn(controls,text="Toggle Loop",command=AudioDef.ToggleLoop).grid(column=1,row=R+6,sticky=(N,S,E,W))
+btn(controls,text="Toggle Loop",command=AD.ToggleLoop).grid(column=1,row=R+6,sticky=(N,S,E,W))
 lb(controls, text="Next played has").grid(column=1, row=R+7,sticky=S)
 lb(controls, textvariable=LoopState).grid(column=1, row=R+8,sticky=N)
 
@@ -275,72 +282,30 @@ lb(controls, text="").grid(column=1, row=R+12,sticky=W)
 lb(controls, text="").grid(column=1, row=R+13,sticky=W)
 lb(controls, text="").grid(column=1, row=R+14,sticky=W)
 
-# Audio Files (Col 1)
-btn(soundbuttons, text="SmashBroDrillRemix",command=AudioDef.SmashBroDrillRemix).grid(column=1,row=R,sticky=(N,S,E,W))
-btn(soundbuttons, text="UltraInstinct",command=AudioDef.UltraInstinct).grid(column=1,row=R+1,sticky=(N,S,E,W))
-btn(soundbuttons, text="DSoulsBossMusic",command=AudioDef.DSoulsBossMusic).grid(column=1,row=R+2,sticky=(N,S,E,W))
-btn(soundbuttons, text="DSoulsDeath",command=AudioDef.DSoulsDeath).grid(column=1,row=R+3,sticky=(N,S,E,W))
-btn(soundbuttons, text="ArabicRingtone",command=AudioDef.ArabicRingtone).grid(column=1,row=R+4,sticky=(N,S,E,W))
-btn(soundbuttons, text="SamsungStartUp",command=AudioDef.SamsungStartUp).grid(column=1,row=R+5,sticky=(N,S,E,W))
-btn(soundbuttons, text="VineBoom",command=AudioDef.VineBoom).grid(column=1,row=R+6,sticky=(N,S,E,W))
-btn(soundbuttons, text="RobloxOof",command=AudioDef.RobloxOof).grid(column=1,row=R+7,sticky=(N,S,E,W))
-btn(soundbuttons, text="SteveOof",command=AudioDef.SteveOof).grid(column=1,row=R+8,sticky=(N,S,E,W))
-btn(soundbuttons, text="OhHarderDaddy",command=AudioDef.OhHarderDaddy).grid(column=1,row=R+9,sticky=(N,S,E,W))
-btn(soundbuttons, text="OsmanthusWine",command=AudioDef.OsmanthusWine).grid(column=1,row=R+10,sticky=(N,S,E,W))
-btn(soundbuttons, text="YTFULying",command=AudioDef.YTFULying).grid(column=1,row=R+11,sticky=(N,S,E,W))
+# IM SO GLAD THIS WORKED!
+# EVERYTHINNG IS AUTOMATED!
+# POGGERS
+DisplayName = SD.DisplayName
+CommandName = SD.CommandName
+Counter = 0
+RowCounter = 0
+MaxRow = 12
+def RenderSoundBtn():
+    global DisplayName, CommandName, Counter, RowCounter, MaxRow
+    COLUMN = 1
+    try:
+         if Counter <= len(DisplayName):
+             for i in DisplayName:
+                 btn(soundbuttons, text=i, command=CommandName[Counter]).grid(column=COLUMN, row=RowCounter+1, sticky=(N,S,E,W))
+                 RowCounter += 1
+                 Counter += 1
+                 if RowCounter >= MaxRow:
+                     RowCounter = 0
+                     COLUMN += 1
+    except Exception as Err:
+        PrintErr("RenderSoundBtn()",Err)
 
-# Audio Files (Col 2)
-btn(soundbuttons,  text="KahootLobby", command=AudioDef.KahootLobby).grid(column=2, row=R,sticky=(N,S,E,W))
-btn(soundbuttons,  text="ToBeContinued", command=AudioDef.ToBeContinued).grid(column=2, row=R+1,sticky=(N,S,E,W))
-btn(soundbuttons,  text="SusImposterRole", command=AudioDef.SusImposterRole).grid(column=2, row=R+2,sticky=(N,S,E,W))
-btn(soundbuttons,  text="SusBodyReported", command=AudioDef.SusBodyReported).grid(column=2, row=R+3,sticky=(N,S,E,W))
-btn(soundbuttons,  text="EmotionalDamage",command=AudioDef.EmotionalDamage).grid(column=2,row=R+4,sticky=(N,S,E,W))
-btn(soundbuttons,  text="ISendU2Jesus",command=AudioDef.ISendU2Jesus).grid(column=2,row=R+5,sticky=(N,S,E,W))
-btn(soundbuttons,  text="YouWhat", command=AudioDef.YouWhat).grid(column=2, row=R+6,sticky=(N,S,E,W))
-btn(soundbuttons,  text="WHATTHEFUCK", command=AudioDef.WHATTHEFUCK).grid(column=2, row=R+7,sticky=(N,S,E,W))
-btn(soundbuttons,  text="WHAT", command=AudioDef.WHAT).grid(column=2, row=R+8,sticky=(N,S,E,W))
-btn(soundbuttons,  text="Shawty", command=AudioDef.Shawty).grid(column=2, row=R+9,sticky=(N,S,E,W))
-btn(soundbuttons,  text="OsManThuSWinE", command=AudioDef.OsManThuSWinE).grid(column=2, row=R+10,sticky=(N,S,E,W))
-btn(soundbuttons,  text="McChallengeGet!", command=AudioDef.McChallengeGet).grid(column=2, row=R+11,sticky=(N,S,E,W))
-
-# Audio Files (Col 3)
-btn(soundbuttons,  text="ThunderStorm", command=AudioDef.ThunderStorm).grid(column=3, row=R,sticky=(N,S,E,W))
-btn(soundbuttons,  text="BFGDivision", command=AudioDef.BFGDivision).grid(column=3, row=R+1,sticky=(N,S,E,W))
-btn(soundbuttons,  text="SmileDogMeme", command=AudioDef.SmileDogMeme).grid(column=3, row=R+2,sticky=(N,S,E,W))
-btn(soundbuttons,  text="Helicopter*2", command=AudioDef.Helicopterx2).grid(column=3, row=R+3,sticky=(N,S,E,W))
-btn(soundbuttons,  text="WinXPShutDown", command=AudioDef.WinXPShutDown).grid(column=3, row=R+4,sticky=(N,S,E,W))
-btn(soundbuttons,  text="WinXPStartup", command=AudioDef.WinXPStartup).grid(column=3, row=R+5,sticky=(N,S,E,W))
-btn(soundbuttons,  text="WinXPCritStop", command=AudioDef.WinXPCritStop).grid(column=3, row=R+6,sticky=(N,S,E,W))
-btn(soundbuttons,  text="WinXPError", command=AudioDef.WinXPError).grid(column=3, row=R+7,sticky=(N,S,E,W))
-btn(soundbuttons,  text="SadHarmonica(!!!)", command=AudioDef.SadHarmonicaEar).grid(column=3, row=R+8,sticky=(N,S,E,W))
-btn(soundbuttons,  text="ReZeroGigguk", command=AudioDef.ReZeroGigguk).grid(column=3, row=R+9,sticky=(N,S,E,W))
-btn(soundbuttons,  text="AnimeGirlAH~", command=AudioDef.AnimeGirlAH).grid(column=3, row=R+10,sticky=(N,S,E,W))
-
-# AudioFiles (Col 4)
-btn(soundbuttons,  text="PHub", command=AudioDef.PHub).grid(column=4, row=R,sticky=(N,S,E,W))
-btn(soundbuttons,  text="GTAWasted", command=AudioDef.GTAWasted).grid(column=4, row=R+1,sticky=(N,S,E,W))
-btn(soundbuttons,  text="GiornoThemePiano", command=AudioDef.GiornoThemePiano).grid(column=4, row=R+2,sticky=(N,S,E,W))
-btn(soundbuttons,  text="SickoModeWaaah", command=AudioDef.SickoModeWaaah).grid(column=4, row=R+3,sticky=(N,S,E,W))
-btn(soundbuttons,  text="DreamTranceMusic", command=AudioDef.DreamTranceMusic).grid(column=4, row=R+4,sticky=(N,S,E,W))
-btn(soundbuttons,  text="IndianMusicMeme", command=AudioDef.IndianMusicMeme).grid(column=4, row=R+5,sticky=(N,S,E,W))
-btn(soundbuttons,  text="DJAirhorn", command=AudioDef.DJAirhorn).grid(column=4, row=R+6,sticky=(N,S,E,W))
-btn(soundbuttons,  text="WhatHow_Meme", command=AudioDef.WhatHow_Meme).grid(column=4, row=R+7,sticky=(N,S,E,W))
-btn(soundbuttons,  text="SadHarmonica", command=AudioDef.SadHarmonica).grid(column=4, row=R+8,sticky=(N,S,E,W))
-btn(soundbuttons,  text="Unravel", command=AudioDef.Unravel).grid(column=4, row=R+9,sticky=(N,S,E,W))
-btn(soundbuttons,  text="Yamete~", command=AudioDef.Yamete).grid(column=4, row=R+10,sticky=(N,S,E,W))
-
-# AudioFiles (Col 5)
-btn(soundbuttons,  text="Bruh", command=AudioDef.Bruh).grid(column=5, row=R,sticky=(N,S,E,W))
-btn(soundbuttons,  text="JebNooo", command=AudioDef.JebNooo).grid(column=5, row=R+1,sticky=(N,S,E,W))
-btn(soundbuttons,  text="ZoneAnkha", command=AudioDef.ZoneAnkha).grid(column=5, row=R+2,sticky=(N,S,E,W))
-btn(soundbuttons,  text="GangstaParadise", command=AudioDef.GangstaParadise).grid(column=5, row=R+3,sticky=(N,S,E,W))
-btn(soundbuttons,  text="HeartFlatline", command=AudioDef.HeartFlatline).grid(column=5, row=R+4,sticky=(N,S,E,W))
-btn(soundbuttons,  text="ChingChengHanji", command=AudioDef.ChingChengHanji).grid(column=5, row=R+5,sticky=(N,S,E,W))
-btn(soundbuttons,  text="SigmaMindset", command=AudioDef.SigmaMindset).grid(column=5, row=R+6,sticky=(N,S,E,W))
-btn(soundbuttons,  text="MissTheRage", command=AudioDef.MissTheRage).grid(column=5, row=R+7,sticky=(N,S,E,W))
-btn(soundbuttons,  text="USSRAnthem", command=AudioDef.USSRAnthem).grid(column=5, row=R+8,sticky=(N,S,E,W))
-btn(soundbuttons,  text="LionSleepsTonight", command=AudioDef.LionSleepsTonight).grid(column=5, row=R+9,sticky=(N,S,E,W))
-btn(soundbuttons,  text="YameteKudasai~", command=AudioDef.YameteKudasai).grid(column=5, row=R+10,sticky=(N,S,E,W))
+RenderSoundBtn()
 
 # Show GUI and Enable live_update
 root.resizable(width=False, height=False)
