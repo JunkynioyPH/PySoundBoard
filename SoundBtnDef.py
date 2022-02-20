@@ -17,7 +17,7 @@ ComDispName = [
 ["SteveOof",AD.SteveOof],
 ["OhHarderDaddy",AD.OhHarderDaddy],
 ["OsmanthusWine",AD.OsmanthusWine],
-["OsManThuSWinE",AD.OsManThuSWinE],
+["OzMenThusWaYn",AD.OsManThuSWinE],
 ["KahootLobby",AD.KahootLobby],
 ["ToBeContinued",AD.ToBeContinued],
 ["SusImposterRole",AD.SusImposterRole],
