@@ -292,16 +292,16 @@ RowCounter = 0
 MaxRow = 12
 def RenderSoundBtn():
     global DisplayName, CommandName, Counter, RowCounter, MaxRow
-    COLUMN = 1
+    COL = 1
     try:
          if Counter <= len(DisplayName):
              for i in DisplayName:
-                 btn(soundbuttons, text=i, command=CommandName[Counter]).grid(column=COLUMN, row=RowCounter+1, sticky=(N,S,E,W))
+                 btn(soundbuttons, text=i, command=CommandName[Counter]).grid(column=COL, row=RowCounter+1, sticky=(N,S,E,W))
                  RowCounter += 1
                  Counter += 1
                  if RowCounter >= MaxRow:
                      RowCounter = 0
-                     COLUMN += 1
+                     COL += 1
     except Exception as Err:
         PrintErr("RenderSoundBtn()",Err)
 
