@@ -268,7 +268,7 @@ btn(controls,text="^ SetVolume",command=SetVol).grid(column=1,row=R+4,sticky=(N,
 lb(controls, textvariable=SongPos).grid(column=1, row=R+5,sticky=(N,S))
 btn(controls,text="Toggle Loop",command=AD.ToggleLoop).grid(column=1,row=R+6,sticky=(N,S,E,W))
 lb(controls, text="Next played has").grid(column=1, row=R+7,sticky=S)
-lb(controls, textvariable=LoopState).grid(column=1,w=R+8,sticky=N)
+lb(controls, textvariable=LoopState).grid(column=1, row=R+8,sticky=N)
 
 # Dumb Bars below the Audio Controls
 lb(controls, textvariable=AnimatedBarText1).grid(column=1, row=R+9,sticky=N)
