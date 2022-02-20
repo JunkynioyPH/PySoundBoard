@@ -289,18 +289,17 @@ lb(controls, text="").grid(column=1, row=R+14,sticky=W)
 # EVERYTHINNG IS AUTOMATED!
 # POGGERS
 #
-DisplayName = SD.DisplayName
-CommandName = SD.CommandName
+ComDispName = SD.ComDispName
 Counter = 0     # Overall Counter for the amount of sounds
 RowCounter = 0  # Counter that gets resert every MaxRow
 MaxRow = 12     # MaxRows Until adding a new Column
 def RenderSoundBtn():
-    global DisplayName, CommandName, Counter, RowCounter, MaxRow
+    global DisplayName, CommandName, Counter, RowCounter, MaxRow, ComDispName
     COL = 1
     try:
-         if Counter <= len(DisplayName):
-             for i in DisplayName:
-                 btn(soundbuttons, text=i, command=CommandName[Counter]).grid(column=COL, row=RowCounter+1, sticky=(N,S,E,W))
+         if Counter <= len(ComDispName):
+             for i in ComDispName:
+                 btn(soundbuttons, text=i[0], command=ComDispName[Counter][1]).grid(column=COL, row=RowCounter+1, sticky=(N,S,E,W))
                  RowCounter += 1
                  Counter += 1
                  if RowCounter >= MaxRow:
