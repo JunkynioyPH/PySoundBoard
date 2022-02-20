@@ -5,7 +5,7 @@ from pathlib import Path
 import pygame
 import time
 import AudioDef as AD
-import SoundDef as SD
+import SoundBtnDef as SD
 import json
 import os
 
