@@ -241,7 +241,7 @@ lb = ttk.Label
 R = 1 # To adjust Y-POS of all buttons and selected labels
 
 # Change the Font of the program
-ttk.Style().configure(".",font=('UD Digi Kyokasho N-B', 10))
+ttk.Style().configure(".",font=('Trebuchet MS Bold', 8))
 
 # Author and Titles
 lb(header, text="Soundboard written in Python! - By: Junkynioy#2408").grid(column=3, row=1,sticky=N)
@@ -256,7 +256,6 @@ btn(header,text="Set Device",command=ChangeAudioDevice).grid(column=4,row=2,stic
 # Labels and Info
 lb(controllabel, text="Controls").grid(column=1, row=0,sticky=(N,S,E,W))
 lb(soundlabel, text="Sound Board").grid(column=1, row=0,sticky=(N,S,E,W))
-
 
 # Audio Controls
 btn(controls,text="Stop Playback",command=Stop).grid(column=1,row=R,sticky=(N,S,E,W))
@@ -299,7 +298,7 @@ def RenderSoundBtn():
     try:
          if Counter <= len(ComDispName):
              for i in ComDispName:
-                 btn(soundbuttons, text=i[0], command=ComDispName[Counter][1]).grid(column=COL, row=RowCounter+1, sticky=(N,S,E,W))
+                 btn(soundbuttons, text=i[0], width=18, command=ComDispName[Counter][1]).grid(column=COL, row=RowCounter+1, sticky=(N,S,E,W))
                  RowCounter += 1
                  Counter += 1
                  if RowCounter >= MaxRow:
