@@ -247,7 +247,7 @@ ttk.Style().configure(".",font=('Trebuchet MS Bold', 8))
 lb(header, text="Soundboard written in Python! - By: Junkynioy#2408").grid(column=3, row=1,sticky=N)
 
 # Change Audio Device
-lb(header, text="       ").grid(column=1, row=2,sticky=E)
+lb(header, text="                  ").grid(column=1, row=2,sticky=E)
 lb(header, text="AudioDevice").grid(column=2, row=2,sticky=E)
 SetAudDev_entry = ttk.Entry(header, width=75, textvariable=AudioDevice)
 SetAudDev_entry.grid(column=3,row=2,sticky=(N,S,E,W))
