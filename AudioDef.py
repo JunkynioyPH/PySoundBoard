@@ -43,6 +43,9 @@ def RobloxOof():
 def SteveOof():
     Play("steveoof.mp3")
 
+def BoyWithUkeToxic():
+    Play("boywithuketoxic.mp3")
+
 def SamsungStartUp():
     Play("samsungstartup.mp3")
 
