@@ -37,6 +37,9 @@ def DreamTranceMusic():
 def DSoulsDeath():
     Play("dsoulsdeath.mp3")
 
+def DarudeSandstorm():
+    Play("darudesandstorm.mp3")
+
 def RobloxOof():
     Play("robloxoof.mp3")
 
