@@ -37,23 +37,34 @@ except:
     ttk.Style().configure(".",font=('Trebuchet MS Bold', 8))
 
 # Cointainers
-header = ttk.Frame(root, relief=RAISED, borderwidth=4)
-header.grid(column=0, row=0, sticky=(N, W, E, S))
 
+# Top Header
+header = ttk.Frame(root, relief=RAISED, borderwidth=4)
+header.grid(column=0, row=0, sticky=(N, S,W, E))
+
+headercenter = ttk.Frame(root)
+headercenter.grid(pady=10, column=0, row=0, sticky=(N, S))
+
+headercontent = ttk.Frame(headercenter, relief=SUNKEN, borderwidth=2)
+headercontent.grid(column=0, row=0, sticky=N)
+
+# Bottom Body
 mframe = ttk.Frame(root, relief=GROOVE, borderwidth=2)
 mframe.grid(column=0, row=1, sticky=(N, W, E, S))
 
+# Controls
 controls = ttk.Frame(mframe, relief=SUNKEN, borderwidth=2)
 controls.grid(padx=5, pady=5, column=0, row=0, sticky=(N, W, E, S))
 
+controllabel = ttk.Frame(controls, relief=RAISED, borderwidth=2)
+controllabel.grid(column=1, row=0, sticky=(N, W, E, S))
+
+# Sound Buttons
 soundboard = ttk.Frame(mframe, relief=SUNKEN, borderwidth=2)
 soundboard.grid(padx=5, pady=5,column=1, row=0, sticky=(N, W, E, S))
 
 soundbuttons = ttk.Frame(soundboard, relief=SUNKEN, borderwidth=2)
 soundbuttons.grid(column=1, row=1, sticky=(N, W, E, S))
-
-controllabel = ttk.Frame(controls, relief=RAISED, borderwidth=2)
-controllabel.grid(column=1, row=0, sticky=(N, W, E, S))
 
 soundlabel = ttk.Frame(soundboard, relief=RAISED, borderwidth=2)
 soundlabel.grid(column=1, row=0, sticky=(N, W, E, S))
@@ -249,14 +260,13 @@ lb = ttk.Label
 R = 1 # To adjust Y-POS of all buttons and selected labels
 
 # Author and Titles
-lb(header, text="Soundboard written in Python! - By: Junkynioy#2408").grid(column=3, row=1,sticky=N)
+lb(headercontent, text="Soundboard written in Python! - By: Junkynioy#2408").grid(column=3, row=0,sticky=N)
 
 # Change Audio Device
-lb(header, text="                  ").grid(column=1, row=2,sticky=E)
-lb(header, text="AudioDevice").grid(column=2, row=2,sticky=E)
-SetAudDev_entry = ttk.Entry(header, width=75, textvariable=AudioDevice)
-SetAudDev_entry.grid(column=3,row=2,sticky=(N,S,E,W))
-btn(header,text="Set Device",command=ChangeAudioDevice).grid(column=4,row=2,sticky=(N,S,E,W))
+lb(headercontent, text="AudioDevice").grid(column=2, row=1,sticky=E)
+SetAudDev_entry = ttk.Entry(headercontent, width=75, textvariable=AudioDevice)
+SetAudDev_entry.grid(column=3,row=1,sticky=(N,S,E,W))
+btn(headercontent,text="Set Device",command=ChangeAudioDevice).grid(column=4,row=1,sticky=(N,S,E,W))
 
 # Labels and Info
 lb(controllabel, text="Controls").grid(column=1, row=0,sticky=(N,S,E,W))
