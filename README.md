@@ -13,11 +13,13 @@ Do note that **I do not own ANY OF THE AUDIO FILES** in SoundFiles Folder.
 **Sounds/Music/Audio are owned by their respective owners.**
 
 # Pre-Requisites
-Requires **python** to be installed. **(Python 3.x +)**
+Requires **python** to be installed. **(Python 3.x+ & make sure you have Ttk/TKinter Ticked!)**
+
+Requires **ttkthemes** to be installed for DarkMode. **OPTIONAL (pip install ttkthemes)**
 
 Requires **pygame** to be installed. **(pip install pygame)**
 
-For **ListAudioDevices.py**, it requires **sounddevice** to be installed. **(pip install sounddevice)** Though this is optional.
+For **ListAudioDevices.py**, it requires **sounddevice** to be installed. **OPTIONAL (pip install sounddevice)**
 
 This is the default way of making this soundboard to work and it requires 2 things to be installed.
 
