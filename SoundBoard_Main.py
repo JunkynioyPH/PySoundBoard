@@ -30,7 +30,7 @@ try:
     style.set_theme("equilux")
     # Change the Font of the program
     ttk.Style().configure(".",font=('Trebuchet MS Bold', 8), foreground='white')
-    print('ttktheme is installed! Darktheme is used!')
+    print('ttkthemes is installed! Darktheme is used!')
 except:
     print("Error while applying themes :","ttkthemes not installed! Dark theme cannot be used!")
     # Change the Font of the program
