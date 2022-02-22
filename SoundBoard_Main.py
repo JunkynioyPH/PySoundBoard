@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
-from pathlib import Path
 
+from pathlib import Path
 import pygame
 import time
 import AudioDef as AD
@@ -19,27 +19,38 @@ print('''
 ╚═╝        ╚═╝   ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝
                     Written By : Junkynioy#2408 - https://github.com/JunkynioyPH
 ''')
-
 # Preliminary preparations
-os.system("title SoundBoard Backend")
+os.system('title PySoundBoard Backend' if os.name=='nt' else 'echo -ne "\033]0;PySoundBoard Backend\007"')
 root = Tk()
-root.title("SoundBoard GUI")
+
+# The sweet dark mode
+try:
+    from ttkthemes import ThemedStyle
+    style = ThemedStyle(root)
+    style.set_theme("equilux")
+    # Change the Font of the program
+    ttk.Style().configure(".",font=('Trebuchet MS Bold', 8), foreground='white')
+    print('ttktheme is installed! Darktheme is used!')
+except:
+    print("Error while applying themes :","ttkthemes not installed! Dark theme cannot be used!")
+    # Change the Font of the program
+    ttk.Style().configure(".",font=('Trebuchet MS Bold', 8))
 
 # Cointainers
-header = ttk.Frame(root, relief=RAISED, borderwidth=8)
-header.grid(padx=5, pady=5, column=0, row=0, sticky=(N, W, E, S))
+header = ttk.Frame(root, relief=RAISED, borderwidth=4)
+header.grid(column=0, row=0, sticky=(N, W, E, S))
 
 mframe = ttk.Frame(root, relief=GROOVE, borderwidth=2)
-mframe.grid(padx=10, pady=10, column=0, row=1, sticky=(N, W, E, S))
+mframe.grid(column=0, row=1, sticky=(N, W, E, S))
 
 controls = ttk.Frame(mframe, relief=SUNKEN, borderwidth=2)
 controls.grid(padx=5, pady=5, column=0, row=0, sticky=(N, W, E, S))
 
 soundboard = ttk.Frame(mframe, relief=SUNKEN, borderwidth=2)
-soundboard.grid(padx=5, pady=5, column=1, row=0, sticky=(N, W, E, S))
+soundboard.grid(padx=5, pady=5,column=1, row=0, sticky=(N, W, E, S))
 
 soundbuttons = ttk.Frame(soundboard, relief=SUNKEN, borderwidth=2)
-soundbuttons.grid(padx=5, pady=5, column=1, row=1, sticky=(N, W, E, S))
+soundbuttons.grid(column=1, row=1, sticky=(N, W, E, S))
 
 controllabel = ttk.Frame(controls, relief=RAISED, borderwidth=2)
 controllabel.grid(column=1, row=0, sticky=(N, W, E, S))
@@ -63,6 +74,7 @@ def clearconsole():
     os.system('cls' if os.name=='nt' else 'clear')
 
 def PrintErr(Where,Err):
+    clearconsole()
     print("=====================================")
     print("Error During "+Where)
     print(Err)
@@ -95,13 +107,12 @@ def CheckPath2Settings():
 
 # Update Settings
 def UpdateSettings(Variable,Value):
+    print("\nUpdating "+Variable+" to "+Value)
     Settings[Variable] = Value
     UpdateSettings = open("Settings.json","w")
-    print("\nsettings.json is opened")
     UpdateSettings.write(json.dumps(Settings))
-    print("settings.json is updated")
     UpdateSettings.close()
-    print(Settings)
+    print(str(Settings)+"\nSettings Updated!")
 
 # Check and open then load settings
 CheckPath2Settings()
@@ -134,7 +145,7 @@ AnimatedBarText2 = StringVar()
 #
 # Its only purpose is to fill out that space that is existent at the left of the window
 #
-TextContents = ["","","",""]
+TextContents = ["",""]
 def AnimatedBar():
     SongPosition = float(pygame.mixer.music.get_pos()/1000)
     if SongPosition > 0:
@@ -147,7 +158,7 @@ def AnimatedBar():
             TextContents[1] += "|"
             if len(TextContents[1]) > 14:
                 TextContents[1] = ""
-                # i could prolly add somethinng here, i just dont know
+                # i could prolly add something here, i just dont know
     else:
         #print('pos < 0')
         for i in range(0,len(TextContents)):
@@ -175,9 +186,9 @@ def ChangeAudioDevice():
         UpdateSettings("AudioDevice",Device)
         print("\n"+AudioDevice.get()+" Found!\nSuccessfully Bound to Device!")
         AD.Play("start.wav")
-    except Exception as err:
+    except Exception as Err:
         PrintErr("ChangeAudioDevice()",Err)
-        print("\nThere's "+str(err)+"\n"+AudioDevice.get())
+        print(AudioDevice.get())
         AudioDevice.set(Settings["AudioDevice"])
         ChangeAudioDevice()
 
@@ -186,12 +197,10 @@ def SetVol():
         Volume = float(Vol.get())/100
         if Volume >= 1:
             pygame.mixer.music.set_volume(Volume)
-            print("\nVolume is now set to '100%'!")
             Vol.set(pygame.mixer.music.get_volume()*100)
             UpdateSettings("Volume",Vol.get())
         else:
             pygame.mixer.music.set_volume(Volume)
-            print("\nVolume changed to '"+Vol.get()+"%'!")
             Vol.set(pygame.mixer.music.get_volume()*100)
             UpdateSettings("Volume",Vol.get())
     except Exception as err:
@@ -208,26 +217,25 @@ if int(Settings["Splash"]) == 1:
 tries = 0
 def InitializeAudioSystem():
     global tries
-    if tries < 40:
+    if tries < 10:
         try:
             pygame.mixer.pre_init(devicename=Settings["AudioDevice"])
             pygame.mixer.init()
             pygame.mixer.music.set_volume(float(Vol.get())/100)
             AD.Play("start.wav")
         except Exception as Err:
+            time.sleep(1)
             tries += 1
             PrintErr("InitializeAudioSystem()",Err)
             print(Settings)
-            print("AudioDevice & Volume Settings is reset with the hopes of fixing the issue.\nSorry for the inconvenience.\n\nIf this did not fix the issue, please create a 'New Issue' on the github page.\nhttps://github.com/JunkynioyPH/PySoundBoard/issues")
+            print("AudioDevice & Volume Settings is reset with the hopes of fixing the issue.\nSorry for the inconvenience.\n\nIf this did not fix the issue, please create a 'New Issue' on the github page.\nhttps://github.com/JunkynioyPH/PySoundBoard/issues \n")
             UpdateSettings("AudioDevice",DefaultValSettings[0])
             UpdateSettings("Volume",DefaultValSettings[1])
             AudioDevice.set(Settings["AudioDevice"])
             InitializeAudioSystem()
             SetVol()
     else:
-        os.system('color 0c')
-        print("\n\nMaximum speed-retries Reached. (40 Retries)")
-        print("This could mean you do not have VoiceMeeter Installed.\nChange the AudioDevice in Settings.json")
+        PrintErr("InitializeAudioSystem()","\nMaximum retries Reached. (40 Retries)\nThis could mean you do not have VoiceMeeter Installed.\nChange the AudioDevice in Settings.json")
         time.sleep(10)
         exit()
 
@@ -239,9 +247,6 @@ InitializeAudioSystem()
 btn = ttk.Button
 lb = ttk.Label
 R = 1 # To adjust Y-POS of all buttons and selected labels
-
-# Change the Font of the program
-ttk.Style().configure(".",font=('Trebuchet MS Bold', 8))
 
 # Author and Titles
 lb(header, text="Soundboard written in Python! - By: Junkynioy#2408").grid(column=3, row=1,sticky=N)
@@ -277,11 +282,11 @@ lb(controls, textvariable=AnimatedBarText2).grid(column=1, row=R+10,sticky=N)
 lb(controls, text="]").grid(column=1, row=R+10,sticky=E)
 lb(controls, text="[").grid(column=1, row=R+10,sticky=W)
 
-# I want to add something in these, idk what though
-lb(controls, text="").grid(column=1, row=R+11,sticky=W)
-lb(controls, text="").grid(column=1, row=R+12,sticky=W)
-lb(controls, text="").grid(column=1, row=R+13,sticky=W)
-lb(controls, text="").grid(column=1, row=R+14,sticky=W)
+## I want to add something in these, idk what though
+# lb(controls, text="").grid(column=1, row=R+11,sticky=W)
+# lb(controls, text="").grid(column=1, row=R+12,sticky=W)
+# lb(controls, text="").grid(column=1, row=R+13,sticky=W)
+# lb(controls, text="").grid(column=1, row=R+14,sticky=W)
 
 #
 # IM SO GLAD THIS WORKED!
