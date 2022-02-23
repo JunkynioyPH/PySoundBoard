@@ -97,8 +97,8 @@ def DSoulsBossMusic():
 def ArabicRingtone():
     Play("arabicringtone.mp3")
 
-def IndianMusicMeme():
-    Play("panjabimc.mp3")
+def Bonk():
+    Play("bonk.mp3")
 
 def ReZeroGigguk():
     Play("rezerogigguk.mp3")
