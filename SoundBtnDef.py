@@ -8,6 +8,7 @@ ComDispName = [
 ["ArabicRingtone",AD.ArabicRingtone],
 ["SamsungStartUp",AD.SamsungStartUp],
 ["VineBoom",AD.VineBoom],
+["TacoBellBoom",AD.TacoBellBoom],
 ["RobloxOof",AD.RobloxOof],
 ["SteveOof",AD.SteveOof],
 ["OhHarderDaddy",AD.OhHarderDaddy],

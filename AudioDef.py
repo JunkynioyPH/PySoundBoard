@@ -31,6 +31,9 @@ def McChallengeGet():
 def VineBoom():
     Play("vineboom.mp3")
 
+def TacoBellBoom():
+    Play("tacobellboom.mp3")
+
 def DreamTranceMusic():
     Play("dreamtrancemusic.mp3")
 
