@@ -34,6 +34,12 @@ def VineBoom():
 def TacoBellBoom():
     Play("tacobellboom.mp3")
 
+def CatUP():
+    Play('catup.mp3')
+
+def CatDOWN():
+    Play('catdown.mp3')
+
 def DreamTranceMusic():
     Play("dreamtrancemusic.mp3")
 

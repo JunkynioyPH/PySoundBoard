@@ -306,7 +306,7 @@ lb(controls, text="[").grid(column=1, row=R+10,sticky=W)
 ComDispName = SD.ComDispName
 Counter = 0     # Overall Counter for the amount of sounds
 RowCounter = 0  # Counter that gets resert every MaxRow
-MaxRow = 12     # MaxRows Until adding a new Column
+MaxRow = 13     # MaxRows Until adding a new Column
 def RenderSoundBtn():
     global Counter, RowCounter, MaxRow, ComDispName
     COL = 1

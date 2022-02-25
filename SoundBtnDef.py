@@ -40,7 +40,6 @@ ComDispName = [
 ["GTAWasted",AD.GTAWasted],
 ["GiornoThemePiano",AD.GiornoThemePiano],
 ["DreamTranceMusic",AD.DreamTranceMusic],
-
 ["DJAirhorn",AD.DJAirhorn],
 ["WhatHow_Meme",AD.WhatHow_Meme],
 ["SadHarmonica(!!!)",AD.SadHarmonicaEar],
@@ -61,5 +60,7 @@ ComDispName = [
 ["MissTheRage",AD.MissTheRage],
 ["BoyWithUkeToxic",AD.BoyWithUkeToxic],
 ["USSRAnthem",AD.USSRAnthem],
-["LionSleepsTonight",AD.LionSleepsTonight]
+["LionSleepsTonight",AD.LionSleepsTonight],
+["CatUP",AD.CatUP],
+["CatDOWN",AD.CatDOWN]
 ]
