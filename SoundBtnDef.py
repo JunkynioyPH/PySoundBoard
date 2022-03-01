@@ -55,7 +55,7 @@ ComDispName = [
 ["DarudeSandstorm",AD.DarudeSandstorm],
 ["SickoModeWaaah",AD.SickoModeWaaah],
 ["GangstaParadise",AD.GangstaParadise],
-["ChingChengHanji",AD.ChingChengHanji],
+["WidePutin",AD.WidePutin],
 ["SigmaMindset",AD.SigmaMindset],
 ["MissTheRage",AD.MissTheRage],
 ["BoyWithUkeToxic",AD.BoyWithUkeToxic],

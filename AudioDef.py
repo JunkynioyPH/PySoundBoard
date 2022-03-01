@@ -40,6 +40,9 @@ def CatUP():
 def CatDOWN():
     Play('catdown.mp3')
 
+def WidePutin():
+    Play('wideputin.mp3')
+
 def DreamTranceMusic():
     Play("dreamtrancemusic.mp3")
 
@@ -126,9 +129,6 @@ def JebNooo():
 
 def Bruh():
     Play('bruh.mp3')
-
-def ChingChengHanji():
-    Play('chingchenghanji.mp3')
 
 def Shawty():
     Play('shawty.mp3')
