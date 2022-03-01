@@ -43,6 +43,9 @@ def CatDOWN():
 def WidePutin():
     Play('wideputin.mp3')
 
+def McCaveNoise():
+    Play('mccavenoise.mp3')
+
 def DreamTranceMusic():
     Play("dreamtrancemusic.mp3")
 
