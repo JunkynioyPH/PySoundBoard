@@ -177,6 +177,11 @@ def AnimatedBar():
         AnimatedBarText1.set(TextContents[0])
         AnimatedBarText2.set(TextContents[1])
 
+# for waiting for a specific key to be pressed
+# temporarily non-functional, will work on it on the near future
+def ScanForKeystroke():
+    print('text')
+
 def live_update():
     try:
         SongPos.set(str(pygame.mixer.music.get_pos()/1000)+"s")
