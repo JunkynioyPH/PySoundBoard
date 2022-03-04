@@ -20,7 +20,7 @@ def Play(AudioFile):
     pygame.mixer.music.unload()
     pygame.mixer.music.load(".\SoundFiles\\"+AudioFile)
     pygame.mixer.music.play(loops=LoopState)
-    pygame.init()
+    # pygame.init()
 
 def SmashBroDrillRemix():
     Play("smashbrodrillremix.mp3")
