@@ -92,7 +92,7 @@ def PrintErr(Where,Err):
     print("=====================================")
 
 # Load Settings
-def CheckPath2Settings():
+def InitializeSettings():
     global Settings
     if Path("Settings.json").exists() == True:
         try:
@@ -103,18 +103,18 @@ def CheckPath2Settings():
             print("\nError Occured:\n"+str(Err)+"\n")
             os.remove("Settings.json")
             print("settings.json is being reset")
-            CheckPath2Settings()
+            InitializeSettings()
             print("settings.json reset complete")
     else:
         x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":"10","Splash":1}
         DefSettingsDump = open("Settings.json","a")
-        print("settings.json is made")
+        print("settings.json [Created]")
         DefSettingsDump.write(json.dumps(x))
-        print("settings.json is written to")
+        print("settings.json [Accessed]")
         DefSettingsDump.close()
-        print("settings.json is closed")
-        CheckPath2Settings()
-        print("Rerun CheckPath2Settings")
+        print("settings.json [Closed]")
+        InitializeSettings()
+        print("Rerun InitializeSettings")
 
 # Display Settings
 def ShowSettings():
@@ -124,16 +124,16 @@ def ShowSettings():
 
 # Update Settings
 def UpdateSettings(Variable,Value):
-    print("\nUpdating "+Variable+" to "+Value)
+    print("\n----------\nUpdating "+Variable+" to "+Value)
     Settings[Variable] = Value
     UpdateSettings = open("Settings.json","w")
     UpdateSettings.write(json.dumps(Settings))
     UpdateSettings.close()
     ShowSettings()
-    print("\nSettings Updated!")
+    print("\nSettings Updated!\n----------")
 
 # Check and open then load settings
-CheckPath2Settings()
+InitializeSettings()
 
 # Show Current Settings
 ShowSettings()
@@ -200,8 +200,8 @@ def ChangeAudioDevice():
         pygame.mixer.pre_init(devicename=Device)
         pygame.mixer.init()
         pygame.mixer.music.set_volume(float(Settings["Volume"])/100)
-        UpdateSettings("AudioDevice",Device)
         print("\n"+AudioDevice.get()+" Found!\nSuccessfully Bound to Device!")
+        UpdateSettings("AudioDevice",Device)
         AD.Play("start.wav")
     except Exception as Err:
         PrintErr("ChangeAudioDevice()",Err)
