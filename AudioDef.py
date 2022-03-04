@@ -2,25 +2,21 @@ import pygame
 import os
 import time
 
-LoopState = 0
-LoopTextState = "No Loop"
+LoopTextState, LoopState = "No Loop", 0
 
 def ToggleLoop():
     global LoopState, LoopTextState
     if LoopState == 0:
-        LoopTextState = "Looping"
-        LoopState = -1
+        LoopTextState, LoopState = "Looping", -1
     else:
-        LoopTextState = "No Loop"
-        LoopState = 0
+        LoopTextState, LoopState = "No Loop", 0
 
 def Play(AudioFile):
     global LoopState, LoopTextState, AudioPath
-    AudioPath = AudioFile
+    AudioPath = AudioFile # for the window title
     pygame.mixer.music.unload()
     pygame.mixer.music.load(".\SoundFiles\\"+AudioFile)
     pygame.mixer.music.play(loops=LoopState)
-    # pygame.init()
 
 def SmashBroDrillRemix():
     Play("smashbrodrillremix.mp3")
