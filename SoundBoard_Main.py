@@ -1,16 +1,14 @@
 from tkinter import *
 from tkinter import ttk
-
 from pathlib import Path
-import pygame
-import time
+import pygame, time, json, os
 import AudioDef as AD
 import SoundBtnDef as SD
-import json
-import os
 
 # Console splash
+os.system('cls' if os.name=='nt' else 'clear')
 print('''
+
 ██████╗ ██╗   ██╗███████╗ ██████╗ ██╗   ██╗███╗   ██╗██████╗ ██████╗  ██████╗  █████╗ ██████╗ ██████╗
 ██╔══██╗╚██╗ ██╔╝██╔════╝██╔═══██╗██║   ██║████╗  ██║██╔══██╗██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██╔══██╗
 ██████╔╝ ╚████╔╝ ███████╗██║   ██║██║   ██║██╔██╗ ██║██║  ██║██████╔╝██║   ██║███████║██████╔╝██║  ██║
@@ -30,9 +28,11 @@ try:
     style.set_theme("equilux")
     # Change the Font of the program
     ttk.Style().configure(".",font=('Trebuchet MS Bold', 8), foreground='white')
-    print('ttkthemes is installed! Darktheme is used!')
-except:
-    print("Error while applying themes :","ttkthemes not installed! Dark theme cannot be used!")
+    print('ttkthemes found! Used Dark Theme!')
+except Exception as Err:
+    print('')
+    print(Err)
+    print("\nError while applying themes :","Using fallback!")
     # Change the Font of the program
     ttk.Style().configure(".",font=('Trebuchet MS Bold', 8))
 
@@ -116,6 +116,12 @@ def CheckPath2Settings():
         CheckPath2Settings()
         print("Rerun CheckPath2Settings")
 
+# Display Settings
+def ShowSettings():
+    print("\n[Current Settings]")
+    for i in Settings:
+        print("["+i+"] ---> ["+str(Settings[i])+"]")
+
 # Update Settings
 def UpdateSettings(Variable,Value):
     print("\nUpdating "+Variable+" to "+Value)
@@ -123,31 +129,26 @@ def UpdateSettings(Variable,Value):
     UpdateSettings = open("Settings.json","w")
     UpdateSettings.write(json.dumps(Settings))
     UpdateSettings.close()
-    print(str(Settings)+"\nSettings Updated!")
+    ShowSettings()
+    print("\nSettings Updated!")
 
 # Check and open then load settings
 CheckPath2Settings()
 
 # Show Current Settings
-print("\nCurrent Settings")
-print(Settings)
+ShowSettings()
 
 # Initialize Values
 DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)",10]
 
-AudioDevice = StringVar()
+# Essential Values
+AudioDevice, Vol, SongPos = StringVar(), StringVar(), StringVar()
 AudioDevice.set(Settings["AudioDevice"])
-
-Vol = StringVar()
 Vol.set(Settings["Volume"])
-
-SongPos = StringVar()
 SongPos.set('0')
 
-LoopState = StringVar()
-
-AnimatedBarText1 = StringVar()
-AnimatedBarText2 = StringVar()
+# Visuals Values
+LoopState, AnimatedBarText1, AnimatedBarText2 = StringVar(), StringVar(), StringVar()
 
 #
 # Since I cant use TTK's Progress Bar and find a working all-rounder AudioVisualizer
@@ -260,8 +261,7 @@ def InitializeAudioSystem():
 InitializeAudioSystem()
 
 # initialize GUI placement and shorten
-btn = ttk.Button
-lb = ttk.Label
+btn, lb = ttk.Button, ttk.Label
 R = 1 # To adjust Y-POS of all buttons and selected labels
 
 # Author and Titles
@@ -297,33 +297,24 @@ lb(controls, textvariable=AnimatedBarText2).grid(column=1, row=R+10,sticky=N)
 lb(controls, text="]").grid(column=1, row=R+10,sticky=E)
 lb(controls, text="[").grid(column=1, row=R+10,sticky=W)
 
-## I want to add something in these, idk what though
-# lb(controls, text="").grid(column=1, row=R+11,sticky=W)
-# lb(controls, text="").grid(column=1, row=R+12,sticky=W)
-# lb(controls, text="").grid(column=1, row=R+13,sticky=W)
-# lb(controls, text="").grid(column=1, row=R+14,sticky=W)
-
 #
 # IM SO GLAD THIS WORKED!
 # EVERYTHINNG IS AUTOMATED!
 # POGGERS
 #
 ComDispName = SD.ComDispName
-Counter = 0     # Overall Counter for the amount of sounds
-RowCounter = 0  # Counter that gets resert every MaxRow
-MaxRow = 13     # MaxRows Until adding a new Column
+Counter, RowCounter, MaxRow = 0, 0, 13     # 'Counter' for the amount of sounds # 'RowCounter' that gets reset every 'MaxRow'  # 'MaxRows' Until adding a new Column
 def RenderSoundBtn():
     global Counter, RowCounter, MaxRow, ComDispName
     COL = 1
     try:
-         if Counter <= len(ComDispName):
-             for i in ComDispName:
-                 btn(soundbuttons, text=i[0], width=18, command=ComDispName[Counter][1]).grid(column=COL, row=RowCounter+1, sticky=(N,S,E,W))
-                 RowCounter += 1
-                 Counter += 1
-                 if RowCounter >= MaxRow:
-                     RowCounter = 0
-                     COL += 1
+         for i in ComDispName:
+             btn(soundbuttons, text=i[0], width=18, command=ComDispName[Counter][1]).grid(column=COL, row=RowCounter+1, sticky=(N,S,E,W))
+             RowCounter += 1
+             Counter += 1
+             if RowCounter >= MaxRow:
+                 RowCounter = 0
+                 COL += 1
     except Exception as Err:
         PrintErr("RenderSoundBtn()",Err)
 
