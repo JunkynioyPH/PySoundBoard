@@ -100,8 +100,7 @@ def InitializeSettings():
     if Path("Settings.json").exists() == True:
         try:
             with open('Settings.json','r') as SettingsValue:
-                SettingsData = SettingsValue.read()
-            Settings = json.loads(SettingsData)
+                Settings = json.loads(SettingsValue.read())
         except Exception as Err:
             print("\nError Occured:\n"+str(Err)+"\n")
             os.remove("Settings.json")
