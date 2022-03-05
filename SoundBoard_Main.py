@@ -151,6 +151,7 @@ SongPos.set('0')
 
 # Visuals Values
 LoopState = StringVar()
+
 # for waiting for a specific key to be pressed
 # temporarily non-functional, will work on it on the near future
 def ScanForKeystroke():
