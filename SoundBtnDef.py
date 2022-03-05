@@ -20,6 +20,7 @@ ComDispName = [
 ["WHATTHEFUCK",AD.WHATTHEFUCK],
 ["WHAT",AD.WHAT],
 ["Bonk",AD.Bonk],
+["AnimeBonk",AD.AnimeBonk],
 ["VineBoom",AD.VineBoom],
 ["TacoBellBoom",AD.TacoBellBoom],
 ["RobloxOof",AD.RobloxOof],
