@@ -255,7 +255,7 @@ btn(controlcontent,text="Pause Playback",command=Pause).grid(column=2,row=1,stic
 btn(controlcontent,text="Resume Playback",command=Resume).grid(column=3,row=1,sticky=(N,S,E,W))
 SetVol_entry = ttk.Entry(controlcontent, width=7, textvariable=Vol)
 SetVol_entry.grid(column=4,row=1,sticky=(W, E))
-btn(controlcontent,text="^ SetVolume",command=SetVol).grid(column=5,row=1,sticky=(N,S,E,W))
+btn(controlcontent,text="< SetVolume",command=SetVol).grid(column=5,row=1,sticky=(N,S,E,W))
 
 lb(controlcontent, textvariable=SongPos, width=10).grid(column=6, row=1,sticky=(N,S))
 btn(controlcontent,text="Toggle Loop",command=AD.ToggleLoop).grid(column=7,row=1,sticky=(N,S,E,W))
