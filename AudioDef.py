@@ -2,14 +2,14 @@ import pygame
 import os
 import time
 
-LoopTextState, LoopState = "No Loop", 0
+LoopTextState, LoopState = "  No   Looping", 0
 
 def ToggleLoop():
     global LoopState, LoopTextState
     if LoopState == 0:
-        LoopTextState, LoopState = "Looping", -1
+        LoopTextState, LoopState = "  Yes Looping", -1
     else:
-        LoopTextState, LoopState = "No Loop", 0
+        LoopTextState, LoopState = "  No   Looping", 0
 
 def Play(AudioFile):
     global LoopState, LoopTextState, AudioPath

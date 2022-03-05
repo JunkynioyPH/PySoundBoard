@@ -43,7 +43,7 @@ header = ttk.Frame(root, relief=RAISED, borderwidth=4)
 header.grid(column=0, row=0, sticky=(N, S,W, E))
 
 headercenter = ttk.Frame(root)
-headercenter.grid(pady=10, column=0, row=0, sticky=(N, S))
+headercenter.grid(padx=5, pady=8, column=0, row=0, sticky=(N, S))
 
 headercontent = ttk.Frame(headercenter, relief=SUNKEN, borderwidth=2)
 headercontent.grid(column=0, row=0, sticky=N)
@@ -53,18 +53,21 @@ mframe = ttk.Frame(root, relief=GROOVE, borderwidth=2)
 mframe.grid(column=0, row=1, sticky=(N, W, E, S))
 
 # Controls
-controls = ttk.Frame(mframe, relief=SUNKEN, borderwidth=2)
-controls.grid(padx=5, pady=5, column=0, row=0, sticky=(N, W, E, S))
+controls = ttk.Frame(headercenter, relief=SUNKEN, borderwidth=2)
+controls.grid(padx=10, pady=2, column=0, row=1, sticky=(N, S))
+
+controlcontent = ttk.Frame(controls, relief=SUNKEN, borderwidth=2)
+controlcontent.grid(column=1, row=1, sticky=(N, S))
 
 controllabel = ttk.Frame(controls, relief=RAISED, borderwidth=2)
 controllabel.grid(column=1, row=0, sticky=(N, W, E, S))
 
 # Sound Buttons
 soundboard = ttk.Frame(mframe, relief=SUNKEN, borderwidth=2)
-soundboard.grid(padx=5, pady=5,column=1, row=0, sticky=(N, W, E, S))
+soundboard.grid(padx=5, pady=5,column=1, row=1, sticky=(N, S))
 
 soundbuttons = ttk.Frame(soundboard, relief=SUNKEN, borderwidth=2)
-soundbuttons.grid(column=1, row=1, sticky=(N, W, E, S))
+soundbuttons.grid(column=1, row=1, sticky=(N, S))
 
 soundlabel = ttk.Frame(soundboard, relief=RAISED, borderwidth=2)
 soundlabel.grid(column=1, row=0, sticky=(N, W, E, S))
@@ -124,13 +127,13 @@ def ShowSettings():
 
 # Update Settings
 def UpdateSettings(Variable,Value):
-    print("\n----------\nUpdating "+Variable+" to "+Value)
+    print("\n------------\nUpdating "+Variable+" to "+Value)
     Settings[Variable] = Value
     UpdateSettings = open("Settings.json","w")
     UpdateSettings.write(json.dumps(Settings))
     UpdateSettings.close()
     ShowSettings()
-    print("\nSettings Updated!\n----------")
+    print("\nSettings Updated!\n------------")
 
 # Check and open then load settings
 InitializeSettings()
@@ -148,36 +151,7 @@ Vol.set(Settings["Volume"])
 SongPos.set('0')
 
 # Visuals Values
-LoopState, AnimatedBarText1, AnimatedBarText2 = StringVar(), StringVar(), StringVar()
-
-#
-# Since I cant use TTK's Progress Bar and find a working all-rounder AudioVisualizer
-# I made my own Visualiser that shows that something is happening along with the
-# song Position counter
-#
-# Its only purpose is to fill out that space that is existent at the left of the window
-#
-TextContents = ["",""]
-def AnimatedBar():
-    SongPosition = float(pygame.mixer.music.get_pos()/1000)
-    if SongPosition > 0:
-        #print('pos > 0')
-        TextContents[0] += "|"
-        AnimatedBarText1.set(TextContents[0])
-        AnimatedBarText2.set(TextContents[1])
-        if len(TextContents[0]) > 13:
-            TextContents[0] = ""
-            TextContents[1] += "|"
-            if len(TextContents[1]) > 14:
-                TextContents[1] = ""
-                # i could prolly add something here, i just dont know
-    else:
-        #print('pos < 0')
-        for i in range(0,len(TextContents)):
-            TextContents[i] = ""
-        AnimatedBarText1.set(TextContents[0])
-        AnimatedBarText2.set(TextContents[1])
-
+LoopState = StringVar()
 # for waiting for a specific key to be pressed
 # temporarily non-functional, will work on it on the near future
 def ScanForKeystroke():
@@ -188,7 +162,6 @@ def live_update():
         SongPos.set(str(pygame.mixer.music.get_pos()/1000)+"s")
         LoopState.set(AD.LoopTextState)
         root.title("SoundBoard GUI - File : '"+AD.AudioPath+"' is loaded.")
-        root.after(250, AnimatedBar)
         root.after(100, live_update)
     except Exception as Err:
         PrintErr("live_update()",Err)
@@ -200,7 +173,7 @@ def ChangeAudioDevice():
         pygame.mixer.pre_init(devicename=Device)
         pygame.mixer.init()
         pygame.mixer.music.set_volume(float(Settings["Volume"])/100)
-        print("\n"+AudioDevice.get()+" Found!\nSuccessfully Bound to Device!")
+        print("\n*************\n"+AudioDevice.get()+" Found!\nSuccessfully Bound to Device!\n*************")
         UpdateSettings("AudioDevice",Device)
         AD.Play("start.wav")
     except Exception as Err:
@@ -262,40 +235,31 @@ InitializeAudioSystem()
 
 # initialize GUI placement and shorten
 btn, lb = ttk.Button, ttk.Label
-R = 1 # To adjust Y-POS of all buttons and selected labels
 
 # Author and Titles
 lb(headercontent, text="Soundboard written in Python! - By: Junkynioy#2408").grid(column=3, row=0,sticky=N)
 
 # Change Audio Device
-lb(headercontent, text="AudioDevice").grid(column=2, row=1,sticky=E)
+lb(headercontent, text="  AudioDevice", width=14).grid(column=2, row=1,sticky=(N,S))
 SetAudDev_entry = ttk.Entry(headercontent, width=75, textvariable=AudioDevice)
 SetAudDev_entry.grid(column=3,row=1,sticky=(N,S,E,W))
 btn(headercontent,text="Set Device",command=ChangeAudioDevice).grid(column=4,row=1,sticky=(N,S,E,W))
 
 # Labels and Info
-lb(controllabel, text="Controls").grid(column=1, row=0,sticky=(N,S,E,W))
-lb(soundlabel, text="Sound Board").grid(column=1, row=0,sticky=(N,S,E,W))
+lb(controllabel, text="Controls").grid(column=1, row=0,sticky=(N,S))
+lb(soundlabel, text="Sound Board").grid(column=1, row=0,sticky=(N,S))
 
 # Audio Controls
-btn(controls,text="Stop Playback",command=Stop).grid(column=1,row=R,sticky=(N,S,E,W))
-btn(controls,text="Pause Playback",command=Pause).grid(column=1,row=R+1,sticky=(N,S,E,W))
-btn(controls,text="Resume Playback",command=Resume).grid(column=1,row=R+2,sticky=(N,S,E,W))
-SetVol_entry = ttk.Entry(controls, width=7, textvariable=Vol)
-SetVol_entry.grid(column=1,row=R+3,sticky=(W, E))
-btn(controls,text="^ SetVolume",command=SetVol).grid(column=1,row=R+4,sticky=(N,S,E,W))
-lb(controls, textvariable=SongPos).grid(column=1, row=R+5,sticky=(N,S))
-btn(controls,text="Toggle Loop",command=AD.ToggleLoop).grid(column=1,row=R+6,sticky=(N,S,E,W))
-lb(controls, text="Next played has").grid(column=1, row=R+7,sticky=S)
-lb(controls, textvariable=LoopState).grid(column=1, row=R+8,sticky=N)
+btn(controlcontent,text="Stop Playback",command=Stop).grid(column=1,row=1,sticky=(N,S,E,W))
+btn(controlcontent,text="Pause Playback",command=Pause).grid(column=2,row=1,sticky=(N,S,E,W))
+btn(controlcontent,text="Resume Playback",command=Resume).grid(column=3,row=1,sticky=(N,S,E,W))
+SetVol_entry = ttk.Entry(controlcontent, width=7, textvariable=Vol)
+SetVol_entry.grid(column=4,row=1,sticky=(W, E))
+btn(controlcontent,text="^ SetVolume",command=SetVol).grid(column=5,row=1,sticky=(N,S,E,W))
 
-# Dumb Bars below the Audio Controls
-lb(controls, textvariable=AnimatedBarText1).grid(column=1, row=R+9,sticky=N)
-lb(controls, text="]").grid(column=1, row=R+9,sticky=E)
-lb(controls, text="[").grid(column=1, row=R+9,sticky=W)
-lb(controls, textvariable=AnimatedBarText2).grid(column=1, row=R+10,sticky=N)
-lb(controls, text="]").grid(column=1, row=R+10,sticky=E)
-lb(controls, text="[").grid(column=1, row=R+10,sticky=W)
+lb(controlcontent, textvariable=SongPos, width=10).grid(column=6, row=1,sticky=(N,S))
+btn(controlcontent,text="Toggle Loop",command=AD.ToggleLoop).grid(column=7,row=1,sticky=(N,S,E,W))
+lb(controlcontent, textvariable=LoopState, width=15).grid(column=8, row=1,sticky=(N, S))
 
 #
 # IM SO GLAD THIS WORKED!
@@ -303,7 +267,7 @@ lb(controls, text="[").grid(column=1, row=R+10,sticky=W)
 # POGGERS
 #
 ComDispName = SD.ComDispName
-Counter, RowCounter, MaxRow = 0, 0, 13     # 'Counter' for the amount of sounds # 'RowCounter' that gets reset every 'MaxRow'  # 'MaxRows' Until adding a new Column
+Counter, RowCounter, MaxRow = 0, 0, 12     # 'Counter' for the amount of sounds # 'RowCounter' that gets reset every 'MaxRow'  # 'MaxRows' Until adding a new Column
 def RenderSoundBtn():
     global Counter, RowCounter, MaxRow, ComDispName
     COL = 1
