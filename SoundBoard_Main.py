@@ -88,8 +88,7 @@ def clearconsole():
     os.system('cls' if os.name=='nt' else 'clear')
 
 def PrintErr(Where,Err):
-    clearconsole()
-    print("=====================================")
+    print("\n=====================================")
     print("Error During "+Where)
     print(Err)
     print("=====================================")
@@ -193,7 +192,7 @@ def SetVol():
             pygame.mixer.music.set_volume(Volume)
             Vol.set(pygame.mixer.music.get_volume()*100)
             UpdateSettings("Volume",Vol.get())
-    except Exception as err:
+    except Exception as Err:
         PrintErr("SetVol()",Err)
         print("\n'"+str(Vol.get())+"' is not a Valid Number between 0-100!")
         Vol.set(pygame.mixer.music.get_volume()*100)
