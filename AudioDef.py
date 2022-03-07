@@ -66,6 +66,12 @@ def BoyWithUkeToxic():
 def SamsungStartUp():
     Play("samsungstartup.mp3")
 
+def SusRemix():
+    Play('susremix.mp3')
+
+def JPSusRemix():
+    Play('jpsusremix.mp3')
+
 def LionSleepsTonight():
     Play('lionsleepstonight.mp3')
 

@@ -17,6 +17,8 @@ ComDispName = [
 ["DreamTranceMusic",AD.DreamTranceMusic],
 ["SusImposterRole",AD.SusImposterRole],
 ["SusBodyReported",AD.SusBodyReported],
+["SusRemix",AD.SusRemix],
+["JPSusRemix",AD.JPSusRemix],
 ["EmotionalDamage",AD.EmotionalDamage],
 ["ISendU2Jesus",AD.ISendU2Jesus],
 ["WHATTHEFUCK",AD.WHATTHEFUCK],
