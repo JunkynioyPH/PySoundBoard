@@ -41,6 +41,8 @@ ComDispName = [
 ["WhatHow_Meme",AD.WhatHow_Meme],
 ["SadHarmonica(!!!)",AD.SadHarmonicaEar],
 ["SadHarmonica",AD.SadHarmonica],
+["RickRoll",AD.RickRoll],
+["リックロール",AD.JPRickRoll],
 ["ReZeroGigguk",AD.ReZeroGigguk],
 ["Unravel",AD.Unravel],
 ["OhHarderDaddy",AD.OhHarderDaddy],

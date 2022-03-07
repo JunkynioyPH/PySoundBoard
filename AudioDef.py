@@ -11,12 +11,21 @@ def ToggleLoop():
     else:
         LoopTextState, LoopState = "  No   Looping", 0
 
+def PrintErr(Where,Err):
+    print("\n=====================================")
+    print("Error During "+Where)
+    print(Err)
+    print("=====================================")
+
 def Play(AudioFile):
     global LoopState, LoopTextState, AudioPath
-    AudioPath = AudioFile # for the window title
-    pygame.mixer.music.unload()
-    pygame.mixer.music.load(".\SoundFiles\\"+AudioFile)
-    pygame.mixer.music.play(loops=LoopState)
+    try:
+        AudioPath = AudioFile # for the window title
+        pygame.mixer.music.unload()
+        pygame.mixer.music.load(".\SoundFiles\\"+AudioFile)
+        pygame.mixer.music.play(loops=LoopState)
+    except Exception as Err:
+        PrintErr('AudioDef.Play()',Err)
 
 def SmashBroDrillRemix():
     Play("smashbrodrillremix.mp3")
@@ -68,6 +77,12 @@ def SamsungStartUp():
 
 def SusRemix():
     Play('susremix.mp3')
+
+def JPRickRoll():
+    Play('jprickroll.mp3')
+
+def RickRoll():
+    Play('rickroll.mp3')
 
 def JPSusRemix():
     Play('jpsusremix.mp3')
