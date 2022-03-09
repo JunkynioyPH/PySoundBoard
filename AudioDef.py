@@ -180,6 +180,9 @@ def SadHarmonicaEar():
 def SadHarmonica():
     Play("sadharmonica.mp3")
 
+def BeserkST4Gatsu():
+    Play('beserkst4gatsu.mp3')
+
 def DJAirhorn():
     Play("djairhorn.mp3")
 
