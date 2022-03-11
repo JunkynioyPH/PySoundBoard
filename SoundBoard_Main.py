@@ -266,7 +266,7 @@ lb(controlcontent, textvariable=LoopState, width=15).grid(column=8, row=1,sticky
 # POGGERS
 #
 ComDispName = SD.ComDispName
-Counter, RowCounter, MaxRow = 0, 0, 12     # 'Counter' for the amount of sounds # 'RowCounter' that gets reset every 'MaxRow'  # 'MaxRows' Until adding a new Column
+Counter, RowCounter, MaxRow = 0, 0, 13     # 'Counter' for the amount of sounds # 'RowCounter' that gets reset every 'MaxRow'  # 'MaxRows' Until adding a new Column
 def RenderSoundBtn():
     global Counter, RowCounter, MaxRow, ComDispName
     COL = 1

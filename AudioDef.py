@@ -192,6 +192,12 @@ def SadNarutoOST13():
 def FrenchAccordion():
     Play("frenchaccordion.mp3")
 
+def FBIOpenUp():
+    Play('fbiopenup.mp3')
+
+def FNAF2Ambience():
+    Play('fnaf2ambience.mp3')
+
 def DJAirhorn():
     Play("djairhorn.mp3")
 
