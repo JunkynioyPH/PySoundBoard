@@ -183,6 +183,12 @@ def SadHarmonica():
 def BeserkST4Gatsu():
     Play('beserkst4gatsu.mp3')
 
+def SadBleachOST19():
+    Play('sadbleachost19.mp3')
+
+def SadNarutoOST13():
+    Play('sadnarutoost13.mp3')
+
 def DJAirhorn():
     Play("djairhorn.mp3")
 
