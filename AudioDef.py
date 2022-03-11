@@ -189,6 +189,9 @@ def SadBleachOST19():
 def SadNarutoOST13():
     Play('sadnarutoost13.mp3')
 
+def FrenchAccordion():
+    Play("frenchaccordion.mp3")
+
 def DJAirhorn():
     Play("djairhorn.mp3")
 

@@ -66,11 +66,10 @@ ComDispName = [
 ["BoyWithUkeToxic",AD.BoyWithUkeToxic],
 ["USSRAnthem",AD.USSRAnthem],
 ["LionSleepsTonight",AD.LionSleepsTonight],
-["CatUP",AD.CatUP],
-["CatDOWN",AD.CatDOWN],
 ["PHub",AD.PHub],
 ["WinXPShutDown",AD.WinXPShutDown],
 ["WinXPStartup",AD.WinXPStartup],
 ["WinXPCritStop",AD.WinXPCritStop],
-["WinXPError",AD.WinXPError]
+["WinXPError",AD.WinXPError],
+["FrenchAccordion",AD.FrenchAccordion]
 ]
