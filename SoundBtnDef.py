@@ -27,6 +27,7 @@ ComDispName = [
 ["Bonk",AD.Bonk],
 ["AnimeBonk",AD.AnimeBonk],
 ["Bruh",AD.Bruh],
+["CryEmojiVanish",AD.CryEmojiVanish],
 ["VineBoom",AD.VineBoom],
 ["TacoBellBoom",AD.TacoBellBoom],
 ["RobloxOof",AD.RobloxOof],
@@ -63,6 +64,7 @@ ComDispName = [
 ["GangstaParadise",AD.GangstaParadise],
 ["WidePutin",AD.WidePutin],
 ["SigmaMindset",AD.SigmaMindset],
+["SigmaMindSlow",AD.SigmaMindSlow]
 ["MissTheRage",AD.MissTheRage],
 ["SpidermanBSuit",AD.SpidermanBSuit],
 ["BoyWithUkeToxic",AD.BoyWithUkeToxic],

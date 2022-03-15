@@ -192,6 +192,12 @@ def SadNarutoOST13():
 def FrenchAccordion():
     Play("frenchaccordion.mp3")
 
+def CryEmojiVanish():
+    Play('cryemojivanish.mp3')
+
+def SigmaMindSlow():
+    Play('sigmamindsetslow.mp3')
+
 def FBIOpenUp():
     Play('fbiopenup.mp3')
 
