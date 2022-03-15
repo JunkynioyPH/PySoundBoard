@@ -66,14 +66,14 @@ ComDispName = [
 ["SigmaMindset",AD.SigmaMindset],
 ["SigmaMindSlow",AD.SigmaMindSlow],
 ["MissTheRage",AD.MissTheRage],
-["SpidermanBSuit",AD.SpidermanBSuit],
 ["BoyWithUkeToxic",AD.BoyWithUkeToxic],
+["SpidermanBSuit",AD.SpidermanBSuit],
+["FrenchAccordion",AD.FrenchAccordion],
 ["USSRAnthem",AD.USSRAnthem],
 ["LionSleepsTonight",AD.LionSleepsTonight],
 ["PHub",AD.PHub],
 ["WinXPShutDown",AD.WinXPShutDown],
 ["WinXPStartup",AD.WinXPStartup],
 ["WinXPCritStop",AD.WinXPCritStop],
-["WinXPError",AD.WinXPError],
-["FrenchAccordion",AD.FrenchAccordion]
+["WinXPError",AD.WinXPError]
 ]
