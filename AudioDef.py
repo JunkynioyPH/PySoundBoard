@@ -162,6 +162,9 @@ def Shawty():
 def SigmaMindset():
     Play('sigmamindset.mp3')
 
+def SasukeTheme():
+    Play('sasuketheme.mp3')
+
 def MissTheRage():
     Play('misstherage.mp3')
 
