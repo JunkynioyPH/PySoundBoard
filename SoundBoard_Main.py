@@ -198,9 +198,9 @@ def SetVol():
         Vol.set(pygame.mixer.music.get_volume()*100)
 
 # Show First-Time Execution then turn off pop up
-if int(Settings["Splash"]) == 1:
+if int(Settings["Splash"]) == "1":
     os.system('python Splash.py')
-    UpdateSettings("Splash",0)
+    UpdateSettings("Splash","0")
 
 # Start audio system
 tries = 0
