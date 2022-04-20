@@ -107,7 +107,7 @@ def InitializeSettings():
             InitializeSettings()
             print("settings.json reset complete")
     else:
-        x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":"10","Splash":1}
+        x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":"10","Splash":"1"}
         DefSettingsDump = open("Settings.json","a")
         print("settings.json [Created]")
         DefSettingsDump.write(json.dumps(x))
