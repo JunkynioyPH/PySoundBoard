@@ -68,6 +68,7 @@ ComDispName = [
 ["SigmaMindSlow",AD.SigmaMindSlow],
 ["MissTheRage",AD.MissTheRage],
 ["BoyWithUkeToxic",AD.BoyWithUkeToxic],
+["SheKnows",AD.SheKnows],
 ["SpidermanBSuit",AD.SpidermanBSuit],
 ["FrenchAccordion",AD.FrenchAccordion],
 ["USSRAnthem",AD.USSRAnthem],

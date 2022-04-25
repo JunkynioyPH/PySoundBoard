@@ -72,6 +72,9 @@ def SteveOof():
 def BoyWithUkeToxic():
     Play("boywithuketoxic.mp3")
 
+def SheKnows():
+    Play("sheknows.mp3")
+
 def SamsungStartUp():
     Play("samsungstartup.mp3")
 
