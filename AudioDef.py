@@ -108,6 +108,9 @@ def AnimeGirlAH():
 def YTFULying():
     Play('ytfulying.mp3')
 
+def HiPitchLaugh():
+    Play('hipitchlaugh.mp3')
+
 def Yamete():
     Play('yamete.mp3')
 

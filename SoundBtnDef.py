@@ -28,6 +28,7 @@ ComDispName = [
 ["AnimeBonk",AD.AnimeBonk],
 ["Bruh",AD.Bruh],
 ["CryEmojiVanish",AD.CryEmojiVanish],
+["HiPitchLaugh",AD.HiPitchLaugh],
 ["VineBoom",AD.VineBoom],
 ["TacoBellBoom",AD.TacoBellBoom],
 ["RobloxOof",AD.RobloxOof],
