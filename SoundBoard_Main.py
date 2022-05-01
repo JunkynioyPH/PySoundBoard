@@ -208,6 +208,8 @@ def InitializeAudioSystem():
     global tries
     if tries < 10:
         try:
+            # perhaps make the frequency + buffer configurable in the future.
+            # frequency=48000
             pygame.mixer.pre_init(devicename=Settings["AudioDevice"])
             pygame.mixer.init()
             pygame.mixer.music.set_volume(float(Vol.get())/100)
@@ -224,7 +226,7 @@ def InitializeAudioSystem():
             InitializeAudioSystem()
             SetVol()
     else:
-        PrintErr("InitializeAudioSystem()","\nMaximum retries Reached. (40 Retries)\nThis could mean you do not have VoiceMeeter Installed.\nChange the AudioDevice in Settings.json")
+        PrintErr("InitializeAudioSystem()","\nMaximum retries Reached. (40 Retries)\nThis could mean you do not have VoiceMeeter or VB-CABLE Installed.\nChange the AudioDevice in Settings.json")
         time.sleep(10)
         exit()
 
