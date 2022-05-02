@@ -114,6 +114,15 @@ def HiPitchLaugh():
 def Yamete():
     Play('yamete.mp3')
 
+def OkIPullUp():
+    Play('okipullup.mp3')
+
+def SnoreAAAH():
+    Play('snoreaaah.mp3')
+
+def IWonderHowWhy():
+    Play('iwonderhowwhy.mp3')
+
 def YameteKudasai():
     Play('yametekudasai.mp3')
 
