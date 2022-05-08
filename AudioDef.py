@@ -96,6 +96,9 @@ def LionSleepsTonight():
 def UltraInstinct():
     Play("ultrainstinct.mp3")
 
+def THXIntro():
+    Play('thxintro.mp3')
+
 def OsmanthusWine():
     Play('osmanthuswine.mp3')
 

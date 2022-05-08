@@ -56,6 +56,7 @@ ComDispName = [
 ["ZoneAnkha",AD.ZoneAnkha],
 ["HeartFlatline",AD.HeartFlatline],
 ["FBIOpenUp",AD.FBIOpenUp],
+["THXIntro",AD.THXIntro],
 ["SnoreAAAH",AD.SnoreAAAH],
 ["FNAF2Ambience",AD.FNAF2Ambience],
 ["DJAirhorn",AD.DJAirhorn],
