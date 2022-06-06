@@ -219,7 +219,7 @@ def InitializeAudioSystem():
             tries += 1
             PrintErr("InitializeAudioSystem()",Err)
             print(Settings)
-            print("AudioDevice & Volume Settings is reset with the hopes of fixing the issue.\nSorry for the inconvenience.\n\nIf this did not fix the issue, please create a 'New Issue' on the github page.\nhttps://github.com/JunkynioyPH/PySoundBoard/issues \n")
+            print("AudioDevice & Volume Settings are reset with the hopes of fixing the issue.\nSorry for the inconvenience.\n\nIf this did not fix the issue, please create a 'New Issue' on the github page.\nhttps://github.com/JunkynioyPH/PySoundBoard/issues \n")
             UpdateSettings("AudioDevice",DefaultValSettings[0])
             UpdateSettings("Volume",DefaultValSettings[1])
             AudioDevice.set(Settings["AudioDevice"])
