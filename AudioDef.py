@@ -69,6 +69,15 @@ def RobloxOof():
 def SteveOof():
     Play("steveoof.mp3")
 
+def C_mZone():
+    Play("c_mzone.mp3")
+
+def C_mThrone():
+    Play("c_mthrone.mp3")
+
+def C_mWontLast():
+    Play("c_mwontlast.mp3")
+
 def BoyWithUkeToxic():
     Play("boywithuketoxic.mp3")
 

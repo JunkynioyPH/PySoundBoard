@@ -82,5 +82,8 @@ ComDispName = [
 ["WinXPShutDown",AD.WinXPShutDown],
 ["WinXPStartup",AD.WinXPStartup],
 ["WinXPCritStop",AD.WinXPCritStop],
-["WinXPError",AD.WinXPError]
+["WinXPError",AD.WinXPError],
+["C_mZone",AD.C_mZone],
+["C_mThrone",AD.C_mThrone],
+["C_mWontLast",AD.C_mWontLast]
 ]
