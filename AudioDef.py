@@ -78,6 +78,12 @@ def C_mThrone():
 def C_mWontLast():
     Play("c_mwontlast.mp3")
 
+def ChadMan():
+    Play('chadman.mp3')
+
+def LovePakistan():
+    Play('lovepakistan.mp3')
+
 def BoyWithUkeToxic():
     Play("boywithuketoxic.mp3")
 
