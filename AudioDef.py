@@ -42,11 +42,11 @@ def AnimeBonk():
 def TacoBellBoom():
     Play("tacobellboom.mp3")
 
-def CatUP():
-    Play('catup.mp3')
-
-def CatDOWN():
-    Play('catdown.mp3')
+# def CatUP():
+#     Play('catup.mp3')
+#
+# def CatDOWN():
+#     Play('catdown.mp3')
 
 def WidePutin():
     Play('wideputin.mp3')
@@ -107,6 +107,9 @@ def JPSusRemix():
 
 def LionSleepsTonight():
     Play('lionsleepstonight.mp3')
+
+def BSBlazing():
+    Play('bsblazing.mp3')
 
 def UltraInstinct():
     Play("ultrainstinct.mp3")

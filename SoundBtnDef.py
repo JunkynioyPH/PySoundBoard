@@ -74,6 +74,7 @@ ComDispName = [
 ["MissTheRage",AD.MissTheRage],
 ["BoyWithUkeToxic",AD.BoyWithUkeToxic],
 ["SheKnows",AD.SheKnows],
+["BSBlazing",AD.BSBlazing],
 ["IWonderHowWhy",AD.IWonderHowWhy],
 ["OkIPullUp",AD.OkIPullUp],
 ["SpidermanBSuit",AD.SpidermanBSuit],
