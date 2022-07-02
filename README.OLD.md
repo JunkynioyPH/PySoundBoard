@@ -23,7 +23,7 @@ For **ListAudioDevices.py**, it requires **sounddevice** to be installed. **OPTI
 
 This is the default way of making this soundboard to work and it requires 2 things to be installed.
 
-[VoiceMeeter Banana - For routing multiple "mic" inputs to a virtual mic output](https://vb-audio.com/Voicemeeter/banana.htm)
+[VoiceMeeter - For routing multiple "mic" inputs to a virtual mic output](https://vb-audio.com/Voicemeeter/index.htm)
 
 [VB-Cable Audio Device - Virtual Cable for PySoundBoard to output audio to.](https://vb-audio.com/Cable/index.htm)
 
