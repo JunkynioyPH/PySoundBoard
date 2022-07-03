@@ -51,6 +51,15 @@ def TacoBellBoom():
 def WidePutin():
     Play('wideputin.mp3')
 
+def MutaharLaugh():
+    Play('mutaharlaugh.mp3')
+
+def SynthBladeRun2048():
+    Play('synthbladerun2048.mp3')
+
+def HoistCLRBassSing():
+    Play('hoistclrbasssing.mp3')
+
 def McCaveNoise():
     Play('mccavenoise.mp3')
 
