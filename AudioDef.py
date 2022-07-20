@@ -57,8 +57,10 @@ def MutaharLaugh():
 def SynthBladeRun2048():
     Play('synthbladerun2048.mp3')
 
-def HoistCLRBassSing():
-    Play('hoistclrbasssing.mp3')
+def SpidermanDunked():
+    Play('spidermandunked.mp3')
+# def HoistCLRBassSing():
+#     Play('hoistclrbasssing.mp3')
 
 def McCaveNoise():
     Play('mccavenoise.mp3')

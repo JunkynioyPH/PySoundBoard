@@ -66,7 +66,7 @@ ComDispName = [
 ["WidePutin",AD.WidePutin],
 ["Shawty",AD.Shawty],
 ["YTFULying",AD.YTFULying],
-["HoistCLRBassSing",AD.HoistCLRBassSing],
+["SpidermanDunked",AD.SpidermanDunked],
 ["DarudeSandstorm",AD.DarudeSandstorm],
 ["SickoModeWaaah",AD.SickoModeWaaah],
 ["GangstaParadise",AD.GangstaParadise],
