@@ -272,13 +272,13 @@ lb(controlcontent, textvariable=LoopState, width=15).grid(column=8, row=1,sticky
 ComDispName = SD.ComDispName
 Counter, RowCounter, MaxRow = 0, 0, 13     # 'Counter' for the amount of sounds # 'RowCounter' that gets reset every 'MaxRow'  # 'MaxRows' Until adding a new Column
 def RenderSoundBtn():
-    global Counter, RowCounter, MaxRow, ComDispName
+    global RowCounter, MaxRow, ComDispName
     COL = 1
     try:
          for i in ComDispName:
              btn(soundbuttons, text=i[0], width=18, command=i[1]).grid(column=COL, row=RowCounter+1, sticky=(N,S,E,W))
              RowCounter += 1
-             Counter += 1
+             # Counter += 1
              if RowCounter >= MaxRow:
                  RowCounter = 0
                  COL += 1
