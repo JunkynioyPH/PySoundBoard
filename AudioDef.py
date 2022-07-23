@@ -1,4 +1,4 @@
-import pygame
+from pygame import mixer
 import os
 import time
 
@@ -21,9 +21,9 @@ def Play(AudioFile):
     global LoopState, LoopTextState, AudioPath
     try:
         AudioPath = AudioFile # for the window title
-        pygame.mixer.music.unload()
-        pygame.mixer.music.load(".\SoundFiles\\"+AudioFile)
-        pygame.mixer.music.play(loops=LoopState)
+        mixer.music.unload()
+        mixer.music.load(".\SoundFiles\\"+AudioFile)
+        mixer.music.play(loops=LoopState)
     except Exception as Err:
         PrintErr('AudioDef.Play()',Err)
 

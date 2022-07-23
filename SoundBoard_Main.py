@@ -3,8 +3,9 @@ from tkinter import ttk
 from pathlib import Path
 from pygame import mixer
 import time, json, os
-import AudioDef as AD
 import SoundBtnDef as SD
+import AudioDef as AD
+
 
 # Console splash
 os.system('cls' if os.name=='nt' else 'clear')
