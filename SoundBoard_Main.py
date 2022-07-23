@@ -276,7 +276,7 @@ def RenderSoundBtn():
     COL = 1
     try:
          for i in ComDispName:
-             btn(soundbuttons, text=i[0], width=18, command=ComDispName[Counter][1]).grid(column=COL, row=RowCounter+1, sticky=(N,S,E,W))
+             btn(soundbuttons, text=i[0], width=18, command=i[1]).grid(column=COL, row=RowCounter+1, sticky=(N,S,E,W))
              RowCounter += 1
              Counter += 1
              if RowCounter >= MaxRow:
