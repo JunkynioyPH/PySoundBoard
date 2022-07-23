@@ -214,7 +214,7 @@ def InitializeAudioSystem():
             mixer.pre_init(devicename=Settings["AudioDevice"])
             mixer.init()
             mixer.music.set_volume(float(Vol.get())/100)
-            AD.Play("start.wav")
+            AD.Play("..\startup.wav")
         except Exception as Err:
             time.sleep(1)
             tries += 1
