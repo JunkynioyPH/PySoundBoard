@@ -1,7 +1,8 @@
 from tkinter import *
 from tkinter import ttk
 from pathlib import Path
-import pygame, time, json, os
+from pygame import mixer
+import time, json, os
 import AudioDef as AD
 import SoundBtnDef as SD
 
@@ -74,14 +75,14 @@ soundlabel.grid(column=1, row=0, sticky=(N, W, E, S))
 
 # Controls
 def Pause():
-    pygame.mixer.music.pause()
+    mixer.music.pause()
 
 def Resume():
-    pygame.mixer.music.unpause()
+    mixer.music.unpause()
 
 def Stop():
     Resume()
-    pygame.mixer.music.fadeout(250)
+    mixer.music.fadeout(250)
 
 # Clear Console
 def clearconsole():
@@ -158,7 +159,7 @@ def ScanForKeystroke():
 
 def live_update():
     try:
-        SongPos.set(str(pygame.mixer.music.get_pos()/1000)+"s")
+        SongPos.set(str(mixer.music.get_pos()/1000)+"s")
         LoopState.set(AD.LoopTextState)
         root.title("SoundBoard GUI - File : '"+AD.AudioPath+"' is loaded.")
         root.after(100, live_update)
@@ -168,10 +169,10 @@ def live_update():
 def ChangeAudioDevice():
     Device = AudioDevice.get()
     try:
-        pygame.mixer.quit()
-        pygame.mixer.pre_init(devicename=Device)
-        pygame.mixer.init()
-        pygame.mixer.music.set_volume(float(Settings["Volume"])/100)
+        mixer.quit()
+        mixer.pre_init(devicename=Device)
+        mixer.init()
+        mixer.music.set_volume(float(Settings["Volume"])/100)
         print("\n*************\n"+AudioDevice.get()+" Found!\nSuccessfully Bound to Device!\n*************")
         UpdateSettings("AudioDevice",Device)
         AD.Play("start.wav")
@@ -185,17 +186,17 @@ def SetVol():
     try:
         Volume = float(Vol.get())/100
         if Volume >= 1:
-            pygame.mixer.music.set_volume(Volume)
-            Vol.set(pygame.mixer.music.get_volume()*100)
+            mixer.music.set_volume(Volume)
+            Vol.set(mixer.music.get_volume()*100)
             UpdateSettings("Volume",Vol.get())
         else:
-            pygame.mixer.music.set_volume(Volume)
-            Vol.set(pygame.mixer.music.get_volume()*100)
+            mixer.music.set_volume(Volume)
+            Vol.set(mixer.music.get_volume()*100)
             UpdateSettings("Volume",Vol.get())
     except Exception as Err:
         PrintErr("SetVol()",Err)
         print("\n'"+str(Vol.get())+"' is not a Valid Number between 0-100!")
-        Vol.set(pygame.mixer.music.get_volume()*100)
+        Vol.set(mixer.music.get_volume()*100)
 
 # Show First-Time Execution then turn off pop up
 if int(Settings["Splash"]) == "1":
@@ -210,9 +211,9 @@ def InitializeAudioSystem():
         try:
             # perhaps make the frequency + buffer configurable in the future.
             # frequency=48000
-            pygame.mixer.pre_init(devicename=Settings["AudioDevice"])
-            pygame.mixer.init()
-            pygame.mixer.music.set_volume(float(Vol.get())/100)
+            mixer.pre_init(devicename=Settings["AudioDevice"])
+            mixer.init()
+            mixer.music.set_volume(float(Vol.get())/100)
             AD.Play("start.wav")
         except Exception as Err:
             time.sleep(1)
@@ -289,4 +290,4 @@ RenderSoundBtn()
 root.resizable(width=False, height=False)
 live_update()
 root.mainloop()
-pygame.quit()
+mixer.quit()
