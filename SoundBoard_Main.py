@@ -6,6 +6,7 @@ import time, json, os
 import SoundBtnDef as SD
 import AudioDef as AD
 
+# Hello in VSCode! (Junkynioy)
 
 # Console splash
 os.system('cls' if os.name=='nt' else 'clear')
