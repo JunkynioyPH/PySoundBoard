@@ -1,6 +1,4 @@
 from pygame import mixer
-import os
-import time
 
 LoopTextState, LoopState = "  No   Looping", 0
 
