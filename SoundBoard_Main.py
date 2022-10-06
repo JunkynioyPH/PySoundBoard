@@ -128,7 +128,7 @@ def ShowSettings():
 
 # Update Settings
 def UpdateSettings(Variable,Value):
-    print("\n------------\nUpdating "+Variable+" to "+Value)
+    print("\n------------\nUpdating "+Variable+" to "+str(Value))
     Settings[Variable] = Value
     UpdateSettings = open("Settings.json","w")
     UpdateSettings.write(json.dumps(Settings))
