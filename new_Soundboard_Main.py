@@ -159,7 +159,7 @@ def ChangeAudioDevice():
         mixer.music.set_volume(float(Settings["Volume"])/100)
         print(f"\n*************\n {AudioDevice.get()} Found!\nSuccessfully Bound to Device!\n*************")
         UpdateSettings("AudioDevice",Device)
-        AD.Play("start.wav")
+        AD.Play("..\startup.wav")
     except Exception as Err:
         PrintErr("ChangeAudioDevice()",Err)
         print(AudioDevice.get())
