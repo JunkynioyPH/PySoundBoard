@@ -7,7 +7,7 @@ import SoundBtnDef as SD
 import AudioDef as AD
 
 # Hello in VSCode! (Junkynioy)
-# Hello
+# Hello from old
 
 # Console splash
 os.system('cls' if os.name=='nt' else 'clear')
