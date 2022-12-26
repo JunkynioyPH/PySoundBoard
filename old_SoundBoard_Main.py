@@ -137,12 +137,6 @@ def UpdateSettings(Variable,Value):
     ShowSettings()
     print("\nSettings Updated!\n------------")
 
-# Check and open then load settings
-InitializeSettings()
-
-# Show Current Settings
-ShowSettings()
-
 # Initialize Values
 DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)",10]
 
@@ -155,16 +149,12 @@ SongPos.set('0')
 # Visuals Values
 LoopState = StringVar()
 
-# for waiting for a specific key to be pressed
-# temporarily non-functional, will work on it on the near future
-def ScanForKeystroke():
-    print('text')
 
 def live_update():
     try:
-        SongPos.set(str(mixer.music.get_pos()/1000)+"s")
+        SongPos.set(f"{mixer.music.get_pos()/1000}s")
         LoopState.set(AD.LoopTextState)
-        root.title("SoundBoard GUI - File : '"+AD.AudioPath+"' is loaded.")
+        root.title(f"SoundBoard GUI - File : '{AD.AudioPath}' is loaded.")
         root.after(100, live_update)
     except Exception as Err:
         PrintErr("live_update()",Err)
@@ -176,7 +166,7 @@ def ChangeAudioDevice():
         mixer.pre_init(devicename=Device)
         mixer.init()
         mixer.music.set_volume(float(Settings["Volume"])/100)
-        print("\n*************\n"+AudioDevice.get()+" Found!\nSuccessfully Bound to Device!\n*************")
+        print(f"\n*************\n {AudioDevice.get()} Found!\nSuccessfully Bound to Device!\n*************")
         UpdateSettings("AudioDevice",Device)
         AD.Play("start.wav")
     except Exception as Err:
@@ -198,7 +188,7 @@ def SetVol():
             UpdateSettings("Volume",Vol.get())
     except Exception as Err:
         PrintErr("SetVol()",Err)
-        print("\n'"+str(Vol.get())+"' is not a Valid Number between 0-100!")
+        print(f"\n'{Vol.get()}' is not a Valid Number between 0-100!")
         Vol.set(mixer.music.get_volume()*100)
 
 # Show First-Time Execution then turn off pop up
@@ -210,7 +200,7 @@ if int(Settings["Splash"]) == "1":
 tries = 0
 def InitializeAudioSystem():
     global tries
-    if tries < 10:
+    if tries > 10:
         try:
             # perhaps make the frequency + buffer configurable in the future.
             # frequency=48000
@@ -234,6 +224,11 @@ def InitializeAudioSystem():
         time.sleep(10)
         exit()
 
+# Check and open then load settings
+InitializeSettings()
+
+# Show Current Settings
+ShowSettings()
 
 # Perform Initialization
 InitializeAudioSystem()
