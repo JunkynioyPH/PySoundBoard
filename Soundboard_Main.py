@@ -4,10 +4,6 @@ from pathlib import Path
 from pygame import mixer
 import time, json, os
 import SoundBtnDef as SD
-import AudioDef as AD
-
-# Hello in VSCode! (Junkynioy)
-# Hello from old
 
 # Console splash
 os.system('cls' if os.name=='nt' else 'clear')
@@ -21,9 +17,18 @@ print('''
 ╚═╝        ╚═╝   ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝
                     Written By : Junkynioy#2408 - https://github.com/JunkynioyPH
 ''')
+
 # Preliminary preparations
 os.system('title PySoundBoard Backend' if os.name=='nt' else 'echo -ne "\033]0;PySoundBoard Backend\007"')
 root = Tk()
+
+DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)",10]
+
+# Essential Values
+AudioDevice, Vol, SongPos = StringVar(), StringVar(), StringVar()
+SongPos.set('0')
+
+LoopState = StringVar()
 
 # The sweet dark mode
 try:
@@ -87,7 +92,7 @@ def Stop():
     Resume()
     mixer.music.fadeout(250)
 
-# Clear Console
+    # Clear Console
 def clearconsole():
     os.system('cls' if os.name=='nt' else 'clear')
 
@@ -105,13 +110,13 @@ def InitializeSettings():
             with open('Settings.json','r') as SettingsValue:
                 Settings = json.loads(SettingsValue.read())
         except Exception as Err:
-            print("\nError Occured:\n"+str(Err)+"\n")
+            print(f"\nError Occured: {Err}\n")
             os.remove("Settings.json")
             print("settings.json is being reset")
             InitializeSettings()
             print("settings.json reset complete")
     else:
-        x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":"10","Splash":"1"}
+        x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":"10","MaxRows":"3","Splash":"1"}
         DefSettingsDump = open("Settings.json","a")
         print("settings.json [Created]")
         DefSettingsDump.write(json.dumps(x))
@@ -121,15 +126,13 @@ def InitializeSettings():
         InitializeSettings()
         print("Rerun InitializeSettings")
 
-# Display Settings
 def ShowSettings():
     print("\n[Current Settings]")
     for i in Settings:
-        print("["+i+"] ---> ["+str(Settings[i])+"]")
+        print(f"[{i}] ---> [{Settings[i]}]")
 
-# Update Settings
 def UpdateSettings(Variable,Value):
-    print("\n------------\nUpdating "+Variable+" to "+str(Value))
+    print(f"\n------------\nUpdating {Variable} to {Value}")
     Settings[Variable] = Value
     UpdateSettings = open("Settings.json","w")
     UpdateSettings.write(json.dumps(Settings))
@@ -137,24 +140,11 @@ def UpdateSettings(Variable,Value):
     ShowSettings()
     print("\nSettings Updated!\n------------")
 
-# Initialize Values
-DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)",10]
-
-# Essential Values
-AudioDevice, Vol, SongPos = StringVar(), StringVar(), StringVar()
-AudioDevice.set(Settings["AudioDevice"])
-Vol.set(Settings["Volume"])
-SongPos.set('0')
-
-# Visuals Values
-LoopState = StringVar()
-
-
 def live_update():
     try:
         SongPos.set(f"{mixer.music.get_pos()/1000}s")
-        LoopState.set(AD.LoopTextState)
-        root.title(f"SoundBoard GUI - File : '{AD.AudioPath}' is loaded.")
+        LoopState.set(SD.LoopTextState)
+        root.title(f"SoundBoard GUI - File : '{SD.AudioPath}' is loaded.")
         root.after(100, live_update)
     except Exception as Err:
         PrintErr("live_update()",Err)
@@ -162,13 +152,10 @@ def live_update():
 def ChangeAudioDevice():
     Device = AudioDevice.get()
     try:
-        mixer.quit()
-        mixer.pre_init(devicename=Device)
-        mixer.init()
-        mixer.music.set_volume(float(Settings["Volume"])/100)
-        print(f"\n*************\n {AudioDevice.get()} Found!\nSuccessfully Bound to Device!\n*************")
         UpdateSettings("AudioDevice",Device)
-        AD.Play("start.wav")
+        print(f"\n*************\n {AudioDevice.get()} Found!\nSuccessfully Bound to Device!\n*************")
+        mixer.quit()
+        InitializeAudioSystem()
     except Exception as Err:
         PrintErr("ChangeAudioDevice()",Err)
         print(AudioDevice.get())
@@ -191,23 +178,17 @@ def SetVol():
         print(f"\n'{Vol.get()}' is not a Valid Number between 0-100!")
         Vol.set(mixer.music.get_volume()*100)
 
-# Show First-Time Execution then turn off pop up
-if int(Settings["Splash"]) == "1":
-    os.system('python Splash.py')
-    UpdateSettings("Splash","0")
-
-# Start audio system
 tries = 0
 def InitializeAudioSystem():
     global tries
-    if tries > 10:
+    if tries < 10:
         try:
             # perhaps make the frequency + buffer configurable in the future.
             # frequency=48000
             mixer.pre_init(devicename=Settings["AudioDevice"])
             mixer.init()
             mixer.music.set_volume(float(Vol.get())/100)
-            AD.Play("..\startup.wav")
+            SD.SoundButton("..\startup.wav").Play()
         except Exception as Err:
             time.sleep(1)
             tries += 1
@@ -220,18 +201,26 @@ def InitializeAudioSystem():
             InitializeAudioSystem()
             SetVol()
     else:
-        PrintErr("InitializeAudioSystem()","\nMaximum retries Reached. (40 Retries)\nThis could mean you do not have VoiceMeeter or VB-CABLE Installed.\nChange the AudioDevice in Settings.json")
+        PrintErr("InitializeAudioSystem()","\nMaximum retries Reached.)\nThis could mean you do not have VoiceMeeter or VB-CABLE Installed.\nChange the AudioDevice in Settings.json")
         time.sleep(10)
         exit()
 
 # Check and open then load settings
 InitializeSettings()
+AudioDevice.set(Settings["AudioDevice"])
+Vol.set(Settings["Volume"])
 
 # Show Current Settings
 ShowSettings()
 
 # Perform Initialization
 InitializeAudioSystem()
+
+
+# Show First-Time Execution then turn off pop up
+if int(Settings["Splash"]) == "1":
+    os.system('python Splash.py')
+    UpdateSettings("Splash","0")
 
 # initialize GUI placement and shorten
 btn, lb = ttk.Button, ttk.Label
@@ -258,7 +247,7 @@ SetVol_entry.grid(column=4,row=1,sticky=(W, E))
 btn(controlcontent,text="< SetVolume",command=SetVol).grid(column=5,row=1,sticky=(N,S,E,W))
 
 lb(controlcontent, textvariable=SongPos, width=10).grid(column=6, row=1,sticky=(N,S))
-btn(controlcontent,text="Toggle Loop",command=AD.ToggleLoop).grid(column=7,row=1,sticky=(N,S,E,W))
+btn(controlcontent,text="Toggle Loop",command=SD.ToggleLoop).grid(column=7,row=1,sticky=(N,S,E,W))
 lb(controlcontent, textvariable=LoopState, width=15).grid(column=8, row=1,sticky=(N, S))
 
 #
@@ -267,12 +256,21 @@ lb(controlcontent, textvariable=LoopState, width=15).grid(column=8, row=1,sticky
 # POGGERS
 #
 ComDispName = SD.ComDispName
-Counter, RowCounter, MaxRow = 0, 0, 13     # 'Counter' for the amount of sounds # 'RowCounter' that gets reset every 'MaxRow'  # 'MaxRows' Until adding a new Column
+# len(ComDispName)/12  # 'Counter' for the amount of sounds # 'RowCounter' that gets reset every 'MaxRow'  # 'MaxRows' Until adding a new Column
+try:
+    if int(Settings['MaxRows']) < 0:
+        PrintErr('RenderSoundBtn() Variable Init','MaxRows is <0: Set MaxRows to 0+')
+    else:
+        Counter, RowCounter, MaxRow = 0, 0, int(Settings['MaxRows'])
+except Exception as ERR:
+    PrintErr('Setting MaxRows ---> Maxrows :',f'MaxRows is Either:\n1: Does not exist! --> Delete Settings.json\n2: Value is NaN!\n\n--> : {ERR}')
 def RenderSoundBtn():
     global RowCounter, MaxRow, ComDispName
     COL = 1
     try:
          for i in ComDispName:
+            # text= DISPLAY NAME
+            # command= CALL FUNCTION
              btn(soundbuttons, text=i[0], width=18, command=i[1]).grid(column=COL, row=RowCounter+1, sticky=(N,S,E,W))
              RowCounter += 1
              # Counter += 1
