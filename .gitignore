@@ -8,6 +8,6 @@ venv/*
 # These stuff is to ignore stuff from getting commited to main from HOST MACHINE
 *__pycache__*
 *Backup_.py*
-SoundFiles/*
+*SoundFiles*
 Settings.json
 ListAudioDevices.py

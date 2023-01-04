@@ -5,14 +5,6 @@ I've always wanted a soundboard but I cant find one that is free to use.
 So I made my own! Lmao.
 
 Please refer to the issues tab if any issues, duh.
-
-# Disclaimer
-Do note that **I do not own ANY OF THE AUDIO FILES** in SoundFiles Folder.
-
-**However**, I made the "startup.wav" myself. I'm Proud of it! :)
-
-**Sounds/Music/Audio are owned by their respective owners.**
-
 # Pre-Requisites
 **(Python 3.x+ & make sure you have Ttk/TKinter Ticked!)**
 Requires **python** to be installed.

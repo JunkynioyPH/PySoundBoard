@@ -42,7 +42,13 @@ class SoundButton:
 def ScanDir(PATH):
     print('Scanning for AudioFiles...')
     time.sleep(1)
-    Files = os.scandir(PATH)
+    try:
+        Files = os.scandir(PATH)
+    except Exception as ERR:
+        PrintErr('SoundBtnDef.ScanDir()',ERR)
+        print('You do not have Sounds yet, SoundFiles Folder has been created!\nJust drag and drop your audio files in .\\SoundFiles folder and run the Program!')
+        os.system('mkdir .\\SoundFiles')
+        time.sleep(2)
     for Entry in Files:
         # time.sleep(0.015625)
         if Entry.is_file():
@@ -61,6 +67,7 @@ def ScanDir(PATH):
         ComDispName.append([f"{y}", Sound.Play])
         print([f"{y}", Sound.Play])
         # time.sleep(0.0015625)
+
 
 os.system('cls' if os.name=='nt' else 'clear')
 ScanDir(AudioFolder)

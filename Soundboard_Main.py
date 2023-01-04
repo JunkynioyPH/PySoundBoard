@@ -277,6 +277,8 @@ def RenderSoundBtn():
              if RowCounter >= MaxRow:
                  RowCounter = 0
                  COL += 1
+         if len(ComDispName) == 0:
+            print('\n\nJust drag and drop your audio files in .\\SoundFiles folder and run the Program again!')
     except Exception as Err:
         PrintErr("RenderSoundBtn()",Err)
 
