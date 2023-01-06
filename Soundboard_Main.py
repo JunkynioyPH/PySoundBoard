@@ -28,7 +28,7 @@ DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)",10]
 AudioDevice, Vol, SongPos = StringVar(), StringVar(), StringVar()
 SongPos.set('0')
 
-LoopState = StringVar()
+LoopState, SpammingState = StringVar(), StringVar()
 
 # The sweet dark mode
 try:
@@ -83,16 +83,18 @@ soundlabel.grid(column=1, row=0, sticky=(N, W, E, S))
 
 # Controls
 def Pause():
+    mixer.pause()
     mixer.music.pause()
-
 def Resume():
+    mixer.unpause()
     mixer.music.unpause()
 
 def Stop():
     Resume()
+    mixer.fadeout(250)
     mixer.music.fadeout(250)
 
-    # Clear Console
+# Clear Console
 def clearconsole():
     os.system('cls' if os.name=='nt' else 'clear')
 
@@ -103,28 +105,7 @@ def PrintErr(Where,Err):
     print("=====================================")
 
 # Load Settings
-def InitializeSettings():
-    global Settings
-    if Path("Settings.json").exists() == True:
-        try:
-            with open('Settings.json','r') as SettingsValue:
-                Settings = json.loads(SettingsValue.read())
-        except Exception as Err:
-            print(f"\nError Occured: {Err}\n")
-            os.remove("Settings.json")
-            print("settings.json is being reset")
-            InitializeSettings()
-            print("settings.json reset complete")
-    else:
-        x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":"10","MaxRows":"3","Splash":"1"}
-        DefSettingsDump = open("Settings.json","a")
-        print("settings.json [Created]")
-        DefSettingsDump.write(json.dumps(x))
-        print("settings.json [Accessed]")
-        DefSettingsDump.close()
-        print("settings.json [Closed]")
-        InitializeSettings()
-        print("Rerun InitializeSettings")
+InitializeSettings, Settings = SD.InitializeSettings, SD.Settings
 
 def ShowSettings():
     print("\n[Current Settings]")
@@ -134,9 +115,9 @@ def ShowSettings():
 def UpdateSettings(Variable,Value):
     print(f"\n------------\nUpdating {Variable} to {Value}")
     Settings[Variable] = Value
-    UpdateSettings = open("Settings.json","w")
-    UpdateSettings.write(json.dumps(Settings))
-    UpdateSettings.close()
+    with open("Settings.json","w") as UpdateSettings:
+        UpdateSettings.write(json.dumps(Settings))
+    InitializeSettings() # Reload Settings
     ShowSettings()
     print("\nSettings Updated!\n------------")
 
@@ -144,6 +125,7 @@ def live_update():
     try:
         SongPos.set(f"{mixer.music.get_pos()/1000}s")
         LoopState.set(SD.LoopTextState)
+        SpammingState.set(SD.SpammingTextState)
         root.title(f"SoundBoard GUI - File : '{SD.AudioPath}' is loaded.")
         root.after(100, live_update)
     except Exception as Err:
@@ -187,7 +169,7 @@ def InitializeAudioSystem():
             # frequency=48000
             mixer.pre_init(devicename=Settings["AudioDevice"])
             mixer.init()
-            mixer.music.set_volume(float(Vol.get())/100)
+            mixer.music.set_volume(float(Settings['Volume'])/100)
             SD.SoundButton("..\startup.wav").Play()
         except Exception as Err:
             time.sleep(1)
@@ -249,6 +231,9 @@ btn(controlcontent,text="< SetVolume",command=SetVol).grid(column=5,row=1,sticky
 lb(controlcontent, textvariable=SongPos, width=10).grid(column=6, row=1,sticky=(N,S))
 btn(controlcontent,text="Toggle Loop",command=SD.ToggleLoop).grid(column=7,row=1,sticky=(N,S,E,W))
 lb(controlcontent, textvariable=LoopState, width=15).grid(column=8, row=1,sticky=(N, S))
+
+btn(controlcontent,text="Toggle Spamming",command=SD.ToggleSpamming).grid(column=9,row=1,sticky=(N,S,E,W))
+lb(controlcontent, textvariable=SpammingState, width=15).grid(column=10, row=1,sticky=(N, S))
 
 #
 # IM SO GLAD THIS WORKED!
