@@ -55,8 +55,7 @@ def PrintErr(Where,Err):
     print(Err)
     print("=====================================")
 
-
-# might move to class
+# POV: You learned about classes and the ability to create different instance of the same object
 class SoundButton:
     def __init__(self, AudioFile: str) -> None:
         self.AudioFile = AudioFile
@@ -66,7 +65,7 @@ class SoundButton:
         if SpammingState == 1 and mixer.music.get_pos()/1000 > 0:
             AudioPath = self.AudioFile # for the window title
             Sound = mixer.Sound(AudioFolder+"\\"+self.AudioFile)
-            Sound.set_volume(float(Settings['Volume'])/100) ## DOES NOT UPDATE WHEN VOLUME IS CHANGED DURIHNG RUNTIME.
+            Sound.set_volume(float(Settings['Volume'])/100)
             Sound.play()
         else:
             AudioPath = self.AudioFile # for the window title
@@ -74,6 +73,7 @@ class SoundButton:
             mixer.music.load(AudioFolder+"\\"+self.AudioFile)
             mixer.music.play(loops=LoopState)
 
+# POV: you dont have to manually make the buttons and functions anymore
 def ScanDir(PATH):
     print('Scanning for AudioFiles...')
     time.sleep(1)
