@@ -16,7 +16,7 @@ def InitializeSettings():
             InitializeSettings()
             print("settings.json reset complete")
     else:
-        x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":"10","MaxRows":"3","Splash":"1"}
+        x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":"10","MaxRows":"8","Splash":"1"}
         DefSettingsDump = open("Settings.json","a")
         print("settings.json [Created]")
         DefSettingsDump.write(json.dumps(x))
@@ -31,7 +31,7 @@ InitializeSettings()
 ComDispName = []
 
 LoopTextState, LoopState,  = "  No   Looping", 0
-SpammingState, SpammingTextState = 0, '  No   Spamming'
+SpammingState, SpammingTextState = 0, '  No   Multiple'
 AudioFolder = r".\SoundFiles"
 AudioFilesIndex = []
 
@@ -45,9 +45,9 @@ def ToggleLoop():
 def ToggleSpamming():
     global SpammingState, SpammingTextState
     if SpammingState == 0:
-        SpammingState, SpammingTextState = 1, "  Yes Spamming"
+        SpammingState, SpammingTextState = 1, "  Yes Multiple"
     else:
-        SpammingState, SpammingTextState = 0, "  No   Spamming"
+        SpammingState, SpammingTextState = 0, "  No   Multiple"
 
 def PrintErr(Where,Err):
     print("\n=====================================")
@@ -61,14 +61,14 @@ class SoundButton:
         self.AudioFile = AudioFile
 
     def Play(self):
-        global LoopState, LoopTextState, AudioPath
+        global LoopState, LoopTextState, AudioPath, Title
+        AudioPath = self.AudioFile # for the window title
+        Title = f"'{AudioPath}' is Looped and Loaded!" if LoopState == -1 else f"'{AudioPath}' is Loaded!"
         if SpammingState == 1 and mixer.music.get_pos()/1000 > 0:
-            AudioPath = self.AudioFile # for the window title
             Sound = mixer.Sound(AudioFolder+"\\"+self.AudioFile)
             Sound.set_volume(float(Settings['Volume'])/100)
             Sound.play()
         else:
-            AudioPath = self.AudioFile # for the window title
             mixer.music.unload()
             mixer.music.load(AudioFolder+"\\"+self.AudioFile)
             mixer.music.play(loops=LoopState)

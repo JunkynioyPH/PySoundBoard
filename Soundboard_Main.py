@@ -2,27 +2,30 @@ from tkinter import *
 from tkinter import ttk
 from pathlib import Path
 from pygame import mixer
+from sys import exit as SysExit
 import time, json, os
 import SoundBtnDef as SD
 
 # Console splash
-os.system('cls' if os.name=='nt' else 'clear')
-print('''
+def splash():
+    os.system('cls' if os.name=='nt' else 'clear')
+    print('''
 
-██████╗ ██╗   ██╗███████╗ ██████╗ ██╗   ██╗███╗   ██╗██████╗ ██████╗  ██████╗  █████╗ ██████╗ ██████╗
-██╔══██╗╚██╗ ██╔╝██╔════╝██╔═══██╗██║   ██║████╗  ██║██╔══██╗██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██╔══██╗
-██████╔╝ ╚████╔╝ ███████╗██║   ██║██║   ██║██╔██╗ ██║██║  ██║██████╔╝██║   ██║███████║██████╔╝██║  ██║
-██╔═══╝   ╚██╔╝  ╚════██║██║   ██║██║   ██║██║╚██╗██║██║  ██║██╔══██╗██║   ██║██╔══██║██╔══██╗██║  ██║
-██║        ██║   ███████║╚██████╔╝╚██████╔╝██║ ╚████║██████╔╝██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝
-╚═╝        ╚═╝   ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝
-                    Written By : Junkynioy#2408 - https://github.com/JunkynioyPH
-''')
+    ██████╗ ██╗   ██╗███████╗ ██████╗ ██╗   ██╗███╗   ██╗██████╗ ██████╗  ██████╗  █████╗ ██████╗ ██████╗
+    ██╔══██╗╚██╗ ██╔╝██╔════╝██╔═══██╗██║   ██║████╗  ██║██╔══██╗██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██╔══██╗
+    ██████╔╝ ╚████╔╝ ███████╗██║   ██║██║   ██║██╔██╗ ██║██║  ██║██████╔╝██║   ██║███████║██████╔╝██║  ██║
+    ██╔═══╝   ╚██╔╝  ╚════██║██║   ██║██║   ██║██║╚██╗██║██║  ██║██╔══██╗██║   ██║██╔══██║██╔══██╗██║  ██║
+    ██║        ██║   ███████║╚██████╔╝╚██████╔╝██║ ╚████║██████╔╝██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝
+    ╚═╝        ╚═╝   ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝
+                        Written By : Junkynioy#2408 - https://github.com/JunkynioyPH
+    ''')
+splash()
 
 # Preliminary preparations
 os.system('title PySoundBoard Backend' if os.name=='nt' else 'echo -ne "\033]0;PySoundBoard Backend\007"')
 root = Tk()
 
-DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)",10]
+DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)","VoiceMeeter Input (VB-Audio VoiceMeeter VAIO)",None]
 
 # Essential Values
 AudioDevice, Vol, SongPos = StringVar(), StringVar(), StringVar()
@@ -126,18 +129,21 @@ def live_update():
         SongPos.set(f"{mixer.music.get_pos()/1000}s")
         LoopState.set(SD.LoopTextState)
         SpammingState.set(SD.SpammingTextState)
-        root.title(f"SoundBoard GUI - File : '{SD.AudioPath}' is loaded.")
+        root.title(f"SoundBoard GUI - File : {SD.Title}")
         root.after(100, live_update)
     except Exception as Err:
         PrintErr("live_update()",Err)
 
 def ChangeAudioDevice():
+    global index
     Device = AudioDevice.get()
     try:
         UpdateSettings("AudioDevice",Device)
-        print(f"\n*************\n {AudioDevice.get()} Found!\nSuccessfully Bound to Device!\n*************")
         mixer.quit()
         InitializeAudioSystem()
+        splash()
+        print(f"\n{'*'*10}\n{'Default Device' if AudioDevice.get() == 'None' else AudioDevice.get()} Found!\nSuccessfully Bound to Device!\n{'*'*10}")
+        index = 0
     except Exception as Err:
         PrintErr("ChangeAudioDevice()",Err)
         print(AudioDevice.get())
@@ -160,32 +166,41 @@ def SetVol():
         print(f"\n'{Vol.get()}' is not a Valid Number between 0-100!")
         Vol.set(mixer.music.get_volume()*100)
 
-tries = 0
+tries, index = 0, 0
 def InitializeAudioSystem():
-    global tries
-    if tries < 10:
+    global tries, index
+    if tries < 5:
         try:
             # perhaps make the frequency + buffer configurable in the future.
             # frequency=48000
+            if Settings['AudioDevice'] is None:
+                print('\nYou Do not have VB-Audio VoiceMeeter or VB-Audio Virtual Cable;\nwhich this program recognises!!\nUsing [System Default Output] !\n\nIf you do have an Output Device you wish to use, specify\nit in the [AudioDevice Input-Box] or in [Settings.json]\nIf you now have VoiceMeeter or VB-Cable Installed, simply press the "Set Device" Button to set it to them.')
             mixer.pre_init(devicename=Settings["AudioDevice"])
             mixer.init()
             mixer.music.set_volume(float(Settings['Volume'])/100)
-            SD.SoundButton("..\startup.wav").Play()
+            try:
+                SD.SoundButton(r"..\startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
+            except Exception as ERR:
+                PrintErr(f"InitializeAudioSystem()",ERR)
         except Exception as Err:
             time.sleep(1)
             tries += 1
-            PrintErr("InitializeAudioSystem()",Err)
             print(Settings)
-            print("AudioDevice & Volume Settings are reset with the hopes of fixing the issue.\nSorry for the inconvenience.\n\nIf this did not fix the issue, please create a 'New Issue' on the github page.\nhttps://github.com/JunkynioyPH/PySoundBoard/issues \n")
-            UpdateSettings("AudioDevice",DefaultValSettings[0])
-            UpdateSettings("Volume",DefaultValSettings[1])
+            PrintErr("InitializeAudioSystem()",f"{Settings['AudioDevice']} - {Err}")
+            print("Attempting Fixes...")
+            
+            if str(Err).lower() == 'no such device.' and index < len(DefaultValSettings):
+                print(f"{index, str(Err).lower()} Setting AudioDevice to [{DefaultValSettings[index]}]")
+                UpdateSettings("AudioDevice",DefaultValSettings[index])
+                index += 1
+
             AudioDevice.set(Settings["AudioDevice"])
             InitializeAudioSystem()
-            SetVol()
+            # clearconsole()
     else:
-        PrintErr("InitializeAudioSystem()","\nMaximum retries Reached.)\nThis could mean you do not have VoiceMeeter or VB-CABLE Installed.\nChange the AudioDevice in Settings.json")
+        PrintErr("InitializeAudioSystem()","\nMaximum retries Reached.\nPlease Check Settings.json\nThis can only be triggered in a manual way, so consult the 'Issues' tab on github if needed.")
         time.sleep(10)
-        exit()
+        SysExit()
 
 # Check and open then load settings
 InitializeSettings()
@@ -232,7 +247,7 @@ lb(controlcontent, textvariable=SongPos, width=10).grid(column=6, row=1,sticky=(
 btn(controlcontent,text="Toggle Loop",command=SD.ToggleLoop).grid(column=7,row=1,sticky=(N,S,E,W))
 lb(controlcontent, textvariable=LoopState, width=15).grid(column=8, row=1,sticky=(N, S))
 
-btn(controlcontent,text="Toggle Spamming",command=SD.ToggleSpamming).grid(column=9,row=1,sticky=(N,S,E,W))
+btn(controlcontent,text="Multi Mode",command=SD.ToggleSpamming).grid(column=9,row=1,sticky=(N,S,E,W))
 lb(controlcontent, textvariable=SpammingState, width=15).grid(column=10, row=1,sticky=(N, S))
 
 #
