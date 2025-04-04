@@ -1,6 +1,6 @@
 from pygame import mixer
 from pathlib import Path
-import time, os, json
+import time, os, json, xpfpath
 
 def InitializeSettings():
     global Settings
@@ -31,7 +31,7 @@ ComDispName = []
 
 LoopTextState, LoopState,  = "  No   Looping", 0
 SpammingState, SpammingTextState = 0, '  No   Multiple'
-AudioFolder = r".\SoundFiles"
+AudioFolder = xpfpath.xpfp(".\\SoundFiles")
 AudioFilesIndex = []
 
 def ToggleLoop():
@@ -64,12 +64,12 @@ class SoundButton:
         AudioPath = self.AudioFile # for the window title
         Title = f"'{AudioPath}' is Looped and Loaded!" if LoopState == -1 else f"'{AudioPath}' is Loaded!"
         if SpammingState == 1 and mixer.music.get_pos()/1000 > 0:
-            Sound = mixer.Sound(AudioFolder+"\\"+self.AudioFile)
+            Sound = mixer.Sound(xpfpath.xpfp(AudioFolder+"\\"+self.AudioFile))
             Sound.set_volume(float(Settings['Volume'])/100)
             Sound.play()
         else:
             mixer.music.unload()
-            mixer.music.load(AudioFolder+"\\"+self.AudioFile)
+            mixer.music.load(xpfpath.xpfp(AudioFolder+"\\"+self.AudioFile))
             mixer.music.play(loops=LoopState)
 
 # POV: you dont have to manually make the buttons and functions anymore
