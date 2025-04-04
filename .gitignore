@@ -11,3 +11,4 @@ venv/*
 *SoundFiles*
 Settings.json
 ListAudioDevices.py
+.venv

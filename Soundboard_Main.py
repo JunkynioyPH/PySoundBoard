@@ -1,8 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-from pathlib import Path
 from pygame import mixer
-from sys import exit as SysExit
 import time, json, os
 import SoundBtnDef as SD
 
@@ -200,7 +198,7 @@ def InitializeAudioSystem():
     else:
         PrintErr("InitializeAudioSystem()","\nMaximum retries Reached.\nPlease Check Settings.json\nThis can only be triggered in a manual way, so consult the 'Issues' tab on github if needed.")
         time.sleep(10)
-        SysExit()
+        exit()
 
 # Check and open then load settings
 InitializeSettings()
