@@ -1,0 +1,202 @@
+from PyQt6.QtCore import Qt, QTimer, QSize
+from PyQt6.QtWidgets import *
+from pygame import mixer
+import time, json, os
+import SoundBtnDef as SD
+
+
+# Console splash
+def splash():
+    os.system('cls' if os.name=='nt' else 'clear')
+    os.system('title PySoundBoard Backend') if os.name=='nt' else print('PySoundBoard Backend')
+    print('''
+
+    ██████╗ ██╗   ██╗███████╗ ██████╗ ██╗   ██╗███╗   ██╗██████╗ ██████╗  ██████╗  █████╗ ██████╗ ██████╗
+    ██╔══██╗╚██╗ ██╔╝██╔════╝██╔═══██╗██║   ██║████╗  ██║██╔══██╗██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██╔══██╗
+    ██████╔╝ ╚████╔╝ ███████╗██║   ██║██║   ██║██╔██╗ ██║██║  ██║██████╔╝██║   ██║███████║██████╔╝██║  ██║ Q
+    ██╔═══╝   ╚██╔╝  ╚════██║██║   ██║██║   ██║██║╚██╗██║██║  ██║██╔══██╗██║   ██║██╔══██║██╔══██╗██║  ██║ T
+    ██║        ██║   ███████║╚██████╔╝╚██████╔╝██║ ╚████║██████╔╝██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝
+    ╚═╝        ╚═╝   ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝
+                        Written By : @Junkynioy - https://github.com/JunkynioyPH
+    ''')
+splash()
+
+# Prelims
+DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)","VoiceMeeter Input (VB-Audio VoiceMeeter VAIO)",None]
+# Load Settings
+InitializeSettings, Settings = SD.InitializeSettings, SD.Settings
+InitializeSettings()
+
+def ShowSettings():
+    print("\n[Current Settings]")
+    for i in Settings:
+        print(f"[{i}] ---> [{Settings[i]}]")
+
+def UpdateSettings(Variable,Value):
+    print(f"\n------------\nUpdating {Variable} to {Value}")
+    Settings[Variable] = Value
+    with open("Settings.json","w") as UpdateSettings:
+        UpdateSettings.write(json.dumps(Settings))
+    InitializeSettings() # Reload Settings
+    ShowSettings()
+    print("\nSettings Updated!\n------------")
+
+tries, index = 0, 0
+limit = int(len(DefaultValSettings)+1) # unused yet
+def InitializeAudioSystem():
+    global tries, index
+    # if tries < limit:
+    #     try:
+            # perhaps make the frequency + buffer configurable in the future.
+            # frequency=48000
+    if Settings['AudioDevice'] is None:
+        print('\nVB-Audio VoiceMeeter/VB-Audio Virtual Cable [NOT FOUND]\nUsing [System Default Output] !\n\nIf you do have an Output Device you wish to use, specify\nit in the [AudioDevice Input-Box] or in [Settings.json]\nIf you now have VoiceMeeter or VB-Cable Installed, Press "Set Device" Button to Apply.')
+    mixer.pre_init(devicename=Settings["AudioDevice"])
+    mixer.init()
+    mixer.music.set_volume(float(Settings['Volume'])/100)
+            # try:
+    SD.SoundButton(r"..\startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
+    #         except Exception as ERR:
+    #             PrintErr(f"InitializeAudioSystem()",ERR)
+    #     except Exception as Err:
+    #         time.sleep(1)
+    #         tries += 1
+    #         print(Settings)
+    #         PrintErr("InitializeAudioSystem()",f"{Settings['AudioDevice']} - {Err}")
+    #         print("Attempting Fixes...")
+            
+    #         if str(Err).lower() == 'no such device.' and index < len(DefaultValSettings):
+    #             print(f"{index, str(Err).lower()} Setting AudioDevice to [{DefaultValSettings[index]}]")
+    #             UpdateSettings("AudioDevice",DefaultValSettings[index])
+    #             index += 1
+
+    #         AudioDevice.set(Settings["AudioDevice"])
+    #         InitializeAudioSystem()
+    #         # clearconsole()
+    # else:
+    #     PrintErr("InitializeAudioSystem()","\nMaximum retries Reached.\nPlease Check Settings.json\nThis can only be triggered in a manual way, so consult the 'Issues' tab on github if needed.")
+    #     time.sleep(10)
+    #     exit()
+ShowSettings()
+InitializeAudioSystem()
+
+
+# Show First-Time Execution then turn off pop up
+# need to replace
+if int(Settings["Splash"]) == "1":
+    os.system('python Splash.py')
+    UpdateSettings("Splash","0")
+
+## Define Main Window
+AlignFlag = Qt.AlignmentFlag
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("PySoundboard : PyQt6 - Junkynioy") # temporary cuz it will be dynamic based on what sound is playing
+        # self.setFixedSize(self.size())
+        
+        ## Define Containers
+        # Modifiable Space
+        Canvas = QWidget()
+        self.setCentralWidget(Canvas)
+        # Main Modifiable Space
+        VCanvas = QVBoxLayout()
+        Canvas.setLayout(VCanvas)
+        # Create Groups and contents
+        AudioDeviceDisplay = QGroupBox("   Audio Device ")
+        VCanvas.addWidget(AudioDeviceDisplay)
+        AudioDeviceDisplay.setLayout(self.AudioDeviceDisplayContent())
+        
+        Controls = QGroupBox("   Controls ")
+        VCanvas.addWidget(Controls)
+        Controls.setLayout(self.ControlsContent())
+        
+        SoundButtons = QGroupBox("   Sounds ")
+        VCanvas.addWidget(SoundButtons)
+        SoundButtons.setLayout(self.SoundButtonsContent())
+
+    # Define Contents of Each Groups
+    ## Audio Set Device Section
+    def AudioDeviceDisplayContent(self):
+        layout = QHBoxLayout()
+        return layout
+    
+    ## Controls Section
+    def ControlsContent(self):
+        layout = QHBoxLayout()
+        ControlButton = FuncButton
+        layout.addWidget(ControlButton('Pause',self.Pause))
+        layout.addWidget(ControlButton('Resume',self.Resume))
+        layout.addWidget(ControlButton('Stop',self.Stop))
+        layout.addWidget(self.TimeElapsed())
+        layout.addStretch(1)
+        
+        return layout
+    # Label specifically for displaying elapsed time since audio started playing
+    class TimeElapsed(QLabel):
+        def __init__(self):
+            super().__init__()
+            self.setFixedWidth(150)
+            self.Timer = QTimer()
+            self.Timer.timeout.connect(self.labelText)
+            self.Timer.start(100)
+        def labelText(self):
+            self.setText(f"Elapsed: {mixer.music.get_pos()/1000} s") if int(mixer.music.get_pos()/1000) < 60 else self.setText(f"Elapsed: {round(mixer.music.get_pos()/60000,2)} min")
+            # print(mixer.music.get_busy())
+            # self.setText('test')
+            # print(mixer.music.get_pos()/1000)
+    def Resume(self):
+        if mixer.music.get_pos() > 0:
+            mixer.unpause()
+            mixer.music.unpause()
+    def Pause(self):
+        mixer.pause()
+        mixer.music.pause() 
+    def Stop(self):
+        self.Resume()
+        mixer.fadeout(250)
+        mixer.music.fadeout(250)
+    
+    ## Sound Buttons Section
+    def SoundButtonsContent(self):
+        # soon add tabs for each folder, so we'll need to rewrite SoundBtnDef.py to add an index of folders which contains sound files
+        SoundButton = FuncButton
+        layoutH = QHBoxLayout()
+        layoutV = QVBoxLayout()
+        index = 0
+        indexRange: int = int(Settings["MaxRows"])
+        indexCounter = 0
+        for each in SD.ComDispName:
+            layoutV.addWidget(SoundButton(each[0],each[1]))
+            index += 1
+            indexCounter += 1
+            # New Column every MaxRow
+            if indexCounter == indexRange:
+                layoutV.addStretch(0)
+                layoutH.addLayout(layoutV)
+                layoutV = QVBoxLayout()
+                indexCounter = 0
+        else:
+            layoutH.addLayout(layoutV) if indexCounter != 0 else print('\nAdded: Completed MaxRow')
+            layoutV.addStretch(0) if indexCounter > 0 else ''
+            print("\nAdding: Incomplete MaxRow") if indexCounter > 0 else print('Perfect.')
+        layoutH.addStretch(0)
+        return layoutH
+
+# Generic Button which allows for 
+# Text and .clicked.connect(classmethod) declaration
+# on the same line
+class FuncButton(QPushButton):
+    def __init__(self, Name:str, Sound:classmethod):
+        super().__init__()
+        self.setText(Name)
+        self.setStyleSheet("text-align: left; padding: 5%; margin: 0%;")
+        self.setFixedWidth(125)
+        self.clicked.connect(Sound)
+
+# Start Window
+APP = QApplication([])
+MainFrame = MainWindow()
+MainFrame.show()
+APP.exec()

@@ -1,0 +1,14 @@
+# These stuff is for REPLIT.com to ignore these from getting commited to main
+*.replit
+/poetry.lock
+/pyproject.toml
+/replit.nix
+venv/*
+
+# These stuff is to ignore stuff from getting commited to main from HOST MACHINE
+*__pycache__*
+*Backup_.py*
+*SoundFiles*
+Settings.json
+ListAudioDevices.py
+.venv
