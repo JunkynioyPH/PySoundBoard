@@ -127,7 +127,7 @@ def live_update():
         SongPos.set(f"{mixer.music.get_pos()/1000}s")
         LoopState.set(SD.LoopTextState)
         SpammingState.set(SD.SpammingTextState)
-        root.title(f"PySoundBoard TkInter - File : {SD.Title}") if LoopState != 0 else f"PySoundBoard TkInter - File : '{SD.Title}' is Looped and Loaded!"
+        root.title(f"PySoundBoard TkInter - File : {SD.Title}") if SD.LoopState == 0 else root.title(f"PySoundBoard TkInter - File : '{SD.Title}' [Loop-Enabled]")
         root.after(100, live_update)
     except Exception as Err:
         PrintErr("live_update()",Err)
