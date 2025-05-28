@@ -12,3 +12,4 @@ venv/*
 Settings.json
 ListAudioDevices.py
 .venv
+test.png

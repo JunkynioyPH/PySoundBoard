@@ -1,4 +1,5 @@
 from PyQt6.QtCore import Qt, QTimer, QSize
+from PyQt6.QtGui import QPixmap, QRegion
 from PyQt6.QtWidgets import *
 from pygame import mixer
 import time, json, os
@@ -25,7 +26,6 @@ splash()
 DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)","VoiceMeeter Input (VB-Audio VoiceMeeter VAIO)",None]
 # Load Settings
 InitializeSettings, Settings = SD.InitializeSettings, SD.Settings
-InitializeSettings()
 
 def ShowSettings():
     print("\n[Current Settings]")
@@ -77,6 +77,7 @@ def InitializeAudioSystem():
     #     PrintErr("InitializeAudioSystem()","\nMaximum retries Reached.\nPlease Check Settings.json\nThis can only be triggered in a manual way, so consult the 'Issues' tab on github if needed.")
     #     time.sleep(10)
     #     exit()
+InitializeSettings()
 ShowSettings()
 InitializeAudioSystem()
 
@@ -95,10 +96,10 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("PySoundboard : PyQt6 - Junkynioy") # temporary cuz it will be dynamic based on what sound is playing
         # self.setFixedSize(self.size())
-        
+
         ## Define Containers
         # Modifiable Space
-        Canvas = QWidget()
+        Canvas = QWidget() 
         self.setCentralWidget(Canvas)
         # Main Modifiable Space
         VCanvas = QVBoxLayout()
@@ -126,26 +127,54 @@ class MainWindow(QMainWindow):
     def ControlsContent(self):
         layout = QHBoxLayout()
         ControlButton = FuncButton
+        layout.addWidget(self.SoundLoaded()) # for now this is how ill change title to have loaded filename
         layout.addWidget(ControlButton('Pause',self.Pause))
         layout.addWidget(ControlButton('Resume',self.Resume))
         layout.addWidget(ControlButton('Stop',self.Stop))
-        layout.addWidget(self.TimeElapsed())
+        layout.addWidget(self.SoundTimeElapsed())
+        layout.addLayout(self.VolumeSlider())
         layout.addStretch(1)
         
         return layout
-    # Label specifically for displaying elapsed time since audio started playing
-    class TimeElapsed(QLabel):
+    class VolumeSlider(QHBoxLayout):
         def __init__(self):
             super().__init__()
-            self.setFixedWidth(150)
+            self.label = QLabel(f"{Settings['Volume']} %")
+            self.slider = QSlider(Qt.Orientation.Horizontal)
+            self.slider.setRange(0,100)
+            self.addWidget(self.label)
+            self.label.setFixedWidth(35)
+            self.addWidget(self.slider)
+            self.slider.setValue(int(Settings['Volume']))
+            self.slider.valueChanged.connect(self.changeVolume)
+            
+        def changeVolume(self):
+            Volume = self.slider.value()
+            self.label.setText(f"{int(Volume)} %")
+            mixer.music.set_volume(Volume/100)
+            splash()
+            UpdateSettings("Volume",Volume) # find a way to not write immediately after ' .valueChanged' cuz im sure that scratches the HDD/SSD on the "write" department
+
+    # Label specifically for displaying elapsed time since audio started playing
+    class SoundLoaded(QLabel):
+        def __init__(self):
+            super().__init__()
+            self.setFixedSize(0,0)
+            self.Timer = QTimer()
+            self.Timer.timeout.connect(self.labelText)
+            self.Timer.start(100)
+        def labelText(self):
+            MainFrame.setWindowTitle(f"PySoundboard : PyQt6 - Junkynioy - File: {SD.Title}")
+
+    class SoundTimeElapsed(QLabel):
+        def __init__(self):
+            super().__init__()
+            self.setFixedWidth(120)
             self.Timer = QTimer()
             self.Timer.timeout.connect(self.labelText)
             self.Timer.start(100)
         def labelText(self):
             self.setText(f"Elapsed: {mixer.music.get_pos()/1000} s") if int(mixer.music.get_pos()/1000) < 60 else self.setText(f"Elapsed: {round(mixer.music.get_pos()/60000,2)} min")
-            # print(mixer.music.get_busy())
-            # self.setText('test')
-            # print(mixer.music.get_pos()/1000)
     def Resume(self):
         if mixer.music.get_pos() > 0:
             mixer.unpause()
@@ -188,12 +217,12 @@ class MainWindow(QMainWindow):
 # Text and .clicked.connect(classmethod) declaration
 # on the same line
 class FuncButton(QPushButton):
-    def __init__(self, Name:str, Sound:classmethod):
+    def __init__(self, Name:str, Method:classmethod):
         super().__init__()
         self.setText(Name)
         self.setStyleSheet("text-align: left; padding: 5%; margin: 0%;")
         self.setFixedWidth(125)
-        self.clicked.connect(Sound)
+        self.clicked.connect(Method)
 
 # Start Window
 APP = QApplication([])

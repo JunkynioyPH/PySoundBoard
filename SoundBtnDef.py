@@ -62,7 +62,7 @@ class SoundButton:
     def Play(self):
         global LoopState, LoopTextState, AudioPath, Title
         AudioPath = self.AudioFile # for the window title
-        Title = f"'{AudioPath}' is Looped and Loaded!" if LoopState == -1 else f"'{AudioPath}' is Loaded!"
+        Title = f"'{AudioPath}'"
         if SpammingState == 1 and mixer.music.get_pos()/1000 > 0:
             Sound = mixer.Sound(xpfpath.xpfp(AudioFolder+"\\"+self.AudioFile))
             Sound.set_volume(float(Settings['Volume'])/100)
