@@ -94,7 +94,7 @@ AlignFlag = Qt.AlignmentFlag
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PySoundboard : PyQt6 - Junkynioy") # temporary cuz it will be dynamic based on what sound is playing
+        self.setWindowTitle("PySoundboard PyQt6 - Junkynioy") # temporary cuz it will be dynamic based on what sound is playing
         # self.setFixedSize(self.size())
 
         ## Define Containers
@@ -127,7 +127,7 @@ class MainWindow(QMainWindow):
     def ControlsContent(self):
         layout = QHBoxLayout()
         ControlButton = FuncButton
-        layout.addWidget(self.SoundLoaded()) # for now this is how ill change title to have loaded filename
+        layout.addWidget(self.SoundLoadedTitle()) # for now this is how ill change title to have loaded filename
         layout.addWidget(ControlButton('Pause',self.Pause))
         layout.addWidget(ControlButton('Resume',self.Resume))
         layout.addWidget(ControlButton('Stop',self.Stop))
@@ -155,8 +155,8 @@ class MainWindow(QMainWindow):
             splash()
             UpdateSettings("Volume",Volume) # find a way to not write immediately after ' .valueChanged' cuz im sure that scratches the HDD/SSD on the "write" department
 
-    # Label specifically for displaying elapsed time since audio started playing
-    class SoundLoaded(QLabel):
+    # Change title depending on what song is loaded (maybe there is a better way of doing this without a QLabel...)
+    class SoundLoadedTitle(QLabel):
         def __init__(self):
             super().__init__()
             self.setFixedSize(0,0)
@@ -164,8 +164,9 @@ class MainWindow(QMainWindow):
             self.Timer.timeout.connect(self.labelText)
             self.Timer.start(100)
         def labelText(self):
-            MainFrame.setWindowTitle(f"PySoundboard : PyQt6 - Junkynioy - File: {SD.Title}")
-
+            MainFrame.setWindowTitle(f"PySoundboard PyQt6 - Junkynioy - File: {SD.Title}")
+            
+    # Label specifically for displaying elapsed time since audio started playing
     class SoundTimeElapsed(QLabel):
         def __init__(self):
             super().__init__()
