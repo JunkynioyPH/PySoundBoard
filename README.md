@@ -13,7 +13,7 @@ Requires **python** to be installed.
 **(PyQt6)**
 Requires **PyQt6** to be installed.
 
-# Pre-Requisites (TKInter)
+# Pre-Requisites (TkInter)
 **(Python 3.10+** & make sure you have Ttk/TKinter Ticked!**)**
 Requires **python** to be installed.
 
