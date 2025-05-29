@@ -3,6 +3,7 @@ from PyQt6.QtGui import QPixmap, QRegion
 # Looks like PyQt6 has some sound capabilities, might re-write Soundboard_Backend to be fully PyQt
 from PyQt6.QtMultimedia import QAudioSource, QAudioFormat, QAudioBufferInput, QAudioBufferOutput # Maybe i can get an audio visualiser out of this..?
 from PyQt6.QtWidgets import *
+
 from pygame import mixer
 import time, json, os
 import Soundboard_Backend_PyG as SoundBackend
