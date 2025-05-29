@@ -68,6 +68,7 @@ class SoundButton:
             Sound.set_volume(float(Settings['Volume'])/100)
             Sound.play()
         else:
+            mixer.fadeout(0) # fix multi-mode long sounds not stopping when multi mode is disabled
             mixer.music.unload()
             mixer.music.load(xpfpath.xpfp(AudioFolder+"\\"+self.AudioFile))
             mixer.music.play(loops=LoopState)
@@ -102,7 +103,8 @@ def ScanDir(PATH):
         ComDispName.append([f"{y}", Sound.Play])
         print([f"{y}", Sound.Play])
         # time.sleep(0.0015625)
-
+    # else:
+    #     print('Sounds List Compiled.')
 
 os.system('cls' if os.name=='nt' else 'clear')
 ScanDir(AudioFolder)

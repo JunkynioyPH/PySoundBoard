@@ -1,0 +1,2 @@
+# Looks like PyQt6 has some sound capabilities, might re-write Soundboard_Backend to be fully PyQt
+from PyQt6.QtMultimedia import QAudioSource, QAudioFormat, QAudioBufferInput, QAudioBufferOutput # Perhaps a new Backend..?

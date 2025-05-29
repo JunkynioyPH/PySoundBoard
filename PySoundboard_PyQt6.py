@@ -1,18 +1,17 @@
 from PyQt6.QtCore import Qt, QTimer, QSize
-from PyQt6.QtGui import QPixmap, QRegion
-# Looks like PyQt6 has some sound capabilities, might re-write Soundboard_Backend to be fully PyQt
-from PyQt6.QtMultimedia import QAudioSource, QAudioFormat, QAudioBufferInput, QAudioBufferOutput # Maybe i can get an audio visualiser out of this..?
+from PyQt6.QtGui import QPixmap, QRegion # MAYBE ill get to work this at some point lmao
+from PyQt6.QtMultimedia import QMediaDevices # for specifically setting the audio Device. Backend will read Settings.json
 from PyQt6.QtWidgets import *
-
 from pygame import mixer
-import time, json, os
+import json, os
 import Soundboard_Backend_PyG as SoundBackend
-
 
 # Console splash
 def splash():
     os.system('cls' if os.name=='nt' else 'clear')
-    os.system('title PySoundBoard Backend') if os.name=='nt' else print('PySoundBoard Backend')
+    _ = QMediaDevices.audioOutputs() # Moving the FFMPEG thing
+    del _
+    os.system('title PySoundBoard Backend') if os.name=='nt' else print('\nPySoundBoard Backend')
     print('''
 
     ██████╗ ██╗   ██╗███████╗ ██████╗ ██╗   ██╗███╗   ██╗██████╗ ██████╗  ██████╗  █████╗ ██████╗ ██████╗
@@ -28,59 +27,32 @@ splash()
 # Prelims
 DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)","VoiceMeeter Input (VB-Audio VoiceMeeter VAIO)",None]
 # Load Settings
-InitializeSettings, Settings = SoundBackend.InitializeSettings, SoundBackend.Settings
-
+Settings = SoundBackend.Settings
 def ShowSettings():
     print("\n[Current Settings]")
     for i in Settings:
         print(f"[{i}] ---> [{Settings[i]}]")
 
 def UpdateSettings(Variable,Value):
-    print(f"\n------------\nUpdating {Variable} to {Value}")
+    print(f"\n------------\nUpdating [{Variable}] to [{Value}]")
     Settings[Variable] = Value
     with open("Settings.json","w") as UpdateSettings:
         UpdateSettings.write(json.dumps(Settings))
-    InitializeSettings() # Reload Settings
+    SoundBackend.InitializeSettings() # Reload Settings
     ShowSettings()
-    print("\nSettings Updated!\n------------")
+    print("\n------------\n")
 
-tries, index = 0, 0
+index = 0
 limit = int(len(DefaultValSettings)+1) # unused yet
 def InitializeAudioSystem():
-    global tries, index
-    # if tries < limit:
-    #     try:
-            # perhaps make the frequency + buffer configurable in the future.
-            # frequency=48000
+    global index
     if Settings['AudioDevice'] is None:
-        print('\nVB-Audio VoiceMeeter/VB-Audio Virtual Cable [NOT FOUND]\nUsing [System Default Output] !\n\nIf you do have an Output Device you wish to use, specify\nit in the [AudioDevice Input-Box] or in [Settings.json]\nIf you now have VoiceMeeter or VB-Cable Installed, Press "Set Device" Button to Apply.')
+        print('\nVB-Audio VoiceMeeter/VB-Audio Virtual Cable [NOT FOUND]\nUsing [System Default Output] !\n[Settings.json] "AudioDevice":None !\n') if os.name == 'nt' else print('\nUsing [System Default Output] !\n[Settings.json] "AudioDevice":None !\n')
     mixer.pre_init(devicename=Settings["AudioDevice"])
     mixer.init()
     mixer.music.set_volume(float(Settings['Volume'])/100)
-            # try:
+        
     SoundBackend.SoundButton(r"..\startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
-    #         except Exception as ERR:
-    #             PrintErr(f"InitializeAudioSystem()",ERR)
-    #     except Exception as Err:
-    #         time.sleep(1)
-    #         tries += 1
-    #         print(Settings)
-    #         PrintErr("InitializeAudioSystem()",f"{Settings['AudioDevice']} - {Err}")
-    #         print("Attempting Fixes...")
-            
-    #         if str(Err).lower() == 'no such device.' and index < len(DefaultValSettings):
-    #             print(f"{index, str(Err).lower()} Setting AudioDevice to [{DefaultValSettings[index]}]")
-    #             UpdateSettings("AudioDevice",DefaultValSettings[index])
-    #             index += 1
-
-    #         AudioDevice.set(Settings["AudioDevice"])
-    #         InitializeAudioSystem()
-    #         # clearconsole()
-    # else:
-    #     PrintErr("InitializeAudioSystem()","\nMaximum retries Reached.\nPlease Check Settings.json\nThis can only be triggered in a manual way, so consult the 'Issues' tab on github if needed.")
-    #     time.sleep(10)
-    #     exit()
-InitializeSettings()
 ShowSettings()
 InitializeAudioSystem()
 
@@ -113,7 +85,7 @@ class MainWindow(QMainWindow):
         # Create Groups and contents
         AudioDeviceDisplay = QGroupBox("   Audio Device ")
         VCanvas.addWidget(AudioDeviceDisplay)
-        AudioDeviceDisplay.setLayout(self.AudioDeviceDisplayContent())
+        AudioDeviceDisplay.setLayout(self.AudioDeviceContent())
         
         Controls = QGroupBox("   Controls ")
         VCanvas.addWidget(Controls)
@@ -129,17 +101,63 @@ class MainWindow(QMainWindow):
         
     # Define Contents of Each Groups
     ## Audio Set Device Section
-    def AudioDeviceDisplayContent(self):
-        layout = QHBoxLayout()
-        return layout
-    
+    class AudioDeviceContent(QHBoxLayout):
+        def __init__(self):
+            super().__init__()
+            self.deviceList:list = []
+            self.deviceInfo = []
+            self.comboList = QComboBox()
+            self.comboList.setFixedWidth(370)
+            self.indexDevices()
+            self.comboList.setCurrentText(Settings["AudioDevice"])
+            self.comboList.activated.connect(self.indexDevices)
+            self.addWidget(FuncButton("Set Device", self.changeDevice))
+            self.addWidget(self.comboList)
+            self.addStretch(0)
+        def indexDevices(self):
+            # When new devices are added, this adds them automatically
+            # but when devices are removed, it still appears on the list
+            self.deviceInfo = QMediaDevices.audioOutputs() 
+            # ##### #
+            
+            comboCount, deviceCount = self.comboList.count()-1, len(self.deviceInfo)
+            self.deviceList.clear() if deviceCount != comboCount else '' #print('No Device Count Change. deviceList not cleared')
+            self.comboList.clear() if deviceCount != comboCount else '' #print('No Device Count Change. comboList not cleared')
+            if deviceCount != comboCount:
+                for each in self.deviceInfo:
+                    self.deviceList.append(each.description())
+                else:
+                    self.comboList.addItem('Select a Device... or Reload List (Default Output Device)')
+                    self.comboList.addItems(self.deviceList)
+                    # print('Audio List Compiled.')
+                    # print(f"{len(self.deviceInfo)} - {self.comboList.count()-1}")
+            # else: 
+            #     print('No Device Count Changes were made. ')
+            # print(f"{len(self.deviceInfo)} - {self.comboList.count()-1}")
+        def changeDevice(self):
+            global index
+            try:
+                UpdateSettings("AudioDevice",self.comboList.currentText())
+                mixer.quit()
+                InitializeAudioSystem()
+                splash()
+                print(f"\n{'*'*10}\n[{'Default Device' if self.comboList.currentText == 'None' else self.comboList.currentText()}] Found!\nSuccessfully Bound to Device!\n{'*'*10}")
+                index = 0
+            except Exception as Err:
+                # PrintErr("ChangeAudioDevice()",Err)
+                print('???? System Defaulting!')
+                UpdateSettings("AudioDevice", None)
+                InitializeAudioSystem()
+                print(f"\n???? [{self.comboList.currentText()}] : {Err}\n???? Restart Soundboard to refresh Dropdown List ") if self.comboList.currentIndex() != 0 else ''
+                # AudioDevice.set(Settings["AudioDevice"])
+            
     ## Controls Section
     def ControlsContent(self):
         layout = QHBoxLayout()
         ControlButton = FuncButton
         # layout.addStretch(1)
-        layout.addWidget(ControlButton('Pause',self.Pause))
         layout.addWidget(ControlButton('Resume',self.Resume))
+        layout.addWidget(ControlButton('Pause',self.Pause))
         layout.addWidget(ControlButton('Stop',self.Stop))
         layout.addWidget(self.SoundTimeElapsed())
         layout.addLayout(self.VolumeSlider())
