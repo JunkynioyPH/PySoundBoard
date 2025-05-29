@@ -23,8 +23,6 @@ Requires ttkthemes to be installed for DarkMode.
 **(pip install pygame)**
 Requires **pygame** to be installed.
 
-This is the default way of making this soundboard to work and it requires multiple things to be installed.
-
 # Basic TL;DR; to make the soundboard to work
 When you run **PySoundBoard_\*.py**, it will give a **1-time pop** up and create **Settings.json**
 In **Settings.json**, you can set **AudioDevice** to your preferred output device.
