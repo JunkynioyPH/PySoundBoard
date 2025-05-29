@@ -10,7 +10,6 @@ venv/*
 *Backup_.py*
 *SoundFiles*
 Settings.json
-ListAudioDevices.py
 .venv
 test.png
 .vscode
