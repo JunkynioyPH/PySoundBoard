@@ -13,3 +13,5 @@ Settings.json
 ListAudioDevices.py
 .venv
 test.png
+.vscode
+tools

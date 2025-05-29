@@ -29,24 +29,24 @@ InitializeSettings()
 
 ComDispName = []
 
-LoopTextState, LoopState,  = "  No   Looping", 0
-SpammingState, SpammingTextState = 0, '  No   Multiple'
+LoopTextState, LoopState,  = "  Looping Disabled", 0
+SpammingState, SpammingTextState = 0, 'Multi-Mode OFF'
 AudioFolder = xpfpath.xpfp(".\\SoundFiles")
-AudioFilesIndex = []
+AudioFilesIndex:list = []
 
 def ToggleLoop():
     global LoopState, LoopTextState
     if LoopState == 0:
-        LoopTextState, LoopState = "  Yes Looping", -1
+        LoopTextState, LoopState = "  Looping  Enabled", -1
     else:
-        LoopTextState, LoopState = "  No   Looping", 0
+        LoopTextState, LoopState = "  Looping Disabled", 0
 
 def ToggleSpamming():
     global SpammingState, SpammingTextState
     if SpammingState == 0:
-        SpammingState, SpammingTextState = 1, "  Yes Multiple"
+        SpammingState, SpammingTextState = 1, "Multi-Mode  ON"
     else:
-        SpammingState, SpammingTextState = 0, "  No   Multiple"
+        SpammingState, SpammingTextState = 0, "Multi-Mode OFF"
 
 def PrintErr(Where,Err):
     print("\n=====================================")

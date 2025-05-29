@@ -1,9 +1,11 @@
 from PyQt6.QtCore import Qt, QTimer, QSize
 from PyQt6.QtGui import QPixmap, QRegion
+# Looks like PyQt6 has some sound capabilities, might re-write Soundboard_Backend to be fully PyQt
+from PyQt6.QtMultimedia import QAudioSource, QAudioFormat, QAudioBufferInput, QAudioBufferOutput # Maybe i can get an audio visualiser out of this..?
 from PyQt6.QtWidgets import *
 from pygame import mixer
 import time, json, os
-import SoundBtnDef as SD
+import Soundboard_Backend_PyG as SoundBackend
 
 
 # Console splash
@@ -25,7 +27,7 @@ splash()
 # Prelims
 DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)","VoiceMeeter Input (VB-Audio VoiceMeeter VAIO)",None]
 # Load Settings
-InitializeSettings, Settings = SD.InitializeSettings, SD.Settings
+InitializeSettings, Settings = SoundBackend.InitializeSettings, SoundBackend.Settings
 
 def ShowSettings():
     print("\n[Current Settings]")
@@ -55,7 +57,7 @@ def InitializeAudioSystem():
     mixer.init()
     mixer.music.set_volume(float(Settings['Volume'])/100)
             # try:
-    SD.SoundButton(r"..\startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
+    SoundBackend.SoundButton(r"..\startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
     #         except Exception as ERR:
     #             PrintErr(f"InitializeAudioSystem()",ERR)
     #     except Exception as Err:
@@ -94,7 +96,10 @@ AlignFlag = Qt.AlignmentFlag
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PySoundboard PyQt6 - Junkynioy") # temporary cuz it will be dynamic based on what sound is playing
+        # Partially weird that i have to add self as parent to this QTimer
+        windowTitleNP = QTimer(self)
+        windowTitleNP.timeout.connect(self.WindowTitleNowPlaying)
+        windowTitleNP.start(100)
         # self.setFixedSize(self.size())
 
         ## Define Containers
@@ -117,6 +122,10 @@ class MainWindow(QMainWindow):
         VCanvas.addWidget(SoundButtons)
         SoundButtons.setLayout(self.SoundButtonsContent())
 
+    # Dynamic Window Title for Now Playing sound
+    def WindowTitleNowPlaying(self):
+        MainFrame.setWindowTitle(f"PySoundboard PyQt6 - Junkynioy - File: {SoundBackend.Title}")
+        
     # Define Contents of Each Groups
     ## Audio Set Device Section
     def AudioDeviceDisplayContent(self):
@@ -127,12 +136,13 @@ class MainWindow(QMainWindow):
     def ControlsContent(self):
         layout = QHBoxLayout()
         ControlButton = FuncButton
-        layout.addWidget(self.SoundLoadedTitle()) # for now this is how ill change title to have loaded filename
+        # layout.addStretch(1)
         layout.addWidget(ControlButton('Pause',self.Pause))
         layout.addWidget(ControlButton('Resume',self.Resume))
         layout.addWidget(ControlButton('Stop',self.Stop))
         layout.addWidget(self.SoundTimeElapsed())
         layout.addLayout(self.VolumeSlider())
+        layout.addLayout(self.Toggles())
         layout.addStretch(1)
         
         return layout
@@ -141,32 +151,20 @@ class MainWindow(QMainWindow):
             super().__init__()
             self.label = QLabel(f"{Settings['Volume']} %")
             self.slider = QSlider(Qt.Orientation.Horizontal)
+            self.slider.setTickPosition(QSlider.TickPosition.TicksBothSides)
             self.slider.setRange(0,100)
             self.addWidget(self.label)
             self.label.setFixedWidth(35)
             self.addWidget(self.slider)
             self.slider.setValue(int(Settings['Volume']))
-            self.slider.valueChanged.connect(self.changeVolume)
-            
+            self.slider.valueChanged.connect(self.changeVolume) # live sound volume change
+            self.slider.sliderReleased.connect(self.saveVolume) # save on release  
         def changeVolume(self):
             Volume = self.slider.value()
             self.label.setText(f"{int(Volume)} %")
             mixer.music.set_volume(Volume/100)
-            splash()
-            UpdateSettings("Volume",Volume) # find a way to not write immediately after ' .valueChanged' cuz im sure that scratches the HDD/SSD on the "write" department
-
-    # Change title depending on what song is loaded (maybe there is a better way of doing this without a QLabel...)
-    class SoundLoadedTitle(QLabel):
-        def __init__(self):
-            super().__init__()
-            self.setFixedSize(0,0)
-            self.Timer = QTimer()
-            self.Timer.timeout.connect(self.labelText)
-            self.Timer.start(100)
-        def labelText(self):
-            MainFrame.setWindowTitle(f"PySoundboard PyQt6 - Junkynioy - File: {SD.Title}")
-            
-    # Label specifically for displaying elapsed time since audio started playing
+        def saveVolume(self):
+            UpdateSettings("Volume", self.slider.value())
     class SoundTimeElapsed(QLabel):
         def __init__(self):
             super().__init__()
@@ -176,6 +174,27 @@ class MainWindow(QMainWindow):
             self.Timer.start(100)
         def labelText(self):
             self.setText(f"Elapsed: {mixer.music.get_pos()/1000} s") if int(mixer.music.get_pos()/1000) < 60 else self.setText(f"Elapsed: {round(mixer.music.get_pos()/60000,2)} min")
+    class Toggles(QHBoxLayout):
+        def __init__(self):
+            super().__init__()
+            # Looping
+            self.loopToggle = FuncButton(f'{SoundBackend.LoopTextState}',self.Loop)
+            self.loopToggle.setCheckable(True) # Mainly Visual, we already have the text changing
+            self.addWidget(self.loopToggle)
+            
+            # Multi-Mode
+            self.multiToggle = FuncButton(f'{SoundBackend.SpammingTextState}',self.Multi)
+            self.multiToggle.setCheckable(True)
+            self.addWidget(self.multiToggle)
+        def Loop(self):
+            SoundBackend.ToggleLoop()
+            self.loopToggle.setText(f"{SoundBackend.LoopTextState}")
+        def Multi(self):
+            SoundBackend.ToggleSpamming()
+            self.multiToggle.setText(f"{SoundBackend.SpammingTextState}")
+            
+            
+    # Typical controls
     def Resume(self):
         if mixer.music.get_pos() > 0:
             mixer.unpause()
@@ -197,7 +216,7 @@ class MainWindow(QMainWindow):
         index = 0
         indexRange: int = int(Settings["MaxRows"])
         indexCounter = 0
-        for each in SD.ComDispName:
+        for each in SoundBackend.ComDispName:
             layoutV.addWidget(SoundButton(each[0],each[1]))
             index += 1
             indexCounter += 1
