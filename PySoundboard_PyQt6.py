@@ -22,7 +22,7 @@ def splash():
     ╚═╝        ╚═╝   ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝
                         Written By : @Junkynioy - https://github.com/JunkynioyPH
     ''')
-splash()
+
 
 # Prelims
 DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)","VoiceMeeter Input (VB-Audio VoiceMeeter VAIO)",None]
@@ -42,20 +42,18 @@ def UpdateSettings(Variable,Value):
     ShowSettings()
     print("\n------------\n")
 
-index = 0
-limit = int(len(DefaultValSettings)+1) # unused yet
 def InitializeAudioSystem():
-    global index
     if Settings['AudioDevice'] is None:
         print('\nVB-Audio VoiceMeeter/VB-Audio Virtual Cable [NOT FOUND]\nUsing [System Default Output] !\n[Settings.json] "AudioDevice":None !\n') if os.name == 'nt' else print('\nUsing [System Default Output] !\n[Settings.json] "AudioDevice":None !\n')
     mixer.pre_init(devicename=Settings["AudioDevice"])
-    mixer.init()
+    try:
+        mixer.init()
+    except Exception as err:
+        print(f'\nWoops. Something went Wrong. {err}\n') ## CATCH IT WHEN SOMEONE CHANGES THE Settings.json FILE ITSELF BECAUSE WHY NOT
+        # MainWindow.AudioDeviceContent().changeDevice()
     mixer.music.set_volume(float(Settings['Volume'])/100)
         
     SoundBackend.SoundButton(r"..\startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
-ShowSettings()
-InitializeAudioSystem()
-
 
 # Show First-Time Execution then turn off pop up
 # need to replace
@@ -65,7 +63,6 @@ if int(Settings["Splash"]) == "1":
 
 ## Define Main Window
 AlignFlag = Qt.AlignmentFlag
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -135,14 +132,12 @@ class MainWindow(QMainWindow):
             #     print('No Device Count Changes were made. ')
             # print(f"{len(self.deviceInfo)} - {self.comboList.count()-1}")
         def changeDevice(self):
-            global index
             try:
                 UpdateSettings("AudioDevice",self.comboList.currentText())
                 mixer.quit()
                 InitializeAudioSystem()
                 splash()
                 print(f"\n{'*'*10}\n[{'Default Device' if self.comboList.currentText == 'None' else self.comboList.currentText()}] Found!\nSuccessfully Bound to Device!\n{'*'*10}")
-                index = 0
             except Exception as Err:
                 # PrintErr("ChangeAudioDevice()",Err)
                 print('???? System Defaulting!')
@@ -262,6 +257,11 @@ class FuncButton(QPushButton):
         self.setStyleSheet("text-align: left; padding: 5%; margin: 0%;")
         self.setFixedWidth(125)
         self.clicked.connect(Method)
+
+# Initialize Backend
+splash()
+ShowSettings()
+InitializeAudioSystem()
 
 # Start Window
 APP = QApplication([])
