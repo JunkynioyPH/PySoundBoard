@@ -14,3 +14,6 @@ Settings.json
 test.png
 .vscode
 tools
+build
+dist
+*.spec
