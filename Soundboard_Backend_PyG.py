@@ -16,14 +16,9 @@ def InitializeSettings():
             print("settings.json reset complete")
     else:
         x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":"10","MaxRows":"8","Splash":"1"}
-        DefSettingsDump = open("Settings.json","a")
-        print("settings.json [Created]")
-        DefSettingsDump.write(json.dumps(x))
-        print("settings.json [Accessed]")
-        DefSettingsDump.close()
-        print("settings.json [Closed]")
+        with open("settings.json","a") as DefaultSettingsDump:
+            DefaultSettingsDump.write(json.dumps(x))
         InitializeSettings()
-        print("Rerun InitializeSettings")
 InitializeSettings()
 # Structure ["DisplayName,AD.DisplayName"]
 

@@ -2,9 +2,9 @@ from PyQt6.QtCore import Qt, QTimer, QSize
 from PyQt6.QtGui import QPixmap, QRegion # MAYBE ill get to work this at some point lmao
 from PyQt6.QtMultimedia import QMediaDevices # for specifically setting the audio Device. Backend will read Settings.json
 from PyQt6.QtWidgets import *
-from pygame import mixer
+# from pygame import mixer # Commented to see clearly my reliance on pygame.mixer on the front-end
 import json, os
-import Soundboard_Backend_PyG as SoundBackend
+import Soundboard_Backend_PyQt6 as SoundBackend
 
 # Console splash
 def splash():
@@ -26,6 +26,7 @@ def splash():
 
 # Prelims
 DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)","VoiceMeeter Input (VB-Audio VoiceMeeter VAIO)",None]
+InitializeAudioSystem = SoundBackend.InitializeAudioSystem
 # Load Settings
 Settings = SoundBackend.Settings
 def ShowSettings():
@@ -41,19 +42,6 @@ def UpdateSettings(Variable,Value):
     SoundBackend.InitializeSettings() # Reload Settings
     ShowSettings()
     print("\n------------\n")
-
-def InitializeAudioSystem():
-    if Settings['AudioDevice'] is None:
-        print('\nVB-Audio VoiceMeeter/VB-Audio Virtual Cable [NOT FOUND]\nUsing [System Default Output] !\n[Settings.json] "AudioDevice":None !\n') if os.name == 'nt' else print('\nUsing [System Default Output] !\n[Settings.json] "AudioDevice":None !\n')
-    mixer.pre_init(devicename=Settings["AudioDevice"])
-    try:
-        mixer.init()
-    except Exception as err:
-        print(f'\nWoops. Something went Wrong. {err}\n') ## CATCH IT WHEN SOMEONE CHANGES THE Settings.json FILE ITSELF BECAUSE WHY NOT
-        # MainWindow.AudioDeviceContent().changeDevice()
-    mixer.music.set_volume(float(Settings['Volume'])/100)
-        
-    SoundBackend.SoundButton(r"..\startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
 
 # Show First-Time Execution then turn off pop up
 # need to replace
@@ -137,7 +125,7 @@ class MainWindow(QMainWindow):
                 mixer.quit()
                 InitializeAudioSystem()
                 splash()
-                print(f"\n{'*'*10}\n[{'Default Device' if self.comboList.currentText == 'None' else self.comboList.currentText()}] Found!\nSuccessfully Bound to Device!\n{'*'*10}")
+                print(f"\n{'*'*10}\n[{f'Default Device "{Settings["AudioDevice"]}"' if Settings["AudioDevice"] is None else self.comboList.currentText()}] Found!\nSuccessfully Bound to Device!\n{'*'*10}")
             except Exception as Err:
                 # PrintErr("ChangeAudioDevice()",Err)
                 print('???? System Defaulting!')
@@ -186,8 +174,10 @@ class MainWindow(QMainWindow):
             self.Timer = QTimer()
             self.Timer.timeout.connect(self.labelText)
             self.Timer.start(100)
+        # Disabled for now to make the GUI work
         def labelText(self):
-            self.setText(f"Elapsed: {mixer.music.get_pos()/1000} s") if int(mixer.music.get_pos()/1000) < 60 else self.setText(f"Elapsed: {round(mixer.music.get_pos()/60000,2)} min")
+            pass
+            # self.setText(f"Elapsed: {mixer.music.get_pos()/1000} s") if int(mixer.music.get_pos()/1000) < 60 else self.setText(f"Elapsed: {round(mixer.music.get_pos()/60000,2)} min")
     class Toggles(QHBoxLayout):
         def __init__(self):
             super().__init__()
@@ -231,7 +221,7 @@ class MainWindow(QMainWindow):
         indexRange: int = int(Settings["MaxRows"])
         indexCounter = 0
         for each in SoundBackend.ComDispName:
-            layoutV.addWidget(SoundButton(each[0],each[1]))
+            layoutV.addWidget(SoundButton(each[1],each[2])) # 0 = TabName / 1 = Sound Name / 2 = classmethod
             index += 1
             indexCounter += 1
             # New Column every MaxRow
