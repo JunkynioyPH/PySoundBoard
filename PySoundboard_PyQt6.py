@@ -3,7 +3,7 @@ from PyQt6.QtGui import QPixmap, QRegion # MAYBE ill get to work this at some po
 from PyQt6.QtMultimedia import QMediaDevices # for specifically setting the audio Device. Backend will read Settings.json
 from PyQt6.QtWidgets import *
 # from pygame import mixer # Commented to see clearly my reliance on pygame.mixer on the front-end
-import json, os
+import json, os, sys
 import Soundboard_Backend_PyQt6 as SoundBackend
 
 # Console splash
@@ -257,4 +257,4 @@ InitializeAudioSystem()
 APP = QApplication([])
 MainFrame = MainWindow()
 MainFrame.show()
-APP.exec()
+sys.exit(APP.exec())
