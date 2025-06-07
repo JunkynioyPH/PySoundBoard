@@ -1,10 +1,9 @@
 from pygame import mixer
-from pathlib import Path
 import time, os, json, xpfpath
 
 def InitializeSettings():
     global Settings
-    if Path("Settings.json").exists() == True:
+    if os.path.exists("Settings.json") == True:
         try:
             with open('Settings.json','r') as SettingsValue:
                 Settings = json.loads(SettingsValue.read())
@@ -15,8 +14,8 @@ def InitializeSettings():
             InitializeSettings()
             print("settings.json reset complete")
     else:
-        x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":"10","MaxRows":"8","Splash":"1"}
-        with open("settings.json","a") as DefaultSettingsDump:
+        x = {"AudioDevice":None,"Volume":"10","MaxRows":"8","Splash":"1"}
+        with open("Settings.json","a") as DefaultSettingsDump:
             DefaultSettingsDump.write(json.dumps(x))
         InitializeSettings()
 InitializeSettings()

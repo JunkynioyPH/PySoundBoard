@@ -1,6 +1,5 @@
 # Looks like PyQt6 has some sound capabilities, might re-write Soundboard_Backend to be fully PyQt
 import PyQt6.QtMultimedia as QtM # Perhaps a new Backend..?
-from pathlib import Path
 import time, os, json, xpfpath
 
 global LoopState, LoopTextState
@@ -12,8 +11,12 @@ AudioFilesIndex:list = []
 
 def InitializeSettings():
     global Settings
-    if Path("Settings.json").exists() == True:
+    time.sleep(1)
+    print('check existance of Settings.json')
+    if os.path.exists("Settings.json") == True:
+        print('test reading')
         try:
+            print('reading')
             with open('Settings.json','r') as SettingsValue:
                 Settings = json.loads(SettingsValue.read())
         except Exception as Err:
@@ -23,8 +26,9 @@ def InitializeSettings():
             InitializeSettings()
             print("settings.json reset complete")
     else:
+        print(f'existance check failed: {os.path.exists("Settings.json")}')
         x = {"AudioDevice":"CABLE Input (VB-Audio Virtual Cable)","Volume":"10","MaxRows":"8","Splash":"1"}
-        with open("settings.json","a") as DefaultSettingsDump:
+        with open("Settings.json","a") as DefaultSettingsDump:
             DefaultSettingsDump.write(json.dumps(x))
         InitializeSettings()
 def InitializeAudioSystem():
@@ -75,7 +79,6 @@ class SoundButton:
 # Recursive... May need to tweak a little bit
 def GenerateSoundIndex(path):
     print(f'Scanning [{path}]')
-    # time.sleep(1)
     try:
         FolderContents = os.scandir(path)
     except:
@@ -85,14 +88,11 @@ def GenerateSoundIndex(path):
         # time.sleep(0.015625)
         if Entry.is_file():
             name:str = str(Entry.name.rsplit(".",1)[0]) # omit file extension.
-            folder:str = str(path).rsplit(f"{'\\' if os=='nt' else '/'}",1)[1] # Get actual folder where file is located.
+            folder:str = str(path).rsplit(f"{'\\' if os.name=='nt' else '/'}",1)[1] # Get actual folder where file is located.
             # add into an uncategorized TAB
             AudioFilesIndex.append([folder,name,SoundButton(Entry.path).Play])
         else:
             GenerateSoundIndex(Entry.path)
-    else:
-        for each in AudioFilesIndex:
-            print(each)
     return AudioFilesIndex
     # try:
     #     Files = os.scandir(PATH)
@@ -105,3 +105,6 @@ def GenerateSoundIndex(path):
 InitializeSettings()
 InitializeAudioSystem()
 ComDispName = GenerateSoundIndex(AudioFolder)
+for _ in ComDispName:
+    print(_)
+time.sleep(1)
