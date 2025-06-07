@@ -12,7 +12,6 @@ AudioFilesIndex:list = []
 def InitializeSettings():
     global Settings
     time.sleep(1)
-    print('check existance of Settings.json')
     if os.path.exists("Settings.json") == True:
         try:
             with open('Settings.json','r') as SettingsValue:
