@@ -77,7 +77,7 @@ def GenerateSoundIndex(path):
     for folder in SubFoldersIndex:
         FolderContents = os.scandir(folder)
         for Entry in FolderContents:
-            add(Entry) if Entry.is_file() else ''  
+            add(Entry) if Entry.is_file() else ''
     return AudioFilesIndex
 
 # PyQt Sound System

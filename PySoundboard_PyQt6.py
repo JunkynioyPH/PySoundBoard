@@ -215,27 +215,44 @@ class MainWindow(QMainWindow):
     def SoundButtonsContent(self):
         # soon add tabs for each folder, so we'll need to rewrite SoundBtnDef.py to add an index of folders which contains sound files
         SoundButton = FuncButton
-        layoutH = QHBoxLayout()
-        layoutV = QVBoxLayout()
-        index = 0
+        layout = QHBoxLayout()
+        tabs =  QTabWidget()
+        
+        # create tablist
+        layout.addWidget(tabs)
+        tabList:list = []
+        for tabName in SoundBackend.ComDispName:
+            tabList.append(tabName[0]) if tabName[0] not in tabList else ''
+            
         indexRange: int = int(Settings["MaxRows"])
-        indexCounter = 0
-        for each in SoundBackend.ComDispName:
-            layoutV.addWidget(SoundButton(each[1],each[2])) # 0 = TabName / 1 = Sound Name / 2 = classmethod
-            index += 1
-            indexCounter += 1
-            # New Column every MaxRow
-            if indexCounter == indexRange:
-                layoutV.addStretch(0)
-                layoutH.addLayout(layoutV)
-                layoutV = QVBoxLayout()
-                indexCounter = 0
-        else:
-            layoutH.addLayout(layoutV) if indexCounter != 0 else print('\nAdded: Completed MaxRow')
-            layoutV.addStretch(0) if indexCounter > 0 else ''
-            print("\nAdding: Incomplete MaxRow") if indexCounter > 0 else print('Perfect.')
-        layoutH.addStretch(0)
-        return layoutH
+        # add them buttons to their own tab
+        for tabName in tabList:
+            content = QWidget() # create a widget which holds all sound buttons for that tab
+            layoutH = QHBoxLayout() # button layout
+            layoutV = QVBoxLayout() # button layout
+            index = 0
+            # each entry in SoundBackend.ComDispName
+            for soundButton in SoundBackend.ComDispName:
+                # check if the current entry's index 0 is the corresponding tabName
+                if soundButton[0] == tabName:
+                    # if it is, add it to the layout
+                    layoutV.addWidget(SoundButton(soundButton[1],soundButton[2]))
+                    index += 1
+                    # if it reaches max range, add new column
+                    if index == indexRange:
+                        layoutV.addStretch(0)
+                        layoutH.addLayout(layoutV)
+                        layoutV = QVBoxLayout()
+                        index = 0
+            else:
+                # force add remaining layoutH and add Stretch, then add tab with the contents
+                layoutH.addLayout(layoutV) if index != 0 else print(f'\nAdded: Completed MaxRow [{tabName}]')
+                layoutH.addStretch(0)
+                content.setLayout(layoutH)
+                layoutV.addStretch(0) if index > 0 else ''
+                print(f"\nAdding: Incomplete MaxRow [{tabName}]") if index > 0 else print('Perfect.')
+                tabs.addTab(content,tabName)
+        return layout
 
 # Generic Button which allows for 
 # Text and .clicked.connect(classmethod) declaration
