@@ -1,8 +1,7 @@
 # Looks like PyQt6 has some sound capabilities, might re-write Soundboard_Backend to be fully PyQt
-import PyQt6.QtMultimedia as QtM # Perhaps a new Backend..?
 import time, os, json, xpfpath
+import AudioSystem_PyQt6 #as mixer
 
-global LoopState, LoopTextState
 ComDispName = []
 LoopTextState, LoopState,  = "  Looping Disabled", 0
 SpammingState, SpammingTextState = 0, 'Multi-Mode OFF'
@@ -94,25 +93,23 @@ class SoundFile:
 # For refrerence down the line
 # class SoundButton:
 #     def __init__(self, AudioFile: str) -> None:
-#         self.AudioFile = xpfpath.xpfp(AudioFile) # normalise file paths \\ or / depending if POSIX or NT
+#         self.AudioFile = AudioFile
+
 #     def Play(self):
-#         global Title
-#         Title = f"'{self.AudioFile}'" # Currently playing Window Title
-#         # Allow MultiMode when it's on
-#         if SpammingState == 1: # and mixer.music.get_pos()/1000 > 0:
-#             Sound = SoundFile(self.AudioFile)
-#             # Sound.set_volume(float(Settings['Volume'])/100)
-#             Sound.Play()
+#         global LoopState, LoopTextState, AudioPath, Title
+#         AudioPath = self.AudioFile # for the window title
+#         Title = f"'{AudioPath}'"
+#         if SpammingState == 1 and mixer.music.get_pos()/1000 > 0:
+#             Sound = mixer.Sound(xpfpath.xpfp(AudioFolder+"\\"+self.AudioFile))
+#             Sound.set_volume(float(Settings['Volume'])/100)
+#             Sound.play()
 #         else:
-#             # Disallow MultiMode when it is off and set looping state
-            
-#         #     mixer.fadeout(0) # fix multi-mode long sounds not stopping when multi mode is disabled
-#         #     mixer.music.unload()
-#         #     mixer.music.load(xpfpath.xpfp(AudioFolder+"\\"+self.AudioFile))
-        
-#             Sound = SoundFile(self.AudioFile)
-#         #     mixer.music.play(loops=LoopState)
-#             Sound.Play()
+#             mixer.fadeout(0) # fix multi-mode long sounds not stopping when multi mode is disabled
+#             mixer.music.unload()
+#             mixer.music.load(xpfpath.xpfp(AudioFolder+"\\"+self.AudioFile))
+#             mixer.music.play(loops=LoopState)
+
+
 InitializeSettings()
 InitializeAudioSystem()
 ComDispName = GenerateSoundIndex(AudioFolder)
