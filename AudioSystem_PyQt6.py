@@ -62,7 +62,7 @@ class AudioPipelineManager:
         print('Deleted all active AudioPipelines.') if ActivePipelines != [] else ''
         ActivePipelines.clear() if ActivePipelines != [] else print('AudioPipelines already Clear.')
     
-    def PipelineInfo(index:int=0):
+    def pipelineInfo(index:int=0):
         """Display Pipeline Info of INDEX"""
         try:
             pipe:AudioSystem = ActivePipelines[index]
@@ -80,11 +80,11 @@ if __name__ == "__main__":
     print('Pre Checking...')
     AudioPipelineManager.showPipelineList()           # no Pipeline to show
     AudioPipelineManager.createPipeline()             # create new default Pipeline
-    AudioPipelineManager.PipelineInfo(0)              # get info of Pipeline 0
-    AudioPipelineManager.PipelineInfo(1)              # get info of Pipeline 1, fails
+    AudioPipelineManager.pipelineInfo(0)              # get info of Pipeline 0
+    AudioPipelineManager.pipelineInfo(1)              # get info of Pipeline 1, fails
     AudioPipelineManager.createPipeline('test',44100) # create second Pipeline
     AudioPipelineManager.showPipelineList()           # show list of Pipelines
-    AudioPipelineManager.PipelineInfo(1)              # get info of Pipeline 1
+    AudioPipelineManager.pipelineInfo(1)              # get info of Pipeline 1
     AudioPipelineManager.deletePipeline()             # delete index -1 Pipeline or Pipeline index
     AudioPipelineManager.showPipelineList()           # show list
     AudioPipelineManager.deletePipeline()             # delete index -1 Pipeline or Pipeline index

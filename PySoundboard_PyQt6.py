@@ -213,7 +213,6 @@ class MainWindow(QMainWindow):
     
     ## Sound Buttons Section
     def SoundButtonsContent(self):
-        # soon add tabs for each folder, so we'll need to rewrite SoundBtnDef.py to add an index of folders which contains sound files
         SoundButton = FuncButton
         layout = QHBoxLayout()
         tabs =  QTabWidget()
