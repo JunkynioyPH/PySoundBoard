@@ -18,3 +18,4 @@ build
 dist
 *.spec
 *.png
+Soundboard_Main.py
