@@ -120,6 +120,8 @@ class MainWindow(QMainWindow):
         
     # Define Contents of Each Groups
     ## Audio Set Device Section
+    ##
+    ## DUE FOR A REWRITE CHANGE FROM PyGame.mixer:str to PyQt6.QtMultimedia.QAudioDevice:QAudioDevice
     class AudioDeviceContent(QHBoxLayout):
         def __init__(self):
             super().__init__()
