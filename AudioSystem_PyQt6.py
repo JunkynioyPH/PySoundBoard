@@ -1,4 +1,6 @@
 import PyQt6.QtMultimedia as QtM # Perhaps a new Backend..?
+from PyQt6.QtCore import QUrl
+
 import time
 
 ##
@@ -24,15 +26,38 @@ import time
 ActivePipelines:list = []
 class AudioSystem():
     """AudioSystem wrapping PyQt*.QtMultimedia. To Pre_Initialize, just Define the data in the class itself. e.g. AudioSystem(device=str|None, frequency=int)"""
-    def __init__(self, device:str|None=None, frequency:int=48000):
-        self.device:str|None = device
+    def __init__(self, device:QtM.QAudioDevice|None=None, frequency:int=48000):
+        self.sound = QtM.QSoundEffect() # create sound effect object
+        self.device:QtM.QAudioDevice|None = device
         self.frequency:int = frequency
-        self.mode:... = ... # SINGLE or MULTI - MODE
         
-    def PipelineInfo(self) -> str:
-        # print(f"{self.device}@{self.frequency}")
-        return f"{self.device}@{self.frequency}"
+        self.volume:int = 100 # default volume
+        # self.mode:... = ... # 0 = SINGLE or 1 = MULTI - MODE
+        self.sound.setAudioDevice(device) if device is not None else None # set audio device
+        
+    def info(self) -> str:
+        return f"{self.device.description() if self.device is not None else 'None'}@{self.frequency}"
     
+    def play(self, soundfile:str, loopstate:int=0):
+        """Play SoundFile with LoopState"""
+        print(f"Playing SoundFile[{soundfile}] with LoopState[{loopstate}] on {self.device.description()}@{self.frequency}Hz")
+        self.sound.setSource(QUrl.fromLocalFile(soundfile)) # set sound file
+        self.sound.setLoopCount(0 if loopstate == 1 else 0) # set loop count NOT YET WORKING
+        self.sound.setVolume(self.volume/100) # set volume
+        self.sound.play() # play sound
+                
+    # def stop(self):
+    #     """Stop SoundFile Playback"""
+    #     print(f"Stopping SoundFile on {self.device}@{self.frequency}Hz")
+        
+    def setVolume(self, volume:int):
+        """Set Volume of AudioSystem"""
+        print(f"Setting Volume to {volume}% on {self.device.description()}@{self.frequency}Hz")
+        self.volume = volume
+    
+    # def getPos(self) -> int:
+    #     ...
+            
     # more [ def func(): ] here specifically for audio playback.
 
 class AudioPipelineManager:
@@ -42,19 +67,19 @@ class AudioPipelineManager:
         print('No AudioPipelines to show.') if ActivePipelines == [] else print('\nCurrent AudioPipelines:')
         for _ in ActivePipelines:
             # device/frequency types say [ ANY ] because it's uncertain in this context.
-            print(f"{index}: {_} - {_.device}@{_.frequency}")
+            print(f"{index}: {_} - {_.device.description() if _.device is not None else 'None'}@{_.frequency}")
             index += 1
         else:
             print()
-    def createPipeline(device:str|None=None, frequency:int=48000):
+    def createPipeline(device:QtM.QAudioDevice|None=None, frequency:int=48000):
         """Load AudioSystem with provided settings or defaults."""
         _:AudioSystem = AudioSystem(device, frequency)
         ActivePipelines.append(_)
-        print(f"Created AudioPipeline: {device}@{frequency} - {ActivePipelines[-1]}")
+        print(f"Created AudioPipeline: {device.description() if device is not None else 'None'}@{frequency} - {ActivePipelines[-1]}")
         
     def deletePipeline(index:int=-1):
         """DELETE last created Pipeline or a specified index."""
-        print(f"Deleted AudioPipeline: {ActivePipelines[index].device}@{ActivePipelines[index].frequency}")
+        print(f"Deleted AudioPipeline: {ActivePipelines[index].info()}")
         ActivePipelines.remove(ActivePipelines[index]) if ActivePipelines != [] else print('No AudioPipelines to delete.')
 
     def deleteAllPipelines():
@@ -66,40 +91,52 @@ class AudioPipelineManager:
         """Display Pipeline Info of INDEX"""
         try:
             pipe:AudioSystem = ActivePipelines[index]
-            print(f"AudioPipeline [ {index} ]: {pipe.PipelineInfo()}")
+            print(f"AudioPipeline [ {index} ]: {pipe.info()}")
         except:
             print(f'AudioPipeline [ {index} ]: does not exist.')
             
     def bindPipeline(index) -> AudioSystem:
-        """RETURN AudioSystem OBJ in ActivePipeline[index]"""
+        """RETURN AudioSystem OBJ from ActivePipeline[index]"""
         _:AudioSystem = ActivePipelines[index]
         return _
     
 # Standalone, Self test code
 if __name__ == "__main__":
     print('Pre Checking...')
+    from PyQt6.QtWidgets import QApplication
+    import sys
+    from PyQt6.QtWidgets import QMainWindow as MainWindow
+    APP = QApplication([])
+    MainFrame = MainWindow()
+    
     AudioPipelineManager.showPipelineList()           # no Pipeline to show
     AudioPipelineManager.createPipeline()             # create new default Pipeline
     AudioPipelineManager.pipelineInfo(0)              # get info of Pipeline 0
     AudioPipelineManager.pipelineInfo(1)              # get info of Pipeline 1, fails
-    AudioPipelineManager.createPipeline('test',44100) # create second Pipeline
+    AudioPipelineManager.createPipeline(QtM.QMediaDevices.audioOutputs()[0],48000) # create second Pipeline
     AudioPipelineManager.showPipelineList()           # show list of Pipelines
     AudioPipelineManager.pipelineInfo(1)              # get info of Pipeline 1
     AudioPipelineManager.deletePipeline()             # delete index -1 Pipeline or Pipeline index
     AudioPipelineManager.showPipelineList()           # show list
     AudioPipelineManager.deletePipeline()             # delete index -1 Pipeline or Pipeline index
     AudioPipelineManager.deleteAllPipelines()         # nothing to delete
-    AudioPipelineManager.createPipeline()
-    AudioPipelineManager.createPipeline()             ### Create 3 Pipelines
-    AudioPipelineManager.createPipeline()
+    AudioPipelineManager.createPipeline(QtM.QMediaDevices.audioOutputs()[1])
+    AudioPipelineManager.createPipeline(QtM.QMediaDevices.audioOutputs()[2])             ### Create 3 Pipelines
+    AudioPipelineManager.createPipeline(QtM.QMediaDevices.audioOutputs()[3])
     AudioPipelineManager.deleteAllPipelines()         # Delete all Pipelines
     AudioPipelineManager.showPipelineList()
     
     ## Create AudioPipeline and perform Function Tests
     print('\n'+'Practical Testing...')
-    AudioPipelineManager.createPipeline()     # Create Default Pipeline
+    AudioPipelineManager.createPipeline(device=QtM.QMediaDevices.audioOutputs()[6])     # Create Default Pipeline
     
     # bind name 'Master' to Pipeline 0
+    # this is such a round about way of doing it but a lot of the code relies on this list.
     Master = AudioPipelineManager.bindPipeline(0)
-    print(Master.PipelineInfo())
+    print(Master.info())
+    # Master.play('startup.wav', loopstate=1)  # Play test.wav with LoopState 1
+    Master.setVolume(14)
+    Master.play('./startup.wav', loopstate=1)
     
+    MainFrame.show()
+    sys.exit(APP.exec())  # Start the Application Event Loop
