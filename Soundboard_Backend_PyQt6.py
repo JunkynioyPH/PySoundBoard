@@ -6,8 +6,6 @@ ComDispName = []
 LoopTextState, LoopState,  = "  Looping Disabled", 0
 SpammingState, SpammingTextState = 0, 'Multi-Mode OFF'
 AudioFolder = xpfpath.xpfp(".\\SoundFiles")
-# AudioFilesIndex:list = []
-SubFoldersIndex:list = []
 
 def InitializeSettings():
     global Settings
@@ -60,6 +58,7 @@ def ToggleSpamming():
 # no more nested folders
 def GenerateSoundIndex(path) -> tuple:
     AudioFilesIndex:list = []
+    SubFoldersIndex:list = []
     print(f'Scanning [{path}]')
     try:
         FolderContents = os.scandir(path)
@@ -81,6 +80,7 @@ def GenerateSoundIndex(path) -> tuple:
     return tuple(AudioFilesIndex)
 
 # PyQt Sound System
+# USE [ AudioSystem_PyQt6.py ]
 class SoundFile:
     def __init__(self, filepath:str):
         # super().__init__()

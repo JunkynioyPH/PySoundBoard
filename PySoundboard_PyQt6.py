@@ -262,8 +262,7 @@ class FuncButton(QPushButton):
         self.setText(Name)
         self.setStyleSheet("text-align: left; padding: 5%; margin: 0%;")
         self.setFixedWidth(125)
-        self.method = Method # keep CLASS INSTANCE alive
-        self.clicked.connect(self.method)
+        self.clicked.connect(Method)
 
 # Initialize Backend
 splash()
