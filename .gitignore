@@ -19,3 +19,4 @@ dist
 *.spec
 *.png
 Soundboard_Main.py
+*.log

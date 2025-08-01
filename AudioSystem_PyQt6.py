@@ -1,68 +1,84 @@
-import PyQt6.QtMultimedia as QTM
+from PyQt6.QtMultimedia import *
 from PyQt6.QtCore import QUrl, QTimer
-import time, xpfpath, os
+from xpfpath import xpfp
+import time, os
 
-### Insert Main Code Here
+
+# main
 class AudioManager():
-    """
-    Main Class which holds:
+    def __init__(self, device:QAudioDevice, volume:int=50):
+        print(f"\n\nSupported MIME Types [QSoundEffect]:\n{QSoundEffect.supportedMimeTypes()}\n\nDetected AudioOutputs:\n{[Device.description() for Device in QMediaDevices.audioOutputs()]}\n")
+        self.settings:dict[str:QAudioDevice, str:int] = {"device":device,"volume":volume}
+        
+        self.audioPool:dict[str:list, str:list] = {'audio':[],'sound':[]}
+        self.audioIndex:dict[dict] = {'audio':{},'sound':{}}
+        
+    def monitor(self, terminal:bool=True) -> None|str:
+        """Prints out the current Status of AudioManager"""
+        status:str = f"...Index..:\n   Audio: {self.audioIndex['audio']}\n   Sound: {self.audioIndex['sound']}\n\nAudioPool.:\n   Audio: {self.audioPool['audio']}\n   Sound: {self.audioPool['sound']}"
+        if terminal:
+            print('++ [AudioManager] ++')
+            print(status)
+            print('++ -------------- ++')
+        else:
+            return status
     
-    - **loadedAudioFiles** & **audioPool**: _SoundEffect_|_AudioMedia_
-    - **device**: _QAudioDevice_
-    - **volume**: _int_ (_volume:int/100_)
-    """
-    def __init__(self, device:QTM.QAudioDevice, volume:int):
-        """_summary_
+    def load(self, type:str, path:str):
+        path = path if xpfp('./') in path else xpfp(f'./{path}') # normalise path to have ' ./ ' prefix
+        audioName:str = os.path.splitext(os.path.basename(path))[0]
+        print(f"[AudioManager] Load: ({type}) '{audioName}' <{path}> ", end='')
+        match type.lower():
+            case 'audio':
+                self.audioIndex['audio'][audioName] = path
+                print(f"*Done*")
+            case 'sound':
+                self.audioIndex['sound'][audioName] = path
+                print(f"*Done*")
+            case _:
+                print(f'*Failed*')
+    def unload(self, type:str, item:str):
+        print(f"[AudioManager] Unloading: ({type}) <{item}> ", end='')
+        # if both actually exists, run the following
+        if self.audioIndex.get(type.lower()) and self.audioIndex[type.lower()].get(item):
+            match type.lower():
+                case 'audio':
+                    self.audioIndex['audio'].pop(item)
+                    print(f"*Done*")
+                case 'sound':
+                    self.audioIndex['sound'].pop(item)
+                    print(f"*Done*")
+        else:
+            print(f"*Failed*")
 
-        Args:
-            device (QTM.QAudioDevice): _description_
-            volume (int): _description_
-        """
-        self.device = device
-        self.volume = volume
-        self.loadedAudio:dict[dict] = {"audio":{},"sound":{}}
-        self.audioPool:dict[list] = {"audio":[],"sound":[]}
-    def infoMonitor(self):
-        print(f"Supported MIME Types: {QTM.QSoundEffect.supportedMimeTypes()}")
-        print(f"Loaded    : {self.loadedAudio}\nPlayerPool: {self.audioPool}")
-    def loadSound(self, file:str):
-        # use ./file.wav if ./ already exists, else append ./ prefix
-        sound = xpfpath.xpfp(file) if xpfpath.xpfp('./') in file else xpfpath.xpfp(f"./{file}")
-        # omit file extension
-        soundName = os.path.splitext(os.path.basename(sound))[0]
-        # on Key soundName, add value SoundEffectLoader
-        self.loadedAudio["sound"][soundName] = sound
-    def playSound(self, name:str, loop:bool=False):
-        # get ./file
-        path = self.loadedAudio["sound"].get(name)
-        if not path:
-            print(f"[AudioManager] Sound '{name}' not found.")
-            return
-        # create new SoundEffectPlayer(QSoundEffect) Instance with data from SoundEffectLoader
-        loops = int(((2**32)/2)-1) if loop else 1
-        player = SoundEffectPlayer(path, self.device, self.volume, loops)
-        self.audioPool['sound'].append(player)
-        player.play()
-        player.playingChanged.connect(lambda: self._cleanupPlayer(player))
-    def _cleanupPlayer(self, player):
-        if not player.isPlaying():
-            try:
-                self.audioPool['sound'].remove(player)
-            except ValueError:
-                pass
-class SoundEffectPlayer(QTM.QSoundEffect):
-    def __init__(self, file:str, device:QTM.QAudioDevice, volume:int, loops:int):
+
+# remember when playing Audio/Sound, for "loops", pass in "### int(((2**32) / 2) - 1) if loop else 1 ###"
+class SoundEffect(QSoundEffect):
+    def __init__(self, file:str, device:QAudioDevice, volume:int, loops:int):
         super().__init__()
         self.name = os.path.basename(file)
-        self.setSource(QUrl.fromLocalFile(file))
         self.setAudioDevice(device)
+        self.setSource(QUrl.fromLocalFile(file))
+        
         self.setVolume(volume/100)
         self.setLoopCount(loops)
     def __repr__(self) -> str:
         return self.name
-        
 
-### Practical Tests
+class AudioMedia(QMediaPlayer):
+    def __init__(self, file:str, device:QAudioDevice, volume:int, loops:int):
+        super().__init__()
+        self.name = os.path.basename(file)
+        self.device = QAudioOutput(device)
+        self.setAudioOutput(self.device)
+        self.setSource(QUrl.fromLocalFile(file))
+        
+        self.device.setVolume(volume/100)
+        self.setLoops(loops)
+    def __repr__(self) -> str:
+        return self.name
+
+# test
+
 if __name__ == "__main__":
     from PyQt6.QtWidgets import QApplication, QPushButton
     import sys
@@ -87,18 +103,36 @@ if __name__ == "__main__":
             self.setCentralWidget(Canvas)
             Canvas.setLayout(HBox)
             
-            self.device = QTM.QMediaDevices.audioOutputs()[0] # simulate loading prefered audioDevice
-            sound = AudioManager(self.device,14) # init AudioSystem
+            self.device = QMediaDevices.audioOutputs()[0] # simulate loading prefered audioDevice
+            self.sound = AudioManager(self.device,14) # init AudioSystem
             
-            sound.loadSound('./startup.wav') # load Audio
+            self.sound.load('sound','startup.wav')     # load sound
+            self.sound.load('audio','startup.wav')     # load audio
+            self.sound.load('vibration','startup.wav') # load unknown
+            
+            self.sound.unload('sound','startup')  # unload
+            self.sound.unload('sound','startup')  # already unloaded
+            self.sound.unload('sounds','startup') # invalid type
+            
+            self.sound.unload('audio','startup')  # unload
+            self.sound.unload('audio','startup')  # already unloaded
+            self.sound.unload('audios','startup')  # invalid type
+            
+            self.sound.load('sound','./startup.wav')     # load sound ./
+            self.sound.load('audio','./startup.wav')     # load audio ./
+
+            self.sound.load('audio','./startup.wav')     # load audio ./
+            
+            self.sound.load('audio','./SoundFiles/bonk.mp3') # load sound from nested folders
+            self.sound.load('audio','SoundFiles/bonk.mp3')
             
             ## monitor sound list
-            timer = QTimer(self)
-            timer.timeout.connect(sound.infoMonitor)
-            timer.start(500)
+            self.timer = QTimer(self)
+            self.timer.timeout.connect(self.sound.monitor)
+            self.timer.start(500)
             
             # learned lambda
-            HBox.addWidget(FuncButton('Sound', lambda play: sound.playSound('startup')))
+            HBox.addWidget(FuncButton('Sound', lambda: self.sound.playSound('startup')))
     
     MainFrame = MainWindow()
     MainFrame.show()
