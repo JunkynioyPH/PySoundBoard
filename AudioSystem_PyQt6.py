@@ -49,7 +49,7 @@ class AudioManager():
             print(f"*Loaded*")
                 
     def unload(self, type:str, item:str):
-        print(f"[AudioManager] Unloading: ({type}) <{item}> ", end='')
+        print(f"[AudioManager] Unload: ({type}) <{item}> ", end='')
         # Check if type exist in the list
         if type.lower() != 'audio' and type.lower() != 'sound':
             return print("*Unknown Type*")
