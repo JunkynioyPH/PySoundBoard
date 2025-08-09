@@ -7,13 +7,13 @@ import time, os
 # main
 class AudioManager():
     def __init__(self, device:QAudioDevice, volume:int=50):
-        print(f"\n\nSupported MIME Types [QSoundEffect]:\n{QSoundEffect.supportedMimeTypes()}\n\nDetected AudioOutputs:\n{[Device.description() for Device in QMediaDevices.audioOutputs()]}\n")
+        print(f"\nSupported MIME Types [QSoundEffect]:\n{QSoundEffect.supportedMimeTypes()}\n\nDetected AudioOutputs:\n{[Device.description() for Device in QMediaDevices.audioOutputs()]}\n")
         self.settings:dict[str:QAudioDevice, str:int] = {"device":device,"volume":volume}
         
         self.audioPool:dict[str:list, str:list] = {'audio':[],'sound':[]}
         self.audioIndex:dict[dict] = {'audio':{},'sound':{}}
         
-    def monitor(self, terminal:bool=True) -> None|str:
+    def status(self, terminal:bool=True) -> None|str:
         """Prints out the current Status of AudioManager"""
         status:str = f"...Index..:\n   Audio: {self.audioIndex['audio']}\n   Sound: {self.audioIndex['sound']}\n\nAudioPool.:\n   Audio: {self.audioPool['audio']}\n   Sound: {self.audioPool['sound']}"
         if terminal:
@@ -24,31 +24,46 @@ class AudioManager():
             return status
     
     def load(self, type:str, path:str):
-        path = path if xpfp('./') in path else xpfp(f'./{path}') # normalise path to have ' ./ ' prefix
         audioName:str = os.path.splitext(os.path.basename(path))[0]
         print(f"[AudioManager] Load: ({type}) '{audioName}' <{path}> ", end='')
-        match type.lower():
-            case 'audio':
-                self.audioIndex['audio'][audioName] = path
-                print(f"*Done*")
-            case 'sound':
-                self.audioIndex['sound'][audioName] = path
-                print(f"*Done*")
-            case _:
-                print(f'*Failed*')
+        
+        ## Normalise path to have ' ./ , .\\ ' prefix
+        ## In windows, this check will fail and duplicate " .\\ "
+        ## However, " .\\.\\ " will still point to "Current Directory"
+        ## I Should probably use "os.path" stuff for this instead of xpfp() shit thing i made
+        path = path if xpfp('./') in path else xpfp(f'./{path}')
+        
+        # Check if type exist in the list
+        if type.lower() != 'audio' and type.lower() != 'sound':
+            return print("*Unknown Type*")
+        # Check if key exist in dict, say it's a duplicate if it is
+        if  self.audioIndex[type.lower()].get(audioName):
+            return print(f'*Duplicate*')
+        
+        # else, make key
+        if type.lower() == 'audio':
+            self.audioIndex['audio'][audioName] = path
+            print(f"*Loaded*")
+        else:
+            self.audioIndex['sound'][audioName] = path
+            print(f"*Loaded*")
+                
     def unload(self, type:str, item:str):
         print(f"[AudioManager] Unloading: ({type}) <{item}> ", end='')
-        # if both actually exists, run the following
-        if self.audioIndex.get(type.lower()) and self.audioIndex[type.lower()].get(item):
-            match type.lower():
-                case 'audio':
-                    self.audioIndex['audio'].pop(item)
-                    print(f"*Done*")
-                case 'sound':
-                    self.audioIndex['sound'].pop(item)
-                    print(f"*Done*")
+        # Check if type exist in the list
+        if type.lower() != 'audio' and type.lower() != 'sound':
+            return print("*Unknown Type*")
+        # If it exists, ever. if not reply already unloaded
+        if not self.audioIndex.get(type.lower()) and not self.audioIndex[type.lower()].get(item):
+            return print(f"*Already Unloaded*")
+
+        # else, unload
+        if type.lower() == 'audio':
+            self.audioIndex['audio'].pop(item)
+            print(f"*Unloaded*")
         else:
-            print(f"*Failed*")
+            self.audioIndex['sound'].pop(item)
+            print(f"*Unloaded*")
 
 
 # remember when playing Audio/Sound, for "loops", pass in "### int(((2**32) / 2) - 1) if loop else 1 ###"
@@ -114,13 +129,11 @@ if __name__ == "__main__":
             self.sound.unload('sound','startup')  # already unloaded
             self.sound.unload('sounds','startup') # invalid type
             
-            self.sound.unload('audio','startup')  # unload
-            self.sound.unload('audio','startup')  # already unloaded
+            self.sound.unload('audio','startup')   # unload
+            self.sound.unload('audio','startup')   # already unloaded
             self.sound.unload('audios','startup')  # invalid type
             
             self.sound.load('sound','./startup.wav')     # load sound ./
-            self.sound.load('audio','./startup.wav')     # load audio ./
-
             self.sound.load('audio','./startup.wav')     # load audio ./
             
             self.sound.load('audio','./SoundFiles/bonk.mp3') # load sound from nested folders
@@ -128,7 +141,7 @@ if __name__ == "__main__":
             
             ## monitor sound list
             self.timer = QTimer(self)
-            self.timer.timeout.connect(self.sound.monitor)
+            self.timer.timeout.connect(self.sound.status)
             self.timer.start(500)
             
             # learned lambda
