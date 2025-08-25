@@ -3,7 +3,6 @@ from PyQt6.QtCore import QUrl, QTimer
 from xpfpath import xpfp
 import time, os
 
-
 # main
 class AudioManager():
     def __init__(self, device:QAudioDevice, volume:int=50):
