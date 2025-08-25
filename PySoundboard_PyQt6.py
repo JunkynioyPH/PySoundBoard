@@ -26,7 +26,6 @@ def splash():
 
 # Prelims
 DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)","VoiceMeeter Input (VB-Audio VoiceMeeter VAIO)",None]
-InitializeAudioSystem = SoundBackend.InitializeAudioSystem
 # Load Settings
 Settings = SoundBackend.Settings
 def ShowSettings():
@@ -222,7 +221,6 @@ class MainWindow(QMainWindow):
         tabList:list = []
         for tabName in SoundBackend.ComDispName:
             tabList.append(tabName[0]) if tabName[0] not in tabList else ''
-            
         indexRange: int = int(Settings["MaxRows"])
         # add them buttons to their own tab
         for tabName in tabList:
@@ -259,6 +257,7 @@ class MainWindow(QMainWindow):
 class FuncButton(QPushButton):
     def __init__(self, Name:str, Method:classmethod):
         super().__init__()
+        # self.Method = Method
         self.setText(Name)
         self.setStyleSheet("text-align: left; padding: 5%; margin: 0%;")
         self.setFixedWidth(125)
@@ -267,10 +266,10 @@ class FuncButton(QPushButton):
 # Initialize Backend
 splash()
 ShowSettings()
-InitializeAudioSystem()
-
 # Start Window
 APP = QApplication([])
 MainFrame = MainWindow()
 MainFrame.show()
+SoundBackend.AudioSystem.status()
+SoundBackend.SoundFile("./startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
 sys.exit(APP.exec())

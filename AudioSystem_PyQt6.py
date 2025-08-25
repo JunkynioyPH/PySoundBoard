@@ -8,6 +8,7 @@ class AudioManager():
     def __init__(self, device:QAudioDevice, volume:int=50):
         print(f"\nSupported MIME Types [QSoundEffect]:\n{QSoundEffect.supportedMimeTypes()}\n\nDetected AudioOutputs:\n{[Device.description() for Device in QMediaDevices.audioOutputs()]}\n")
         self.settings:dict[str:QAudioDevice, str:int] = {"device":device,"volume":volume}
+        print(f'Using Device: {device.description()}\n')
         
         self.audioPool:dict[str:list, str:list] = {'audio':[],'sound':[]}
         self.audioIndex:dict[dict] = {'audio':{},'sound':{}}
@@ -63,6 +64,34 @@ class AudioManager():
         else:
             self.audioIndex['sound'].pop(item)
             print(f"*Unloaded*")
+    
+    def play(self, type:str, item:str, loop:bool=False):
+        # Check if type exist in the list
+        if type.lower() != 'audio' and type.lower() != 'sound':
+            return print("*Unknown Type*")
+        
+        # Check if the audio actually exist in audioIndex
+        audioName = self.audioIndex[type].get(item)
+        if not audioName:
+            return print(f'*Not Found ({type}:{item})*')
+        
+        # clean up after sound is done playing
+        def _vanish(type:str, item:str):
+            if type.lower() == 'audio':
+                self.audioPool['audio'].remove(item)
+            else:
+                self.audioPool['sound'].remove(item)
+                
+        looping = int(((2**32) / 2) - 1) if loop else 0
+        if type.lower() == 'audio':
+            _ = ...
+            self.audioPool['audio'].append(_)
+            _ = ...
+        else:
+            _ = SoundEffect(self.audioIndex['sound'].get(item), self.settings['device'], self.settings['volume'], looping)
+            self.audioPool['sound'].append(_)
+            _.playingChanged.connect(lambda: _vanish('sound', _))
+        print(f"[AudioManager] Play: ({type}) <{item}> ")
 
 
 # remember when playing Audio/Sound, for "loops", pass in "### int(((2**32) / 2) - 1) if loop else 1 ###"
@@ -72,9 +101,11 @@ class SoundEffect(QSoundEffect):
         self.name = os.path.basename(file)
         self.setAudioDevice(device)
         self.setSource(QUrl.fromLocalFile(file))
-        
+
         self.setVolume(volume/100)
         self.setLoopCount(loops)
+        self.play()
+        
     def __repr__(self) -> str:
         return self.name
 
@@ -96,7 +127,7 @@ class AudioMedia(QMediaPlayer):
 if __name__ == "__main__":
     from PyQt6.QtWidgets import QApplication, QPushButton
     import sys
-    from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QWidget
+    from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget
     
     APP = QApplication([])
     class FuncButton(QPushButton):
@@ -105,19 +136,30 @@ if __name__ == "__main__":
             self.setText(Name)
             self.setStyleSheet("text-align: left; padding: 5%; margin: 0%;")
             self.setFixedWidth(125)
-            # self.method = Method # keep alive
+            # self.Method = Method # keep alive
             self.clicked.connect(Method)
-    
+            
+    #this is for reference later
+    #this is to keep alive what sound is per button
+    class SoundButton(FuncButton):
+        def __init__(self, Type, Name, Method:classmethod):
+            self.name:str = Name
+            self.type:str = Type
+            self.playAudio:classmethod = Method
+            super().__init__(self.name, self.play)
+        def play(self):
+            self.playAudio(f'{self.type}',f'{self.name}')
+
     class MainWindow(QMainWindow):
         def __init__(self):
             super().__init__()
             Canvas = QWidget()
 
-            HBox = QHBoxLayout()
+            VBox = QVBoxLayout()
             self.setCentralWidget(Canvas)
-            Canvas.setLayout(HBox)
+            Canvas.setLayout(VBox)
             
-            self.device = QMediaDevices.audioOutputs()[0] # simulate loading prefered audioDevice
+            self.device = QMediaDevices.audioOutputs()[3] # simulate loading prefered audioDevice
             self.sound = AudioManager(self.device,14) # init AudioSystem
             
             self.sound.load('sound','startup.wav')     # load sound
@@ -133,6 +175,7 @@ if __name__ == "__main__":
             self.sound.unload('audios','startup')  # invalid type
             
             self.sound.load('sound','./startup.wav')     # load sound ./
+            self.sound.load('sound','./SoundFiles/Question.wav')     # load sound ./
             self.sound.load('audio','./startup.wav')     # load audio ./
             
             self.sound.load('audio','./SoundFiles/bonk.mp3') # load sound from nested folders
@@ -144,7 +187,12 @@ if __name__ == "__main__":
             self.timer.start(500)
             
             # learned lambda
-            HBox.addWidget(FuncButton('Sound', lambda: self.sound.playSound('startup')))
+            for each in self.sound.audioIndex['sound']:    
+                print(each) 
+                VBox.addWidget(SoundButton(f'sound', f'{each}', self.sound.play))
+            for each in self.sound.audioIndex['sound']:    
+                print(each) 
+                VBox.addWidget(SoundButton(f'audio', f'{each}', self.sound.play))
     
     MainFrame = MainWindow()
     MainFrame.show()
