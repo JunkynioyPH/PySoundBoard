@@ -99,7 +99,7 @@ class AudioManager():
                 self.audioPool[type.lower()][0].stop()
             else:
                 self.audioPool[type.lower()][0].stop()
-                #TODO Might be the cause of the program freezing.
+                #TODO Might be the cause of the program freezing. maybe AudioMedia()'s "AudioDevice Output" getting deleted after is not good.
                 self.audioPool[type.lower()].remove(self.audioPool[type.lower()][0])
         
         # clean up after sound is done playing
@@ -130,7 +130,7 @@ class AudioManager():
         while self.audioPool['audio'] != []:
             print(f'stopping {self.audioPool['audio'][0]}')
             self.audioPool['audio'][0].stop()
-            #TODO Might be the cause of the program freezing.
+            #TODO Might be the cause of the program freezing. maybe AudioMedia()'s "AudioDevice Output" getting deleted after is not good.
             self.audioPool['audio'].remove(self.audioPool['audio'][0])
             
 
