@@ -37,14 +37,18 @@ def ToggleLoop():
     global LoopState, LoopTextState
     if LoopState == 0:
         LoopTextState, LoopState = "  Looping  Enabled", -1
+        AudioSystem.toggleState('audio','loop')
     else:
         LoopTextState, LoopState = "  Looping Disabled", 0
+        AudioSystem.toggleState('audio','loop')
 def ToggleSpamming():
     global SpammingState, SpammingTextState
     if SpammingState == 0:
         SpammingState, SpammingTextState = 1, "Multi-Mode  ON"
+        AudioSystem.toggleState('audio','multi')
     else:
         SpammingState, SpammingTextState = 0, "Multi-Mode OFF"
+        AudioSystem.toggleState('audio','multi')
 
 # It now only scans ./SoundFiles and its folders, Not Recurseive!
 # no more nested folders
@@ -57,7 +61,7 @@ def GenerateSoundIndex(path) -> tuple:
     except:
         os.mkdir(AudioFolder)
         FolderContents = os.scandir(path)
-    def add(_:str):
+    def add(_):
         name:str = str(_.name.rsplit(".",1)[0]) # omit file extension.
         folder:str = str(_.path).rsplit(f"{'\\' if os.name=='nt' else '/'}",2)[1] # Get actual folder where file is located.
         AudioFilesIndex.append([folder,name,SoundFile(Entry.path).Play])
@@ -78,11 +82,11 @@ class SoundFile:
     def __init__(self, filepath:str):
         # super().__init__()
         self.file = filepath
-        AudioSystem.load('sound',self.file)
+        AudioSystem.load('audio',self.file)
     def Play(self):
         global Title
         Title = f"'{self.file}'"
-        AudioSystem.play('sound',os.path.splitext(os.path.basename(self.file))[0])
+        AudioSystem.play('audio',os.path.splitext(os.path.basename(self.file))[0])
         print(f" - {LoopState}/{SpammingState}"+LoopTextState+"/"+SpammingTextState)
     def __repr__(self):
         return self.file

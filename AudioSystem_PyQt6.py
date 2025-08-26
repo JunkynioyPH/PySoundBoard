@@ -7,11 +7,14 @@ import time, os
 class AudioManager():
     def __init__(self, device:QAudioDevice, volume:int=50):
         print(f"\nSupported MIME Types [QSoundEffect]:\n{QSoundEffect.supportedMimeTypes()}\n\nDetected AudioOutputs:\n{[Device.description() for Device in QMediaDevices.audioOutputs()]}\n")
-        self.settings:dict[str:QAudioDevice, str:int] = {"device":device,"volume":volume}
+        self.settings:dict[str, QAudioDevice|int] = {"device":device,"volume":volume}
         print(f'Using Device: {device.description()}\n')
         
-        self.audioPool:dict[str:list, str:list] = {'audio':[],'sound':[]}
-        self.audioIndex:dict[dict] = {'audio':{},'sound':{}}
+        self.multiMode:dict[str, bool] = {'audio':False, 'sound':False}
+        self.loopMode:dict[str, bool] = {'audio':False, 'sound':False}
+        
+        self.audioPool:dict[str, list] = {'audio':[],'sound':[]}
+        self.audioIndex:dict[str, set] = {'audio':{},'sound':{}}
         
     def status(self, terminal:bool=True) -> None|str:
         """Prints out the current Status of AudioManager"""
@@ -33,8 +36,8 @@ class AudioManager():
         ## I Should probably use "os.path" stuff for this instead of xpfp() shit thing i made
         path = path if xpfp('./') in path else xpfp(f'./{path}')
         
-        # Check if type exist in the list
-        if type.lower() != 'audio' and type.lower() != 'sound':
+        # Check if type exist
+        if type.lower() not in ('audio','sound'):
             return print("*Unknown Type*")
         # Check if key exist in dict, say it's a duplicate if it is
         if  self.audioIndex[type.lower()].get(audioName):
@@ -50,8 +53,8 @@ class AudioManager():
                 
     def unload(self, type:str, item:str):
         print(f"[AudioManager] Unload: ({type}) <{item}> ", end='')
-        # Check if type exist in the list
-        if type.lower() != 'audio' and type.lower() != 'sound':
+        # Check if type exist
+        if type.lower() not in ('audio','sound'):
             return print("*Unknown Type*")
         # If it exists, ever. if not reply already unloaded
         if not self.audioIndex.get(type.lower()) and not self.audioIndex[type.lower()].get(item):
@@ -64,37 +67,71 @@ class AudioManager():
         else:
             self.audioIndex['sound'].pop(item)
             print(f"*Unloaded*")
-    
-    def play(self, type:str, item:str, loop:bool=False):
-        # Check if type exist in the list
-        if type.lower() != 'audio' and type.lower() != 'sound':
-            return print("*Unknown Type*")
+    def toggleState(self, type:str, mode:str):
+        print(f"[AudioManager] ToggleState: ({type}) '{mode}' ", end='')
+        if type.lower() not in ('audio','sound'):
+            return print('*Unknown Type*')
+        if mode.lower() not in ('multi','loop'):
+            return print('*Unknown Mode*')
         
+        if mode.lower() == 'multi':
+            self.multiMode[type.lower()] = True if self.multiMode[type.lower()] != True else False
+            print(f"{self.multiMode[type.lower()]} ", end='')
+        else:
+            self.loopMode[type.lower()] = True if self.loopMode[type.lower()] != True else False
+            print(f"{self.loopMode[type.lower()]} ", end='')
+        print("*Done*")
+    
+    def play(self, type:str, item:str):
+        print(f"[AudioManager] Play: ({type}) <{item}> ", end='')
+        # Check if type exist in the list
+        if type.lower() not in ('audio','sound'):
+            return print("*Unknown Type*")
         # Check if the audio actually exist in audioIndex
-        audioName = self.audioIndex[type].get(item)
+        audioName = self.audioIndex[type.lower()].get(item)
         if not audioName:
-            return print(f'*Not Found ({type}:{item})*')
+            return print(f'*Not Found*')
+        
+        # if it's not empty, something is already playing, remove it and proceed
+        # else add to pool
+        if self.audioPool[type.lower()] != [] and self.multiMode[type.lower()] == False:
+            if type == 'sound':
+                self.audioPool[type.lower()][0].stop()
+            else:
+                self.audioPool[type.lower()][0].stop()
+                self.audioPool[type.lower()].remove(self.audioPool[type.lower()][0])
         
         # clean up after sound is done playing
         def _vanish(type:str, item:str):
-            if type.lower() == 'audio':
-                self.audioPool['audio'].remove(item)
-            else:
-                self.audioPool['sound'].remove(item)
+                self.audioPool[type.lower()].remove(item)
                 
-        looping = int(((2**32) / 2) - 1) if loop else 0
+        looping = int(((2**32) / 2) - 1) if self.loopMode[type.lower()] else 0
         if type.lower() == 'audio':
-            _ = ...
+            # create new instance
+            _ = AudioMedia(self.audioIndex['audio'].get(item), self.settings['device'], self.settings['volume'], looping)
+
+            # add to pool and delete instance once audio finishes
             self.audioPool['audio'].append(_)
-            _ = ...
+            _.mediaStatusChanged.connect(lambda status: _vanish(type.lower(), _) if status == QMediaPlayer.MediaStatus.EndOfMedia else None)
         else:
+            # create new instance
             _ = SoundEffect(self.audioIndex['sound'].get(item), self.settings['device'], self.settings['volume'], looping)
+
+            # add to pool and delete instance once audio finishes
             self.audioPool['sound'].append(_)
-            _.playingChanged.connect(lambda: _vanish('sound', _))
-        print(f"[AudioManager] Play: ({type}) <{item}> ")
+            _.playingChanged.connect(lambda: _vanish(type.lower(), _))
+        print("*Done*")
+    
+    def stopAll(self):
+        while self.audioPool['sound'] != []:
+            print(f'stopping {self.audioPool['sound'][0]}')
+            self.audioPool['sound'][0].stop()
+        while self.audioPool['audio'] != []:
+            print(f'stopping {self.audioPool['audio'][0]}')
+            self.audioPool['audio'][0].stop()
+            self.audioPool['audio'].remove(self.audioPool['audio'][0])
+            
 
-
-# remember when playing Audio/Sound, for "loops", pass in "### int(((2**32) / 2) - 1) if loop else 1 ###"
 class SoundEffect(QSoundEffect):
     def __init__(self, file:str, device:QAudioDevice, volume:int, loops:int):
         super().__init__()
@@ -107,7 +144,7 @@ class SoundEffect(QSoundEffect):
         self.play()
         
     def __repr__(self) -> str:
-        return self.name
+        return f"{self.name}{'(looped)' if self.loopCount() > 1 else ''}"
 
 class AudioMedia(QMediaPlayer):
     def __init__(self, file:str, device:QAudioDevice, volume:int, loops:int):
@@ -119,8 +156,10 @@ class AudioMedia(QMediaPlayer):
         
         self.device.setVolume(volume/100)
         self.setLoops(loops)
+        self.play()
+        
     def __repr__(self) -> str:
-        return self.name
+        return f"{self.name}{f'(looped)' if self.loops() > 1 else ''}"
 
 # test
 
@@ -131,7 +170,7 @@ if __name__ == "__main__":
     
     APP = QApplication([])
     class FuncButton(QPushButton):
-        def __init__(self, Name:str, Method:classmethod):
+        def __init__(self, Name:str, Method):
             super().__init__()
             self.setText(Name)
             self.setStyleSheet("text-align: left; padding: 5%; margin: 0%;")
@@ -142,10 +181,10 @@ if __name__ == "__main__":
     #this is for reference later
     #this is to keep alive what sound is per button
     class SoundButton(FuncButton):
-        def __init__(self, Type, Name, Method:classmethod):
+        def __init__(self, Type:str, Name:str, Method):
             self.name:str = Name
-            self.type:str = Type
-            self.playAudio:classmethod = Method
+            self.type = Type
+            self.playAudio = Method
             super().__init__(self.name, self.play)
         def play(self):
             self.playAudio(f'{self.type}',f'{self.name}')
@@ -194,6 +233,16 @@ if __name__ == "__main__":
                 print(each) 
                 VBox.addWidget(SoundButton(f'audio', f'{each}', self.sound.play))
     
+            self.sound.toggleState('sound','multi')
+            self.sound.toggleState('audio','multi')
+            self.sound.toggleState('sound','multi')
+            self.sound.toggleState('audio','multi')
+            
+            self.sound.toggleState('sound','loop')
+            self.sound.toggleState('audio','loop')
+            self.sound.toggleState('sound','loop')
+            self.sound.toggleState('audio','loop')
+            
     MainFrame = MainWindow()
     MainFrame.show()
     sys.exit(APP.exec())  # Start the Application Event Loop

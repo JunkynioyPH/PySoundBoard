@@ -206,9 +206,10 @@ class MainWindow(QMainWindow):
         mixer.pause()
         mixer.music.pause() 
     def Stop(self):
-        self.Resume()
-        mixer.fadeout(250)
-        mixer.music.fadeout(250)
+        SoundBackend.AudioSystem.stopAll()
+        # self.Resume()
+        # mixer.fadeout(250)
+        # mixer.music.fadeout(250)
     
     ## Sound Buttons Section
     def SoundButtonsContent(self):
@@ -252,10 +253,10 @@ class MainWindow(QMainWindow):
         return layout
 
 # Generic Button which allows for 
-# Text and .clicked.connect(classmethod) declaration
+# Text and .clicked.connect() declaration
 # on the same line
 class FuncButton(QPushButton):
-    def __init__(self, Name:str, Method:classmethod):
+    def __init__(self, Name:str, Method):
         super().__init__()
         # self.Method = Method
         self.setText(Name)
