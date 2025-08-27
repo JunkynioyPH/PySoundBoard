@@ -13,8 +13,28 @@ class AudioManager():
         self.multiMode:dict[str, bool] = {'audio':False, 'sound':False}
         self.loopMode:dict[str, bool] = {'audio':False, 'sound':False}
         
-        self.audioPool:dict[str, list] = {'audio':[],'sound':[]}
-        self.audioIndex:dict[str, set] = {'audio':{},'sound':{}}
+        self.audioPool:dict[str, list[SoundEffect|AudioMedia]] = {'audio':[],'sound':[]}
+        self.audioIndex:dict[str, dict[str, str]] = {'audio':{},'sound':{}}
+        self.init_AudioMedia()
+        
+        # initialize audioPool['audio'] with a fixed amount of inactive AudioMedia Objects.
+    def init_AudioMedia(self):
+        # self.audioPool['audio'] = []
+        # for count in range(0,2):
+        #     _ = AudioMedia(self.settings['device'])
+        #     _.name = count
+        #     def _clearMedia(status:QMediaPlayer.MediaStatus):
+        #         if status != QMediaPlayer.MediaStatus.EndOfMedia:
+        #             return
+        #         if status != QMediaPlayer.PlaybackState.StoppedState:
+        #             return print ('??>???')
+                
+        #         _.setSource(QUrl(QUrl.fromLocalFile(None)))
+                
+        #     _.mediaStatusChanged.connect(lambda status: _clearMedia(status))
+        #     self.audioPool['audio'].append(_)
+        pass
+            
         
     def status(self, terminal:bool=True) -> None|str:
         """Prints out the current Status of AudioManager"""
@@ -24,7 +44,7 @@ class AudioManager():
             print(status)
             print('++ -------------- ++')
         else:
-            return status
+            return f'AudioPool.:\n   Audio: {self.audioPool['audio']}\n   Sound: {self.audioPool['sound']}'
     
     def load(self, type:str, path:str):
         audioName:str = os.path.splitext(os.path.basename(path))[0]
@@ -98,40 +118,69 @@ class AudioManager():
             if type == 'sound':
                 self.audioPool[type.lower()][0].stop()
             else:
-                self.audioPool[type.lower()][0].stop()
-                #TODO Might be the cause of the program freezing. maybe AudioMedia()'s "AudioDevice Output" getting deleted after is not good.
-                self.audioPool[type.lower()].remove(self.audioPool[type.lower()][0])
+                # self.audioPool[type.lower()][0].stop()
+                # related to AudioMedia()
+                # self.audioPool[type.lower()].remove(self.audioPool[type.lower()][0])
+                pass
         
         # clean up after sound is done playing
-        def _vanish(type:str, item:str):
-                self.audioPool[type.lower()].remove(item)
+        def _vanish(item:SoundEffect):
+            # item.stop()
+            item.playingChanged.disconnect()
+            self.audioPool['sound'].remove(item)
                 
         looping = int(((2**32) / 2) - 1) if self.loopMode[type.lower()] else 0
         if type.lower() == 'audio':
             # create new instance
-            _ = AudioMedia(self.audioIndex['audio'].get(item), self.settings['device'], self.settings['volume'], looping)
+            # _ = AudioMedia(self.audioIndex['audio'].get(item), self.settings['device'], self.settings['volume'], looping)
 
             # add to pool and delete instance once audio finishes
-            self.audioPool['audio'].append(_)
-            _.mediaStatusChanged.connect(lambda status: _vanish(type.lower(), _) if status == QMediaPlayer.MediaStatus.EndOfMedia else None)
+            # self.audioPool['audio'].append(_)
+  
+
+            #######################
+            # handled differnetly, it will select a free object from the limited pool of AudioMedia() objects 
+            # assign a source and then play. this way we are not deleting the object, which is a problem with code above ^
+            
+            # for _poolitem in self.audioPool['audio']:
+            #     print(f'checking {_poolitem} ', end='')
+            #     # _poolitem:AudioMedia = _poolitem
+            #     # Skip things that has media playing in them.
+            #     if _poolitem.mediaStatus() not in (QMediaPlayer.MediaStatus.EndOfMedia, QMediaPlayer.MediaStatus.NoMedia):
+            #         print('!= EndOfMedia')
+            #         continue
+            #     # Skip Paused/Playing media
+            #     if _poolitem.playbackState() != QMediaPlayer.PlaybackState.StoppedState:
+            #         continue
+            #     _poolitem.setSource(QUrl.fromLocalFile(self.audioIndex['audio'].get(item)))
+            #     _poolitem.device.setVolume(self.settings['volume']/100)
+            #     _poolitem.play()
+            #     return
+                
+            
+            pass
         else:
             # create new instance
             _ = SoundEffect(self.audioIndex['sound'].get(item), self.settings['device'], self.settings['volume'], looping)
 
             # add to pool and delete instance once audio finishes
             self.audioPool['sound'].append(_)
-            _.playingChanged.connect(lambda: _vanish(type.lower(), _))
+            _.playingChanged.connect(lambda: _vanish(_))
         print("*Done*")
     
     def stopAll(self):
         while self.audioPool['sound'] != []:
             print(f'stopping {self.audioPool['sound'][0]}')
             self.audioPool['sound'][0].stop()
-        while self.audioPool['audio'] != []:
-            print(f'stopping {self.audioPool['audio'][0]}')
-            self.audioPool['audio'][0].stop()
-            #TODO Might be the cause of the program freezing. maybe AudioMedia()'s "AudioDevice Output" getting deleted after is not good.
-            self.audioPool['audio'].remove(self.audioPool['audio'][0])
+        ### Complete Rework to only stop all and unload the files from the remaining AudioMedia() Objects
+        for each in self.audioPool.get('audio'):
+            each.stop()
+        
+        # while self.audioPool['audio'] != []:
+        #     print(f'stopping {self.audioPool['audio'][0]}')
+        #     self.audioPool['audio'][0].stop()
+        #     #TODO Might be the cause of the program freezing. maybe AudioMedia()'s "AudioDevice Output" getting deleted after is not good.
+        #     self.audioPool['audio'].remove(self.audioPool['audio'][0])
             
 
 class SoundEffect(QSoundEffect):
@@ -149,19 +198,17 @@ class SoundEffect(QSoundEffect):
         return f"{self.name}{'(looped)' if self.loopCount() > 1 else ''}"
 
 class AudioMedia(QMediaPlayer):
-    def __init__(self, file:str, device:QAudioDevice, volume:int, loops:int):
+    def __init__(self, device:QAudioDevice):
         super().__init__()
-        self.name = os.path.basename(file)
+        self.name = 0
         self.device = QAudioOutput(device)
         self.setAudioOutput(self.device)
-        self.setSource(QUrl.fromLocalFile(file))
-        
-        self.device.setVolume(volume/100)
-        self.setLoops(loops)
-        self.play()
         
     def __repr__(self) -> str:
-        return f"{self.name}{f'(looped)' if self.loops() > 1 else ''}"
+        # BufferingMedia == Media is being played.
+        # LoadedMedia == Media is loaded, something is in it
+        # EndOfMedia == Media has finished playing. Still Loaded.
+        return f"{self.name}:{str(self.mediaStatus()).split('.')[1]}_{str(self.playbackState()).split('.')[1]}{f'(looped)' if self.loops() > 1 else ''}"
 
 # test
 

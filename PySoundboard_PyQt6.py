@@ -57,6 +57,12 @@ class MainWindow(QMainWindow):
         windowTitleNP = QTimer(self)
         windowTitleNP.timeout.connect(self.WindowTitleNowPlaying)
         windowTitleNP.start(100)
+        
+        # temporary
+        audioSystemStatus = QTimer(self)
+        audioSystemStatus.timeout.connect(self.status)
+        audioSystemStatus.start(100)
+        
         # self.setFixedSize(self.size())
 
         ## Define Containers
@@ -79,6 +85,15 @@ class MainWindow(QMainWindow):
         VCanvas.addWidget(SoundButtons)
         SoundButtons.setLayout(self.SoundButtonsContent())
 
+        # temporary 
+        self.AudioSystemStatusDisplay = QLabel()
+        self.AudioSystemStatusDisplay.setFixedWidth(950)
+        self.AudioSystemStatusDisplay.setWordWrap(True)
+        VCanvas.addWidget(self.AudioSystemStatusDisplay)
+    # temporary
+    def status(self):
+        self.AudioSystemStatusDisplay.setText(SoundBackend.AudioSystem.status(terminal=False))
+    
     # Dynamic Window Title for Now Playing sound
     def WindowTitleNowPlaying(self):
         MainFrame.setWindowTitle(f"PySoundboard PyQt6 - Junkynioy - File: {SoundBackend.Title}")
@@ -272,5 +287,5 @@ APP = QApplication([])
 MainFrame = MainWindow()
 MainFrame.show()
 SoundBackend.AudioSystem.status()
-SoundBackend.SoundFile("./startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
+# SoundBackend.SoundFile("./startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
 sys.exit(APP.exec())
