@@ -214,14 +214,11 @@ class MainWindow(QMainWindow):
             
     # Typical controls
     def Resume(self):
-        if mixer.music.get_pos() > 0:
-            mixer.unpause()
-            mixer.music.unpause()
+        SoundBackend.AudioSystem.resumeAll('audio')
     def Pause(self):
-        mixer.pause()
-        mixer.music.pause() 
+        SoundBackend.AudioSystem.pauseAll('audio')
     def Stop(self):
-        SoundBackend.AudioSystem.stopAll()
+        SoundBackend.AudioSystem.stopAll('audio')
         # self.Resume()
         # mixer.fadeout(250)
         # mixer.music.fadeout(250)
@@ -287,5 +284,5 @@ APP = QApplication([])
 MainFrame = MainWindow()
 MainFrame.show()
 SoundBackend.AudioSystem.status()
-# SoundBackend.SoundFile("./startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
+SoundBackend.SoundFile("./startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
 sys.exit(APP.exec())

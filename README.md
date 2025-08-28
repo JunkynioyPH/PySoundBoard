@@ -1,24 +1,33 @@
 # PySoundBoard
 Soundboard written in python as a hobby project.
 
-I've always wanted a soundboard but I cant find one that is free to use.
+I've always wanted a soundboard but I can't find one that is free to use.
 So I made my own! Lmao.
 
-Please refer to the issues tab if any issues, duh.
+I have 2 Versions. PySoundBoard_Legacy (TkInter/PyQt6_PyG) and PySoundboard_PyQt6.
 
-# Pre-Requisites (PyQt6)
-**(Python 3.10+**)
+PySoundboard_Legacy holds the old versions of the soundboard. Written with TkInter + PyGame. It also has a PyQt6 GUI which still uses PyGame
+
+PySoundboard_PyQt6 is my latest iteration of this soundboard. Written soley with PyQt6.
+
+# Pre-Requisites (PySoundboard_PyQt6)
+**(Python 3.10+)**
 Requires **python** to be installed.
 
-**(PyQt6)**
+**(pip install pyqt6)**
 Requires **PyQt6** to be installed.
 
-# Pre-Requisites (TkInter)
-**(Python 3.10+** & make sure you have Ttk/TKinter Ticked!**)**
-Requires **python** to be installed.
+# Pre-Requisites (PySoundboard_Legacy)
+**(Python 3.10+** with **Ttk/TKinter**)
+Requires **python** to be installed. **Ttk/TKinter** for **TkInter GUI**
 
-**(pip install ttkthemes)**
+- _For TkInter DarkMode GUI_
+>**(pip install ttkthemes)**
 Requires ttkthemes to be installed for DarkMode.
+
+- _For PyQt6 GUI_
+>**(pip install pyqt6)**
+Requires **PyQt6** to be installed.
 
 **(pip install pygame)**
 Requires **pygame** to be installed.

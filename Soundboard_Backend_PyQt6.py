@@ -1,6 +1,6 @@
 # Looks like PyQt6 has some sound capabilities, might re-write Soundboard_Backend to be fully PyQt
 import time, os, json, xpfpath
-import AudioSystem_PyQt6 as mixer
+import AudioSystem_PyQt6 as AS_PYQT6
 from PyQt6.QtMultimedia import QMediaDevices
 
 ComDispName = []
@@ -30,7 +30,7 @@ def InitializeSettings():
 def InitializeAudioSystem():
     if Settings['AudioDevice'] is None:
         print('\nVB-Audio VoiceMeeter/VB-Audio Virtual Cable [NOT FOUND]\nUsing [System Default Output] !\n[Settings.json] "AudioDevice":None !\n') if os.name == 'nt' else print('\nUsing [System Default Output] !\n[Settings.json] "AudioDevice":None !\n')     
-    return mixer.AudioManager(QMediaDevices.audioOutputs()[3], 14)
+    return AS_PYQT6.AudioManager(QMediaDevices.audioOutputs()[3], 14)
     
 ## These 2 Functions ar enot available Built-in on PyQt6, Will have to Create it from scratch.
 def ToggleLoop():
