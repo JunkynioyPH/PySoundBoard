@@ -183,6 +183,8 @@ class AudioManager():
         else:
             # Loop through all items in preloaded pool and stop them + clear Media
             for each in self.audioPool.get('audio'):
+                
+                ###TODO THIS CHECK PREVENTS AUDIO CLEARING WHEN THERE ARE MULTIPLE AUDIO PLAYING BUT MULTIMODE IS SET TO OFF.
                 if self.audioPool.get('audio').index(each) == 1 and self.multiMode['audio'] != True:
                     return
                 print(f'[AudioManager] Stop: {each}')
@@ -204,6 +206,8 @@ class AudioManager():
                 
         else:
             for each in self.audioPool.get('audio'):
+                
+                ###TODO THIS CHECK PREVENTS AUDIO CLEARING WHEN THERE ARE MULTIPLE AUDIO PLAYING BUT MULTIMODE IS SET TO OFF.
                 if self.audioPool.get('audio').index(each) == 1 and self.multiMode['audio'] != True:
                     return
                 print(f'[AudioManager] Resume: {each}')
@@ -220,6 +224,8 @@ class AudioManager():
                 each.stop()
         else:
             for each in self.audioPool.get('audio'):
+                
+                ###TODO THIS CHECK PREVENTS AUDIO CLEARING WHEN THERE ARE MULTIPLE AUDIO PLAYING BUT MULTIMODE IS SET TO OFF.
                 if self.audioPool.get('audio').index(each) == 1 and self.multiMode['audio'] != True:
                     return
                 print(f'[AudioManager] Pause: {each}')
