@@ -141,12 +141,10 @@ class MainWindow(QMainWindow):
                 splash()
                 print(f"\n{'*'*10}\n[{f'Default Device "{Settings["AudioDevice"]}"' if Settings["AudioDevice"] is None else self.comboList.currentText()}] Found!\nSuccessfully Bound to Device!\n{'*'*10}")
             except Exception as Err:
-                # PrintErr("ChangeAudioDevice()",Err)
                 print('???? System Defaulting!')
                 UpdateSettings("AudioDevice", None)
                 InitializeAudioSystem()
                 print(f"\n???? [{self.comboList.currentText()}] : {Err}\n???? Restart Soundboard to refresh Dropdown List ") if self.comboList.currentIndex() != 0 else ''
-                # AudioDevice.set(Settings["AudioDevice"])
             
     ## Controls Section
     def ControlsContent(self):

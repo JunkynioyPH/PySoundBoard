@@ -11,7 +11,6 @@ Title = ''
 
 def InitializeSettings():
     global Settings
-    time.sleep(1)
     if os.path.exists("Settings.json") == True:
         try:
             with open('Settings.json','r') as SettingsValue:
@@ -30,9 +29,10 @@ def InitializeSettings():
 def InitializeAudioSystem():
     if Settings['AudioDevice'] is None:
         print('\nVB-Audio VoiceMeeter/VB-Audio Virtual Cable [NOT FOUND]\nUsing [System Default Output] !\n[Settings.json] "AudioDevice":None !\n') if os.name == 'nt' else print('\nUsing [System Default Output] !\n[Settings.json] "AudioDevice":None !\n')     
+        
+    # need implementation for a fallback and actually using the device specified in the settings.json
     return AS_PYQT6.AudioManager(QMediaDevices.audioOutputs()[3], 14)
     
-## These 2 Functions ar enot available Built-in on PyQt6, Will have to Create it from scratch.
 def ToggleLoop():
     global LoopState, LoopTextState
     if LoopState == 0:
@@ -50,7 +50,7 @@ def ToggleSpamming():
         SpammingState, SpammingTextState = 0, "Multi-Mode OFF"
         AudioSystem.toggleState('audio','multi')
 
-# It now only scans ./SoundFiles and its folders, Not Recurseive!
+# It now only scans ./SoundFiles and its folders, Not Recursive!
 # no more nested folders
 def GenerateSoundIndex(path) -> tuple:
     AudioFilesIndex:list = []
@@ -77,7 +77,6 @@ def GenerateSoundIndex(path) -> tuple:
     return tuple(AudioFilesIndex)
 
 # PyQt Sound System
-# USE [ AudioSystem_PyQt6.py ]
 class SoundFile:
     def __init__(self, filepath:str):
         # super().__init__()
@@ -96,5 +95,3 @@ InitializeSettings()
 AudioSystem = InitializeAudioSystem()
 ComDispName = GenerateSoundIndex(AudioFolder)
 time.sleep(1)
-# for _ in ComDispName:
-#     print(f"[GUI] [Tab: {_[0]}] (Button: {_[1]}) {_[2]}")
