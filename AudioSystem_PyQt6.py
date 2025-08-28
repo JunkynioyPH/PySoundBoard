@@ -147,6 +147,8 @@ class AudioManager():
                     
                     #if it's EndOfMedia | NoMedia AND StoppedState
                     poolItem.setSource(QUrl.fromLocalFile(self.audioIndex['audio'].get(item)))
+                    
+                    # SETLOOPS() ONCE IT IS SET ON, IT NEVER GETS SETS OFF. FIX LATER.
                     poolItem.setLoops(looping)
                     poolItem.device.setVolume(self.settings['volume']/100)
                     poolItem.play()
