@@ -42,10 +42,16 @@ class AudioManager():
             print('++ -------------- ++')
         else:
             return f'AudioPool.:\n   Audio:\n{self.audioPool['audio']}\n\n   Sound:\n{self.audioPool['sound']}'
-    def setVolume(self):
+        
+    def setVolume(self, type:str, vol:int):
         ...
-    def setDevice():
+        
+    def setDevice(self, device:QAudioDevice):
         ...
+        
+    def audioMediaPos(self, index:int):
+        ...
+        
     def load(self, type:str, path:str):
         audioName:str = os.path.splitext(os.path.basename(path))[0]
         print(f"[AudioManager] Load: ({type}) '{audioName}' <{path}> ", end='')
