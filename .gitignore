@@ -10,5 +10,13 @@ venv/*
 *Backup_.py*
 *SoundFiles*
 Settings.json
-ListAudioDevices.py
 .venv
+test.png
+.vscode
+tools
+build
+dist
+*.spec
+*.png
+Soundboard_Main.py
+*.log

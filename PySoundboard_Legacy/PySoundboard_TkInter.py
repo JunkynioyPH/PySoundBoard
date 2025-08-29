@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import ttk
 from pygame import mixer
 import time, json, os
-import SoundBtnDef as SD
+import Soundboard_Backend_PyG as SoundBackend
 
 # Console splash
 def splash():
@@ -106,7 +106,7 @@ def PrintErr(Where,Err):
     print("=====================================")
 
 # Load Settings
-InitializeSettings, Settings = SD.InitializeSettings, SD.Settings
+InitializeSettings, Settings = SoundBackend.InitializeSettings, SoundBackend.Settings
 
 def ShowSettings():
     print("\n[Current Settings]")
@@ -125,9 +125,9 @@ def UpdateSettings(Variable,Value):
 def live_update():
     try:
         SongPos.set(f"{mixer.music.get_pos()/1000}s")
-        LoopState.set(SD.LoopTextState)
-        SpammingState.set(SD.SpammingTextState)
-        root.title(f"PySoundBoard TkInter - File : {SD.Title}")
+        LoopState.set(SoundBackend.LoopTextState)
+        SpammingState.set(SoundBackend.SpammingTextState)
+        root.title(f"PySoundBoard TkInter - File : {SoundBackend.Title}") if SoundBackend.LoopState == 0 else root.title(f"PySoundBoard TkInter - File : '{SoundBackend.Title}' [Loop-Enabled]")
         root.after(100, live_update)
     except Exception as Err:
         PrintErr("live_update()",Err)
@@ -177,7 +177,7 @@ def InitializeAudioSystem():
             mixer.init()
             mixer.music.set_volume(float(Settings['Volume'])/100)
             try:
-                SD.SoundButton(r"..\startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
+                SoundBackend.SoundButton(r"..\startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
             except Exception as ERR:
                 PrintErr(f"InitializeAudioSystem()",ERR)
         except Exception as Err:
@@ -242,10 +242,10 @@ SetVol_entry.grid(column=4,row=1,sticky=(W, E))
 btn(controlcontent,text="< SetVolume",command=SetVol).grid(column=5,row=1,sticky=(N,S,E,W))
 
 lb(controlcontent, textvariable=SongPos, width=10).grid(column=6, row=1,sticky=(N,S))
-btn(controlcontent,text="Toggle Loop",command=SD.ToggleLoop).grid(column=7,row=1,sticky=(N,S,E,W))
+btn(controlcontent,text="Toggle Loop",command=SoundBackend.ToggleLoop).grid(column=7,row=1,sticky=(N,S,E,W))
 lb(controlcontent, textvariable=LoopState, width=15).grid(column=8, row=1,sticky=(N, S))
 
-btn(controlcontent,text="Multi Mode",command=SD.ToggleSpamming).grid(column=9,row=1,sticky=(N,S,E,W))
+btn(controlcontent,text="Multi Mode",command=SoundBackend.ToggleSpamming).grid(column=9,row=1,sticky=(N,S,E,W))
 lb(controlcontent, textvariable=SpammingState, width=15).grid(column=10, row=1,sticky=(N, S))
 
 #
@@ -253,7 +253,7 @@ lb(controlcontent, textvariable=SpammingState, width=15).grid(column=10, row=1,s
 # EVERYTHINNG IS AUTOMATED!
 # POGGERS
 #
-ComDispName = SD.ComDispName
+ComDispName = SoundBackend.ComDispName
 # len(ComDispName)/12  # 'Counter' for the amount of sounds # 'RowCounter' that gets reset every 'MaxRow'  # 'MaxRows' Until adding a new Column
 try:
     if int(Settings['MaxRows']) < 0:
