@@ -16,22 +16,26 @@ def InitializeSettings():
             with open('Settings.json','r') as SettingsValue:
                 Settings = json.loads(SettingsValue.read())
         except Exception as Err:
-            print(f"\nError Occured: {Err}\n")
+            print(f"\n[PySoundboard] Error: {Err}\n")
             os.remove("Settings.json")
-            print("settings.json is being reset")
+            print("[PySoundboard] settings.json is being reset")
             InitializeSettings()
-            print("settings.json reset complete")
+            print("[PySoundboard] settings.json reset complete")
     else:
-        x = {"AudioDevice":None,"Volume":"10","MaxRows":"8","Splash":"1"}
+        x = {"AudioDevice":None,"Volume":10,"MaxRows":"8","Splash":"1"}
         with open("Settings.json","a") as DefaultSettingsDump:
             DefaultSettingsDump.write(json.dumps(x))
         InitializeSettings()
+        
 def InitializeAudioSystem():
     if Settings['AudioDevice'] is None:
-        print('\nVB-Audio VoiceMeeter/VB-Audio Virtual Cable [NOT FOUND]\nUsing [System Default Output] !\n[Settings.json] "AudioDevice":None !\n') if os.name == 'nt' else print('\nUsing [System Default Output] !\n[Settings.json] "AudioDevice":None !\n')     
-        
+        print('\n[PySoundboard] VB-Audio VoiceMeeter/VB-Audio Virtual Cable [NOT FOUND]\n[PySoundboard] Using [System Default Output] !\n[PySoundboard] <Settings.json> "AudioDevice":None !\n') if os.name == 'nt' else print('\n[PySoundboard] Using [System Default Output] !\n[PySoundboard] <Settings.json> "AudioDevice":None !\n')     
+    def _getDevice():
+        for device in QMediaDevices.audioOutputs():
+            if device.description() == Settings['AudioDevice']:
+                return device
     # need implementation for a fallback and actually using the device specified in the settings.json
-    return AS_PYQT6.AudioManager(QMediaDevices.audioOutputs()[3], 14)
+    return AS_PYQT6.AudioManager(_getDevice(), Settings['Volume'])
     
 def ToggleLoop():
     global LoopState, LoopTextState
