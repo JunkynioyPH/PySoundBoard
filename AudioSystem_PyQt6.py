@@ -51,12 +51,13 @@ class AudioManager():
             else:
                 each.device.setVolume(self.settings['volume'][type.lower()]/100)
             
-    def setDevice(self, device:QAudioDevice):
+    def setDevice(self, device:QAudioDevice, stopAll:bool=False):
         self.stopAll('sound')
-        self.stopAll('audio')
+        self.stopAll('audio') if stopAll else self.pauseAll('audio')
         self.settings['device'] = device
         for each in self.audioPool['audio']:
             each.device.setDevice(self.settings['device'])
+        '' if stopAll else self.resumeAll('audio')
         
     def audioMediaPos(self, index:int):
         item = self.audioPool['audio'][index]

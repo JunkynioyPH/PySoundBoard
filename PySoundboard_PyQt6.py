@@ -143,7 +143,7 @@ class MainWindow(QMainWindow):
                         return device
             try:
                 UpdateSettings("AudioDevice",self.comboList.currentText())
-                SoundBackend.AudioSystem.setDevice(_getDevice())
+                SoundBackend.AudioSystem.setDevice(_getDevice(), True)
                 SoundBackend.SoundFile("./startup.wav").Play()
                 splash()
                 print(f"[PySoundboard] <{f'Default Device"{Settings["AudioDevice"]}"' if Settings["AudioDevice"] is None else self.comboList.currentText()}> Found!\n[PySoundboard] Successfully Bound to Device!")
@@ -151,7 +151,7 @@ class MainWindow(QMainWindow):
                 splash()
                 print('[PySoundboard] System Defaulting!')
                 UpdateSettings("AudioDevice", None)
-                SoundBackend.AudioSystem.setDevice(QMediaDevices.defaultAudioOutput())
+                SoundBackend.AudioSystem.setDevice(QMediaDevices.defaultAudioOutput(), True)
                 SoundBackend.SoundFile("./startup.wav").Play()
                 print(f"[PySoundboard] [{self.comboList.currentText()}] : {Err}\n[PySoundboard] Restart Soundboard to refresh Dropdown List ") if self.comboList.currentIndex() != 0 else ''
             
