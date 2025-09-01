@@ -266,6 +266,12 @@ class SoundEffect(QSoundEffect):
     def __repr__(self) -> str:
         return f"{self.name}{' (looped)' if self.loopCount() > 1 else ''}"
 
+###
+#  Plan to add PlaybackRate. maybe slowmo, or fast-mo functions.
+###
+#  Plan to add a slight delay when playing and unloading Media,
+#  in the hopes that it would reduce or eliminate crackles when playing audio
+###
 class AudioMedia(QMediaPlayer):
     def __init__(self, count, device:QAudioDevice):
         super().__init__()

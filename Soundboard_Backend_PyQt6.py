@@ -34,7 +34,6 @@ def InitializeAudioSystem():
         for device in QMediaDevices.audioOutputs():
             if device.description() == Settings['AudioDevice']:
                 return device
-    # need implementation for a fallback and actually using the device specified in the settings.json
     return AS_PYQT6.AudioManager(_getDevice(), Settings['Volume'])
     
 def ToggleLoop():
@@ -96,6 +95,11 @@ class SoundFile:
 
 
 InitializeSettings()
+##
+# Double AudioSystem into "MicAudioSystem" and "HostAudioSystem"
+# as a fix for linux-pipewire, when my mic HyperXDuocast and my Starmatisse hate each other when Firefox is playing audio.
+# make it so it only applies to linux "os.name == posix"
+##
 AudioSystem = InitializeAudioSystem()
 ComDispName = GenerateSoundIndex(AudioFolder)
 time.sleep(1)
