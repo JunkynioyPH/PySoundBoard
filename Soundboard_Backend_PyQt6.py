@@ -1,7 +1,10 @@
-# Looks like PyQt6 has some sound capabilities, might re-write Soundboard_Backend to be fully PyQt
 import time, os, json, xpfpath
-import AudioSystem_PyQt6 as AS_PYQT6
 from PyQt6.QtMultimedia import QMediaDevices
+
+# Use standard
+if os.name=='nt': import AudioSystem_PyQt6 as AS_PYQT6 
+# Use Linux Pipewire fix
+else: import AudSys_LinuxPatch as AS_PYQT6
 
 ComDispName = []
 LoopTextState, LoopState,  = "  Looping Disabled", 0
