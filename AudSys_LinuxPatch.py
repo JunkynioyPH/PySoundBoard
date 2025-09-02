@@ -76,6 +76,11 @@ class AudioManager(AS.AudioManager):
             each.play()
             print(f"[AudioManager] Fix: (hostAudioPool) Sync RESUME to {each}")
 
+    def setVolume(self, type:str, vol:int):
+        for each in self.hostAudioPool:
+            each.device.setVolume(self.settings['volume'][type.lower()]/100)
+        super().setVolume(type, vol)
+    
     def play(self, type:str, item:str):
         super().play(type, item) 
         self._playToHost()
