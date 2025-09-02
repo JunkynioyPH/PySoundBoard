@@ -153,7 +153,7 @@ class AudioManager():
             poolItem.play()
             
         if type.lower() == 'audio':
-            if self.multiMode['audio'] == True:
+            if self.multiMode['audio']: # if true'
                 for poolItem in self.audioPool['audio']:
                     
                     # Skip if it's not EndOfMedia | NoMedia
@@ -171,6 +171,7 @@ class AudioManager():
                     #
                     # if it's EndOfMedia | NoMedia AND StoppedState
                     _playAudioMedia(poolItem, QUrl.fromLocalFile(self.audioIndex['audio'].get(item)), self.settings['volume']['audio']/100, looping)
+                    print('*Done*')
                     return
                 else:
                     if self.rollingPoolIndex == len(self.audioPool['audio']):
@@ -212,7 +213,7 @@ class AudioManager():
                     continue
                 print(f'[AudioManager] Stop: {each}')
                 each.stop()
-                each.setSource(QUrl(QUrl.fromLocalFile(None)))
+                each.setSource(QUrl.fromLocalFile(None))
                 
     def resumeAll(self, type:str):
         if type.lower() not in ('audio','sound'):
