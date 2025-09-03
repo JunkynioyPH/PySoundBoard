@@ -1,18 +1,20 @@
 from PyQt6.QtCore import Qt, QTimer, QSize
 from PyQt6.QtGui import QPixmap, QRegion # MAYBE ill get to work this at some point lmao
-from PyQt6.QtMultimedia import QMediaDevices # for specifically setting the audio Device. Backend will read Settings.json
+from PyQt6.QtMultimedia import QMediaDevices
 from PyQt6.QtWidgets import *
-# from pygame import mixer # Commented to see clearly my reliance on pygame.mixer on the front-end
+import rich
+from rich import pretty
 import json, os, sys
 import Soundboard_Backend_PyQt6 as SoundBackend
+pretty.install()
 
 # Console splash
 def splash():
-    os.system('cls' if os.name=='nt' else 'clear')
+    # os.system('cls' if os.name=='nt' else 'clear')
     _ = QMediaDevices.audioOutputs() # Moving the FFMPEG thing
     del _
-    os.system('title PySoundBoard Backend') if os.name=='nt' else print('\nPySoundBoard Backend')
-    print('''
+    os.system('title PySoundBoard Backend') if os.name=='nt' else rich.print('\nPySoundBoard Backend')
+    rich.print('''
 
     ██████╗ ██╗   ██╗███████╗ ██████╗ ██╗   ██╗███╗   ██╗██████╗ ██████╗  ██████╗  █████╗ ██████╗ ██████╗
     ██╔══██╗╚██╗ ██╔╝██╔════╝██╔═══██╗██║   ██║████╗  ██║██╔══██╗██╔══██╗██╔═══██╗██╔══██╗██╔══██╗██╔══██╗
@@ -28,14 +30,14 @@ DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)","VoiceMeeter Input 
 # Load Settings
 Settings = SoundBackend.Settings
 def ShowSettings():
-    print("[PySoundboard] ", end='')
+    rich.print("[PySoundboard] ", end='')
     for i in Settings:
-        print(f"[{i}:{Settings[i]}] ", end='')
+        rich.print(f"[yellow][{i}:{Settings[i]}][/yellow] ", end='')
     else:
-        print()
+        rich.print()
 
 def UpdateSettings(Variable,Value):
-    print(f"[PySoundboard] Update Setting: <{Variable}> to '{Value}'")
+    rich.print(f"[PySoundboard] [green]Update Setting:[/green] <{Variable}> to '{Value}'")
     Settings[Variable] = Value
     with open("Settings.json","w") as UpdateSettings:
         UpdateSettings.write(json.dumps(Settings))
@@ -69,15 +71,15 @@ class MainWindow(QMainWindow):
         VCanvas = QVBoxLayout()
         Canvas.setLayout(VCanvas)
         # Create Groups and contents
-        AudioDeviceDisplay = QGroupBox("   Audio Device ")
+        AudioDeviceDisplay = QGroupBox("   AudioDevice Controls ")
         VCanvas.addWidget(AudioDeviceDisplay)
         AudioDeviceDisplay.setLayout(self.AudioDeviceContent())
         
-        Controls = QGroupBox("   Controls ")
+        Controls = QGroupBox("   Media Controls ")
         VCanvas.addWidget(Controls)
         Controls.setLayout(self.ControlsContent())
         
-        SoundButtons = QGroupBox("   Sounds ")
+        SoundButtons = QGroupBox("   Soundboard ")
         VCanvas.addWidget(SoundButtons)
         SoundButtons.setLayout(self.SoundButtonsContent())
 
@@ -114,6 +116,7 @@ class MainWindow(QMainWindow):
             self.comboList.activated.connect(self.indexDevices)
             self.addWidget(FuncButton("Set Device", self.changeDevice))
             self.addWidget(self.comboList)
+            self.addLayout(self.VolumeSlider())
             self.addStretch(0)
             
             # maybe somehow add a custom widget here which visualises the audio.
@@ -125,19 +128,19 @@ class MainWindow(QMainWindow):
             # ##### #
             
             comboCount, deviceCount = self.comboList.count()-1, len(self.deviceInfo)
-            self.deviceList.clear() if deviceCount != comboCount else '' #print('No Device Count Change. deviceList not cleared')
-            self.comboList.clear() if deviceCount != comboCount else '' #print('No Device Count Change. comboList not cleared')
+            self.deviceList.clear() if deviceCount != comboCount else '' #rich.print('No Device Count Change. deviceList not cleared')
+            self.comboList.clear() if deviceCount != comboCount else '' #rich.print('No Device Count Change. comboList not cleared')
             if deviceCount != comboCount:
                 for each in self.deviceInfo:
                     self.deviceList.append(each.description())
                 else:
                     self.comboList.addItem('Select a Device... or Reload List (Default Output Device)')
                     self.comboList.addItems(self.deviceList)
-                    # print('Audio List Compiled.')
-                    # print(f"{len(self.deviceInfo)} - {self.comboList.count()-1}")
+                    # rich.print('Audio List Compiled.')
+                    # rich.print(f"{len(self.deviceInfo)} - {self.comboList.count()-1}")
             # else: 
-            #     print('No Device Count Changes were made. ')
-            # print(f"{len(self.deviceInfo)} - {self.comboList.count()-1}")
+            #     rich.print('No Device Count Changes were made. ')
+            # rich.print(f"{len(self.deviceInfo)} - {self.comboList.count()-1}")
         def changeDevice(self):
             def _getDevice():
                 for device in self.deviceInfo:
@@ -146,17 +149,39 @@ class MainWindow(QMainWindow):
             try:
                 UpdateSettings("AudioDevice",self.comboList.currentText())
                 SoundBackend.AudioSystem.setDevice(_getDevice(), True)
-                SoundBackend.SoundFile("./startup.wav").Play()
+                # SoundBackend.SoundFile('./startup.wav').Play()
+                SoundBackend.AudioSystem.play('audio','startup')
                 splash()
-                print(f"[PySoundboard] <{f'Default Device"{Settings["AudioDevice"]}"' if Settings["AudioDevice"] is None else self.comboList.currentText()}> Found!\n[PySoundboard] Successfully Bound to Device!")
+                rich.print(f"[PySoundboard] <{f'Default Device"{Settings["AudioDevice"]}"' if Settings["AudioDevice"] is None else self.comboList.currentText()}> Found!\n[PySoundboard] Successfully Bound to Device!")
             except Exception as Err:
                 splash()
-                print('[PySoundboard] System Defaulting!')
+                rich.print('[PySoundboard] System Defaulting!')
                 UpdateSettings("AudioDevice", None)
                 SoundBackend.AudioSystem.setDevice(QMediaDevices.defaultAudioOutput(), True)
-                SoundBackend.SoundFile("./startup.wav").Play()
-                print(f"[PySoundboard] [{self.comboList.currentText()}] : {Err}\n[PySoundboard] Restart Soundboard to refresh Dropdown List ") if self.comboList.currentIndex() != 0 else ''
-            
+                SoundBackend.AudioSystem.play('audio','startup')
+                rich.print(f"[PySoundboard] [{self.comboList.currentText()}] : {Err}\n[PySoundboard] Restart Soundboard to refresh Dropdown List ") if self.comboList.currentIndex() != 0 else ''
+        class VolumeSlider(QHBoxLayout):
+            def __init__(self):
+                super().__init__()
+                self.label = QLabel(f"{Settings['Volume']} %")
+                self.slider = QSlider(Qt.Orientation.Horizontal)
+                self.slider.setTickPosition(QSlider.TickPosition.TicksBothSides)
+                self.slider.setRange(0,100)
+                self.addWidget(self.label)
+                self.label.setFixedWidth(35)
+                self.addWidget(self.slider)
+                self.slider.setValue(int(Settings['Volume']))
+                self.slider.valueChanged.connect(self.changeVolume) # live sound volume change
+                self.slider.sliderReleased.connect(self.saveVolume) # save on release  
+            def changeVolume(self):
+                Volume = self.slider.value()
+                self.label.setText(f"{int(Volume)} %")
+                SoundBackend.AudioSystem.setVolume('audio', Volume)
+            def saveVolume(self):
+                UpdateSettings("Volume", self.slider.value())
+                # Janky asf but it gets the job done.
+                SoundBackend.SoundFile('./boop.wav').Play() if SoundBackend.AudioSystem.audioPool['audio'][0].playbackState() in (SoundBackend.AudioSystem.audioPool['audio'][0].PlaybackState.StoppedState, SoundBackend.AudioSystem.audioPool['audio'][0].PlaybackState.PausedState) else ''
+    
     ## Controls Section
     def ControlsContent(self):
         layout = QHBoxLayout()
@@ -166,30 +191,10 @@ class MainWindow(QMainWindow):
         layout.addWidget(ControlButton('Pause',self.Pause))
         layout.addWidget(ControlButton('Stop',self.Stop))
         layout.addWidget(self.SoundTimeElapsed())
-        layout.addLayout(self.VolumeSlider())
         layout.addLayout(self.Toggles())
         layout.addStretch(1)
         
         return layout
-    class VolumeSlider(QHBoxLayout):
-        def __init__(self):
-            super().__init__()
-            self.label = QLabel(f"{Settings['Volume']} %")
-            self.slider = QSlider(Qt.Orientation.Horizontal)
-            self.slider.setTickPosition(QSlider.TickPosition.TicksBothSides)
-            self.slider.setRange(0,100)
-            self.addWidget(self.label)
-            self.label.setFixedWidth(35)
-            self.addWidget(self.slider)
-            self.slider.setValue(int(Settings['Volume']))
-            self.slider.valueChanged.connect(self.changeVolume) # live sound volume change
-            self.slider.sliderReleased.connect(self.saveVolume) # save on release  
-        def changeVolume(self):
-            Volume = self.slider.value()
-            self.label.setText(f"{int(Volume)} %")
-            SoundBackend.AudioSystem.setVolume('audio', Volume)
-        def saveVolume(self):
-            UpdateSettings("Volume", self.slider.value())
     class SoundTimeElapsed(QLabel):
         def __init__(self):
             super().__init__()
@@ -263,11 +268,11 @@ class MainWindow(QMainWindow):
                         index = 0
             else:
                 # force add remaining layoutH and add Stretch, then add tab with the contents
-                layoutH.addLayout(layoutV) if index != 0 else print(f'[GUI] Added: Completed MaxRow <{tabName}>')
+                layoutH.addLayout(layoutV) if index != 0 else rich.print(f'[GUI] [green]Adding: Completed MaxRow[/green] [magenta b]<{tabName}>[/magenta b]')
                 layoutH.addStretch(0)
                 content.setLayout(layoutH)
                 layoutV.addStretch(0) if index > 0 else ''
-                print(f"[GUI] Adding: Incomplete MaxRow [{tabName}]") if index > 0 else print('[GUI] Perfect.')
+                rich.print(f"[GUI] [yellow]Adding: Incomplete MaxRow[/yellow] [magenta b]<{tabName}>[/magenta b]") if index > 0 else rich.print('[GUI] [b]Perfect.[/b]')
                 tabs.addTab(content,tabName)
         return layout
 
@@ -284,7 +289,7 @@ class FuncButton(QPushButton):
         self.clicked.connect(Method)
 
 # Initialize Backend
-# splash()
+splash()
 ShowSettings()
 # Start Window
 APP = QApplication([])

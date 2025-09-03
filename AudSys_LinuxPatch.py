@@ -6,11 +6,11 @@ import AudioSystem_PyQt6 as AS
 
 class AudioManager(AS.AudioManager):
     def __init__(self, device:QAudioDevice, audioVolume:int=14, soundVolume:int=14, musicPoolSize:int=8):
-        print('[AudioManager] Fix: Applying Linux Pipewire Fix!')
         self.hostRollingPoolIndex = 0
         self.hostAudioPool:list[AS.AudioMedia] = []
         self._initHostAudioPool(musicPoolSize)
         super().__init__(device, audioVolume, soundVolume, musicPoolSize)
+        print('[AudioManager Patch] Linux Pipewire fix Applied')
         
     def _initHostAudioPool(self, poolCount):
         self.hostAudioPool = []
@@ -36,12 +36,12 @@ class AudioManager(AS.AudioManager):
                     continue
                 fromAudioPool = self.audioPool['audio'][self.hostAudioPool.index(each)]
                 __play(each, fromAudioPool.source(), fromAudioPool.device.volume(), fromAudioPool.loops())
-                print(f"[AudioManager] Fix: (hostAudioPool) Sync PLAY to {each}")
+                print(f"[AudioManager Patch] (hostAudioPool) Sync PLAY to {each}")
                 return
             else:
                 if self.hostRollingPoolIndex == len(self.hostAudioPool):
                     self.hostRollingPoolIndex = 0
-                print(f"[AudioManager] Fix: (hostAudioPool) Sync PLAY <reusing> {self.hostAudioPool[self.hostRollingPoolIndex]} ")
+                print(f"[AudioManager Patch] (hostAudioPool) Sync PLAY <reusing> {self.hostAudioPool[self.hostRollingPoolIndex]} ")
                 rollingIndex = self.hostAudioPool[self.hostRollingPoolIndex]
                 fromAudioPool = self.audioPool['audio'][self.hostRollingPoolIndex]
                 
@@ -51,30 +51,30 @@ class AudioManager(AS.AudioManager):
             poolItem = self.hostAudioPool[0]
             fromAudioPool = self.audioPool['audio'][0]
             __play(poolItem, fromAudioPool.source(), fromAudioPool.device.volume(), fromAudioPool.loops())
-            print(f"[AudioManager] Fix: (hostAudioPool) Sync PLAY to {fromAudioPool}")
+            print(f"[AudioManager Patch] (hostAudioPool) Sync PLAY to {fromAudioPool}")
         
     def _stopAllToHost(self):
             for each in self.hostAudioPool:
-                # print(f"[AudioManager] Fix: Linking {each} to {self.hostAudioPool[self.audioPool['audio'].index(each)]}")
+                # print(f"[AudioManager Patch]  Linking {each} to {self.hostAudioPool[self.audioPool['audio'].index(each)]}")
                 if each.mediaStatus() == QMediaPlayer.MediaStatus.NoMedia:
                     continue
                 each.stop()
                 each.setSource(QUrl.fromLocalFile(None))
-                print(f"[AudioManager] Fix: (hostAudioPool) Sync STOP to  {each}")
+                print(f"[AudioManager Patch] (hostAudioPool) Sync STOP to  {each}")
                 
     def _pauseAllToHost(self):
         for each in self.hostAudioPool:
             if each.playbackState() != QMediaPlayer.PlaybackState.PlayingState:
                 continue
             each.pause()
-            print(f"[AudioManager] Fix: (hostAudioPool) Sync PAUSE to {each}")
+            print(f"[AudioManager Patch] (hostAudioPool) Sync PAUSE to {each}")
             
     def _resumeAllToHost(self):
         for each in self.hostAudioPool:
             if each.playbackState() != QMediaPlayer.PlaybackState.PausedState:
                 continue
             each.play()
-            print(f"[AudioManager] Fix: (hostAudioPool) Sync RESUME to {each}")
+            print(f"[AudioManager Patch] (hostAudioPool) Sync RESUME to {each}")
 
     def setVolume(self, type:str, vol:int):
         for each in self.hostAudioPool:
