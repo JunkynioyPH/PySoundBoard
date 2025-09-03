@@ -83,19 +83,19 @@ class MainWindow(QMainWindow):
         VCanvas.addWidget(SoundButtons)
         SoundButtons.setLayout(self.SoundButtonsContent())
 
-        # Debug
-        audioSystemStatus = QTimer(self)
-        audioSystemStatus.timeout.connect(self.statusDebug)
-        audioSystemStatus.start(500)
-        # Debug 
-        self.AudioSystemStatusDisplay = QLabel()
-        self.AudioSystemStatusDisplay.setFixedWidth(950)
-        self.AudioSystemStatusDisplay.setWordWrap(True)
-        VCanvas.addWidget(self.AudioSystemStatusDisplay)
-    # Debug
-    def statusDebug(self):
-        self.AudioSystemStatusDisplay.setText(f"{SoundBackend.AudioSystem.status(cli=False)}\n{SoundBackend.AudioSystem.hostAudioPoolStatus() if os.name=='posix' else ''}")
-        # SoundBackend.AudioSystem.linkAudioMediaToHost()
+    #     # Debug
+    #     audioSystemStatus = QTimer(self)
+    #     audioSystemStatus.timeout.connect(self.statusDebug)
+    #     audioSystemStatus.start(500)
+    #     # Debug 
+    #     self.AudioSystemStatusDisplay = QLabel()
+    #     self.AudioSystemStatusDisplay.setFixedWidth(950)
+    #     self.AudioSystemStatusDisplay.setWordWrap(True)
+    #     VCanvas.addWidget(self.AudioSystemStatusDisplay)
+    # # Debug
+    # def statusDebug(self):
+    #     self.AudioSystemStatusDisplay.setText(f"{SoundBackend.AudioSystem.status(cli=False)}\n{SoundBackend.AudioSystem.hostAudioPoolStatus() if os.name=='posix' else ''}")
+    #     # SoundBackend.AudioSystem.linkAudioMediaToHost()
         
     
     # Dynamic Window Title for Now Playing sound
