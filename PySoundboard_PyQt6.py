@@ -180,6 +180,7 @@ class MainWindow(QMainWindow):
             def saveVolume(self):
                 UpdateSettings("Volume", self.slider.value())
                 # Janky asf but it gets the job done.
+                SoundBackend.AudioSystem.play('audio','boop')
                 SoundBackend.SoundFile('./boop.wav').Play() if SoundBackend.AudioSystem.audioPool['audio'][0].playbackState() in (SoundBackend.AudioSystem.audioPool['audio'][0].PlaybackState.StoppedState, SoundBackend.AudioSystem.audioPool['audio'][0].PlaybackState.PausedState) else ''
     
     ## Controls Section
@@ -296,5 +297,6 @@ APP = QApplication([])
 MainFrame = MainWindow()
 MainFrame.show()
 # SoundBackend.AudioSystem.status()
+SoundBackend.SoundFile('./boop.wav')
 SoundBackend.SoundFile("./startup.wav").Play() #try to look for a way to make this not be bound to only .wav files for startup sound!
 sys.exit(APP.exec())
