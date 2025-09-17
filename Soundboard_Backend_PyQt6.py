@@ -60,6 +60,9 @@ def ToggleSpamming():
 
 # It now only scans ./SoundFiles and its folders, Not Recursive!
 # no more nested folders
+#
+## NEED RE-WRITE, USE AudioSystem's AudioIndex['audio'] LIST!!!
+#
 def GenerateSoundIndex(path) -> tuple:
     AudioFilesIndex:list = []
     SubFoldersIndex:list = []
@@ -72,8 +75,10 @@ def GenerateSoundIndex(path) -> tuple:
     def add(_):
         name:str = str(_.name.rsplit(".",1)[0]) # omit file extension.
         folder:str = str(_.path).rsplit(f"{'\\' if os.name=='nt' else '/'}",2)[1] # Get actual folder where file is located.
-        AudioFilesIndex.append([folder,name,SoundFile(Entry.path).Play])
+        
+        AudioFilesIndex.append([folder,name,SoundFile(Entry.path).Play]) # append  (TabName, ButtonName, PlayFunction)
         rich.print(f"[GUI] [blue][Tab: {folder}][/blue] [cyan](Button: {name})[/cyan]")
+        
     # scan "Root" ./SoundFiles Folder for files and Folders
     for Entry in FolderContents:
         add(Entry) if Entry.is_file() else SubFoldersIndex.append(Entry.path)
@@ -82,6 +87,9 @@ def GenerateSoundIndex(path) -> tuple:
         FolderContents = os.scandir(folder)
         for Entry in FolderContents:
             add(Entry) if Entry.is_file() else ''
+    
+    
+    # Return (TabName, ButtonName, PlayFunction)
     return tuple(AudioFilesIndex)
 
 # PyQt Sound System
@@ -92,10 +100,10 @@ class SoundFile:
         if  AudioSystem.audioIndex['audio'].get(os.path.splitext(os.path.basename(self.file))[0]):
             self.audioName = (os.path.splitext(os.path.basename(self.file))[0])
             self.audioName = f"{len(AudioSystem.audioIndex['audio'])^len(self.audioName)}_{self.audioName}"
-            AudioSystem.load('audio',self.file)
+            AudioSystem.addIndex('audio',self.file)
             rich.print(f'[GUI] [cyan][Button] set to <{self.audioName}>[/cyan]')
         else:
-            AudioSystem.load('audio',self.file)
+            AudioSystem.addIndex('audio',self.file)
     def Play(self):
         global Title
         Title = f"'{self.file}'"

@@ -67,9 +67,9 @@ class AudioManager():
         dur, pos = round(item.duration()/1000,2), round(item.position()/1000,2)
         return f"{index}: {f"{pos} s" if pos < 60 else f"{round(pos/60,2)} min"} / {f'{dur} s' if dur < 60 else f'{round(dur/60,2)} min'}"
         
-    def load(self, type:str, path:str):
+    def addIndex(self, type:str, path:str):
         audioName:str = os.path.splitext(os.path.basename(path))[0]
-        rich.print(f"[AudioManager] [green]Load:[/green] ({type}) '{audioName}' [magenta b]<{path}>[/magenta b] ", end='')
+        rich.print(f"[AudioManager] [green]Adding Index:[/green] ({type}) '{audioName}' [magenta b]<{path}>[/magenta b] ", end='')
         
         ## Normalise path to have ' ./ , .\\ ' prefix
         ## In windows, this check will fail and duplicate " .\\ "
@@ -88,27 +88,27 @@ class AudioManager():
         # else, make key
         if type.lower() == 'audio':
             self.audioIndex['audio'][audioName] = path
-            rich.print(f"[green b]*Loaded*[/green b]")
+            rich.print(f"[green b]*Added Index*[/green b]")
         else:
             self.audioIndex['sound'][audioName] = path
-            rich.print(f"[green b]*Loaded*[/green b]")
+            rich.print(f"[green b]*Added Index*[/green b]")
                 
-    def unload(self, type:str, item:str):
-        rich.print(f"[AudioManager] [red]Unload:[/red] ({type}) [magenta b]<{item}>[/magenta b] ", end='')
+    def removeIndex(self, type:str, item:str):
+        rich.print(f"[AudioManager] [red]Removed Index:[/red] ({type}) [magenta b]<{item}>[/magenta b] ", end='')
         # Check if type exist
         if type.lower() not in ('audio','sound'):
             return rich.print("[yellow b]*Unknown Type*[/yellow b]")
-        # If it exists, ever. if not reply already unloaded
+        # If it exists, ever. if not reply already unindexed
         if not self.audioIndex.get(type.lower()) and not self.audioIndex[type.lower()].get(item):
-            return rich.print(f"[red b]*Already Unloaded*[/red b]")
+            return rich.print(f"[red b]*Already Removed Index*[/red b]")
 
-        # else, unload
+        # else, unindex
         if type.lower() == 'audio':
             self.audioIndex['audio'].pop(item)
-            rich.print(f"[red b]*Unloaded*[/red b]")
+            rich.print(f"[red b]*Removed Index*[/red b]")
         else:
             self.audioIndex['sound'].pop(item)
-            rich.print(f"[red b]*Unloaded*[/red b]")
+            rich.print(f"[red b]*Removed Index*[/red b]")
     
     def toggleState(self, type:str, mode:str):
         rich.print(f"[AudioManager] ToggleState: ({type}) '{mode}' ", end='')
@@ -222,7 +222,7 @@ class AudioManager():
                 self.audioPool.get('sound')[0].stop()
 
         else:
-            # Loop through all items in preloaded pool and stop them + clear Media
+            # Loop through all items in preindexed pool and stop them + clear Media
             for each in self.audioPool.get('audio'):
                 if each.mediaStatus() == QMediaPlayer.MediaStatus.NoMedia:
                     continue
@@ -285,7 +285,7 @@ class SoundEffect(QSoundEffect):
 ###
 #  Plan to add PlaybackRate. maybe slowmo, or fast-mo functions.
 ###
-#  Plan to add a slight delay when playing and unloading Media,
+#  Plan to add a slight delay when playing and unindexing Media,
 #  in the hopes that it would reduce or eliminate crackles when playing audio
 ###
 class AudioMedia(QMediaPlayer):
@@ -305,5 +305,5 @@ class AudioMedia(QMediaPlayer):
         
     def __repr__(self) -> str:
         # BufferingMedia == Media is being played.
-        # EndOfMedia == Media has finished playing. Still Loaded.
+        # EndOfMedia == Media has finished playing. Still indexed.
         return f"{self.name}:<{self.source().toString()}>:({str(self.mediaStatus()).split('.')[1]}_{f'Looped' if self.loops() > 1 else ''}{str(self.playbackState()).split('.')[1]})"

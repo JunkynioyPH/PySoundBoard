@@ -35,24 +35,24 @@ class MainWindow(QMainWindow):
         self.device = QMediaDevices.audioOutputs()[3] # simulate loading prefered audioDevice
         self.sound = AudioManager(self.device,14) # init AudioSystem
         
-        self.sound.load('sound','startup.wav')     # load sound
-        self.sound.load('audio','startup.wav')     # load audio
-        self.sound.load('vibration','startup.wav') # load unknown
+        self.sound.addIndex('sound','startup.wav')     # addIndex sound
+        self.sound.addIndex('audio','startup.wav')     # addIndex audio
+        self.sound.addIndex('vibration','startup.wav') # addIndex unknown
         
-        self.sound.unload('sound','startup')  # unload
-        self.sound.unload('sound','startup')  # already unloaded
-        self.sound.unload('sounds','startup') # invalid type
+        self.sound.removeIndex('sound','startup')  # removeIndex
+        self.sound.removeIndex('sound','startup')  # already unloaded
+        self.sound.removeIndex('sounds','startup') # invalid type
         
-        self.sound.unload('audio','startup')   # unload
-        self.sound.unload('audio','startup')   # already unloaded
-        self.sound.unload('audios','startup')  # invalid type
+        self.sound.removeIndex('audio','startup')   # removeIndex
+        self.sound.removeIndex('audio','startup')   # already unloaded
+        self.sound.removeIndex('audios','startup')  # invalid type
         
-        self.sound.load('sound','./startup.wav')     # load sound ./
-        self.sound.load('sound','./SoundFiles/Question.wav')     # load sound ./
-        self.sound.load('audio','./startup.wav')     # load audio ./
+        self.sound.addIndex('sound','./startup.wav')     # addIndex sound ./
+        self.sound.addIndex('sound','./SoundFiles/Question.wav')     # addIndex sound ./
+        self.sound.addIndex('audio','./startup.wav')     # addIndex audio ./
         
-        self.sound.load('audio','./SoundFiles/bonk.mp3') # load sound from nested folders
-        self.sound.load('audio','SoundFiles/bonk.mp3')
+        self.sound.addIndex('audio','./SoundFiles/bonk.mp3') # addIndex sound from nested folders
+        self.sound.addIndex('audio','SoundFiles/bonk.mp3')
         
         ## monitor sound list
         self.timer = QTimer(self)
