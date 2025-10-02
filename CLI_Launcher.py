@@ -2,7 +2,7 @@
 # Chat GPT Generated code because I'm too lazy
 # to look for what available terminal emulators
 # 
-# This is to cover Linux/MacOS side of things
+# This is to cover Linux/MacOS side of terminals
 #
 
 import shutil, subprocess, platform, xpfpath, sys
