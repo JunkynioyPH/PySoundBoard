@@ -65,49 +65,50 @@ def ToggleSpamming():
 #
 def GenerateSoundIndex(path) -> tuple:
     AudioFilesIndex:list = []
-    SubFoldersIndex:list = []
-    rich.print(f'[PySoundboard] Scanning [{path}]')
+    SubFoldersIndex:list[os.DirEntry] = []
+    rich.print(f'[yellow][PySoundboard] Scanning [{path}][/yellow]')
     try:
-        FolderContents = os.scandir(path)
+        RootFolderContents = os.scandir(path)
     except:
         os.mkdir(AudioFolder)
-        FolderContents = os.scandir(path)
-    def add(_):
-        name:str = str(_.name.rsplit(".",1)[0]) # omit file extension.
-        folder:str = str(_.path).rsplit(f"{'\\' if os.name=='nt' else '/'}",2)[1] # Get actual folder where file is located.
-        
-        AudioFilesIndex.append([folder,name,SoundFile(Entry.path).Play]) # append  (TabName, ButtonName, PlayFunction)
-        rich.print(f"[GUI] [blue][Tab: {folder}][/blue] [cyan](Button: {name})[/cyan]")
-        
-    # scan "Root" ./SoundFiles Folder for files and Folders
-    for Entry in FolderContents:
-        add(Entry) if Entry.is_file() else SubFoldersIndex.append(Entry.path)
-    # scan "SubFolders" for files and add()
-    for folder in SubFoldersIndex:
-        FolderContents = os.scandir(folder)
-        for Entry in FolderContents:
-            add(Entry) if Entry.is_file() else ''
+        RootFolderContents = os.scandir(path)
     
+    # Scan Root ./SoundFiles
+    for File in RootFolderContents:
+        AudioSystem.addIndex('audio',f'{xpfpath.xpfp(File.path)}') if File.is_file() else SubFoldersIndex.append(File.path)
+    # Scan Subfolders
+    for Folder in SubFoldersIndex:
+        rich.print(f'[blue][PySoundboard] Scanning [{Folder}][/blue]')
+        SubFolderContents = os.scandir(Folder)
+        for File in SubFolderContents:
+            AudioSystem.addIndex('audio',f'{xpfpath.xpfp(File.path)}') if File.is_file() else SubFoldersIndex.append(File.path)
+    # idk but i did anyways
+    del RootFolderContents, AudioFilesIndex, SubFoldersIndex
     
+    # create index for the GUI generator
+    Index:list = []
+    for each in AudioSystem.audioIndex['audio']:
+        _a:str = os.path.split(AudioSystem.audioIndex['audio'].get(each))[0] # get path
+        _b:str = _a.split('/' if os.name!='nt' else "\\") # split @ / or \\
+            
+        # if len is < 3, then use an index before 2
+        _ = [_b[1 if len(_b) < 3 else 2],each,SoundFile(each).Play]
+        
+        # append
+        Index.append(_)
+        rich.print(f'[GUI] Button Indexing: {_}')
+
     # Return (TabName, ButtonName, PlayFunction)
-    return tuple(AudioFilesIndex)
+    return tuple(Index)
 
 # PyQt Sound System
 class SoundFile:
     def __init__(self, filepath:str):
-        self.file = filepath
-        self.audioName = ''
-        if  AudioSystem.audioIndex['audio'].get(os.path.splitext(os.path.basename(self.file))[0]):
-            self.audioName = (os.path.splitext(os.path.basename(self.file))[0])
-            self.audioName = f"{len(AudioSystem.audioIndex['audio'])^len(self.audioName)}_{self.audioName}"
-            AudioSystem.addIndex('audio',self.file)
-            rich.print(f'[GUI] [cyan][Button] set to <{self.audioName}>[/cyan]')
-        else:
-            AudioSystem.addIndex('audio',self.file)
+        self.file = filepath # Its keyName on dictionary
     def Play(self):
         global Title
         Title = f"'{self.file}'"
-        AudioSystem.play('audio',os.path.splitext(os.path.basename(self.file if self.audioName == '' else self.audioName))[0])
+        AudioSystem.play('audio',self.file)
         rich.print(f" - {LoopState}/{SpammingState}"+LoopTextState+"/"+SpammingTextState)
     def __repr__(self):
         return self.file

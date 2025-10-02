@@ -82,7 +82,7 @@ class AudioManager():
             return rich.print("[yellow b]*Unknown Type*[/yellow b]")
         # Check if key exist in dict, say it's a duplicate if it is, and append disriminator
         if  self.audioIndex[type.lower()].get(audioName):
-            audioName = f"{len(self.audioIndex['audio'])^len(audioName)}_{audioName}"
+            audioName = f"{audioName}.{len(self.audioIndex['audio'])^len(audioName)}"
             rich.print(f'as [blue]<{audioName}>[/blue] ', end='')
         
         # else, make key

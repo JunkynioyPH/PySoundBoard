@@ -306,5 +306,9 @@ MainFrame.show()
 SoundBackend.AudioSystem.addIndex('audio','./boop.wav')
 SoundBackend.AudioSystem.addIndex('audio','./startup.wav')
 
-SoundBackend.AudioSystem.play('audio','startup') #try to look for a way to make this not be bound to only .wav files for startup sound!
+# try to look for a way to make this not be bound to only .wav files for startup sound!
+# ^^^ In a way, this is already done.
+# ^^^ Because  im using keyNames in Dicts now, which doesnt have file extensions.
+SoundBackend.AudioSystem.play('audio','startup')
+
 sys.exit(APP.exec())
