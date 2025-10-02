@@ -58,11 +58,6 @@ def ToggleSpamming():
         SpammingState, SpammingTextState = 0, "Multi-Mode OFF"
         AudioSystem.toggleState('audio','multi')
 
-# It now only scans ./SoundFiles and its folders, Not Recursive!
-# no more nested folders
-#
-## NEED RE-WRITE, USE AudioSystem's AudioIndex['audio'] LIST!!!
-#
 def GenerateSoundIndex(path) -> tuple:
     AudioFilesIndex:list = []
     SubFoldersIndex:list[os.DirEntry] = []
