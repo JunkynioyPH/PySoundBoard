@@ -59,14 +59,14 @@ def ToggleSpamming():
         AudioSystem.toggleState('audio','multi')
 
 def GenerateSoundIndex(path) -> tuple:
-    AudioFilesIndex:list = []
     SubFoldersIndex:list[os.DirEntry] = []
-    rich.print(f'[yellow][PySoundboard] Scanning [{path}][/yellow]')
-    try:
-        RootFolderContents = os.scandir(path)
-    except:
+    if not os.path.exists(path):
+        rich.print(f'[yellow][PySoundboard] Checking: <{path}>[/yellow][red] Not Found[/red]')
         os.mkdir(AudioFolder)
-        RootFolderContents = os.scandir(path)
+        rich.print(f'[yellow][PySoundboard] Checking: <{path}>[/yellow][green] Created[/green]')
+        
+    rich.print(f'[yellow][PySoundboard] Scanning [{path}][/yellow]')
+    RootFolderContents = os.scandir(path)
     
     # Scan Root ./SoundFiles
     for File in RootFolderContents:
@@ -78,13 +78,13 @@ def GenerateSoundIndex(path) -> tuple:
         for File in SubFolderContents:
             AudioSystem.addIndex('audio',f'{xpfpath.xpfp(File.path)}') if File.is_file() else SubFoldersIndex.append(File.path)
     # idk but i did anyways
-    del RootFolderContents, AudioFilesIndex, SubFoldersIndex
+    del RootFolderContents, SubFoldersIndex
     
     # create index for the GUI generator
     Index:list = []
     for each in AudioSystem.audioIndex['audio']:
         _a:str = os.path.split(AudioSystem.audioIndex['audio'].get(each))[0] # get path
-        _b:str = _a.split('/' if os.name!='nt' else "\\") # split @ / or \\
+        _b:list[str] = _a.split('/' if os.name!='nt' else "\\") # split @ / or \\
             
         # if len is < 3, then use an index before 2
         _ = [_b[1 if len(_b) < 3 else 2],each,SoundFile(each).Play]
