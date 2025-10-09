@@ -94,7 +94,7 @@ def GenerateSoundIndex(path) -> tuple:
         rich.print(f'[GUI] Button Indexing: {_}')
 
     # Return (TabName, ButtonName, PlayFunction)
-    return tuple(Index)
+    return tuple(sorted(Index))
 
 # PyQt Sound System
 class SoundFile:
