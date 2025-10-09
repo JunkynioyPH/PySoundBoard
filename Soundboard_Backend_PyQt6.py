@@ -8,7 +8,7 @@ if os.name=='nt': import AudioSystem_PyQt6 as AS_PYQT6
 # Use Linux Pipewire fix
 else: import AudSys_LinuxPatch as AS_PYQT6
 
-ComDispName = []
+buttonIndex = []
 LoopTextState, LoopState,  = "  Looping Disabled", 0
 SpammingState, SpammingTextState = 0, 'Multi-Mode OFF'
 AudioFolder = xpfpath.xpfp(".\\SoundFiles")
@@ -58,7 +58,7 @@ def ToggleSpamming():
         SpammingState, SpammingTextState = 0, "Multi-Mode OFF"
         AudioSystem.toggleState('audio','multi')
 
-def GenerateSoundIndex(path) -> tuple:
+def GenerateSoundIndex(path) -> dict:
     SubFoldersIndex:list[os.DirEntry] = []
     if not os.path.exists(path):
         rich.print(f'[yellow][PySoundboard] Checking: <{path}>[/yellow][red] Not Found[/red]')
@@ -81,20 +81,34 @@ def GenerateSoundIndex(path) -> tuple:
     del RootFolderContents, SubFoldersIndex
     
     # create index for the GUI generator
-    Index:list = []
+    Index:dict[str, list[list[str]]] = {}
     for each in AudioSystem.audioIndex['audio']:
-        _a:str = os.path.split(AudioSystem.audioIndex['audio'].get(each))[0] # get path
-        _b:list[str] = _a.split('/' if os.name!='nt' else "\\") # split @ / or \\
-            
+         # get path
+        filepath:str = os.path.split(AudioSystem.audioIndex['audio'].get(each))[0]
+        
+         # split @ / or \\ to get folder names
+        parentdir:list[str] = filepath.split('/' if os.name!='nt' else "\\")
+        
+        # Readable
         # if len is < 3, then use an index before 2
-        _ = [_b[1 if len(_b) < 3 else 2],each,SoundFile(each).Play]
+        tabName, buttonName, playFunc = parentdir[1 if len(parentdir) < 3 else 2], each, SoundFile(each).Play
+        button = [buttonName,playFunc]
+        
+        # create if it no exist pls thx
+        if not Index.get(tabName): Index[tabName] = []
         
         # append
-        Index.append(_)
-        rich.print(f'[GUI] Button Indexing: {_}')
-
-    # Return (TabName, ButtonName, PlayFunction)
-    return tuple(sorted(Index))
+        Index.get(tabName).append(button)
+        
+        rich.print(f'[GUI] Button Indexing: <Tab_[blue bold]{tabName}[/blue bold]> << {button} ')
+        
+    # sorting
+    for each in Index:
+        rich.print(f"[GUI] Button Sorting: <Tab_[yellow bold]{each}[/yellow bold]>")
+        Index[each] = sorted(Index[each])
+        
+    # Return {tabName:[buttonName, playFunc]}
+    return Index
 
 # PyQt Sound System
 class SoundFile:
@@ -111,5 +125,5 @@ class SoundFile:
 
 InitializeSettings()
 AudioSystem = InitializeAudioSystem()
-ComDispName = GenerateSoundIndex(AudioFolder)
+buttonIndex = GenerateSoundIndex(AudioFolder)
 time.sleep(1)

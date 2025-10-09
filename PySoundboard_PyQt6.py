@@ -251,29 +251,23 @@ class MainWindow(QMainWindow):
         
         # create tablist
         layout.addWidget(tabs)
-        tabList:list = []
-        for tabName in SoundBackend.ComDispName:
-            tabList.append(tabName[0]) if tabName[0] not in tabList else ''
         indexRange: int = int(Settings["MaxRows"])
         # add them buttons to their own tab
-        for tabName in tabList:
+        for tabName in SoundBackend.buttonIndex:
             content = QWidget() # create a widget which holds all sound buttons for that tab
             layoutH = QHBoxLayout() # button layout
             layoutV = QVBoxLayout() # button layout
             index = 0
             # each entry in SoundBackend.ComDispName
-            for soundButton in SoundBackend.ComDispName:
-                # check if the current entry's index 0 is the corresponding tabName
-                if soundButton[0] == tabName:
-                    # if it is, add it to the layout
-                    layoutV.addWidget(SoundButton(soundButton[1],soundButton[2]))
-                    index += 1
-                    # if it reaches max range, add new column
-                    if index == indexRange:
-                        layoutV.addStretch(0)
-                        layoutH.addLayout(layoutV)
-                        layoutV = QVBoxLayout()
-                        index = 0
+            for soundButton in SoundBackend.buttonIndex[tabName]:
+                layoutV.addWidget(SoundButton(soundButton[0],soundButton[1]))
+                index += 1
+                # if it reaches max range, add new column
+                if index == indexRange:
+                    layoutV.addStretch(0)
+                    layoutH.addLayout(layoutV)
+                    layoutV = QVBoxLayout()
+                    index = 0
             else:
                 # force add remaining layoutH and add Stretch, then add tab with the contents
                 layoutH.addLayout(layoutV) if index != 0 else rprint(f'[GUI] [green]Adding: Completed MaxRow[/green] [magenta b]<{tabName}>[/magenta b]')
