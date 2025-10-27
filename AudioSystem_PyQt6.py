@@ -76,6 +76,10 @@ class AudioManager():
         ## However, " .\\.\\ " will still point to "Current Directory"
         ## I Should probably use "os.path" stuff for this instead of xpfp() shit thing i made
         path = path if xpfp('./') in path else xpfp(f'./{path}')
+        if os.path.exists(path):
+            pass
+        else:
+            return rich.print("[red b]*Path Not Found*[/red b]")
         
         # Check if type exist
         if type.lower() not in ('audio','sound'):

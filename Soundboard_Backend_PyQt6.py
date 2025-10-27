@@ -65,10 +65,9 @@ def GenerateSoundIndex(path) -> dict:
         os.mkdir(AudioFolder)
         rich.print(f'[yellow][PySoundboard] Checking: <{path}>[/yellow][green] Created[/green]')
         
+    # Scan Root ./SoundFiles
     rich.print(f'[yellow][PySoundboard] Scanning [{path}][/yellow]')
     RootFolderContents = os.scandir(path)
-    
-    # Scan Root ./SoundFiles
     for File in RootFolderContents:
         AudioSystem.addIndex('audio',f'{xpfpath.xpfp(File.path)}') if File.is_file() else SubFoldersIndex.append(File.path)
     # Scan Subfolders
@@ -83,10 +82,10 @@ def GenerateSoundIndex(path) -> dict:
     # create index for the GUI generator
     Index:dict[str, list[list[str]]] = {}
     for each in AudioSystem.audioIndex['audio']:
-         # get path
+        # get path
         filepath:str = os.path.split(AudioSystem.audioIndex['audio'].get(each))[0]
         
-         # split @ / or \\ to get folder names
+        # split @ / or \\ to get folder names
         parentdir:list[str] = filepath.split('/' if os.name!='nt' else "\\")
         
         # Readable
