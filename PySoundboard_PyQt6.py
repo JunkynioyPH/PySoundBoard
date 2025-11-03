@@ -4,7 +4,6 @@ from PyQt6.QtMultimedia import QMediaDevices
 from PyQt6.QtWidgets import *
 import Soundboard_Backend_PyQt6 as SoundBackend
 import json, os, sys, rich
-
 from rich import pretty
 pretty.install()
 
@@ -78,6 +77,8 @@ class MainWindow(QMainWindow):
         # Main Modifiable Space
         VCanvas = QVBoxLayout()
         Canvas.setLayout(VCanvas)
+        
+        
         # Create Groups and contents
         AudioDeviceDisplay = QGroupBox("   AudioDevice Controls ")
         VCanvas.addWidget(AudioDeviceDisplay)
@@ -125,7 +126,8 @@ class MainWindow(QMainWindow):
             self.addWidget(FuncButton("Set Device", self.changeDevice))
             self.addWidget(self.comboList)
             self.addLayout(self.VolumeSlider())
-            self.addStretch(0)
+            self.addStretch()
+            
             
             # maybe somehow add a custom widget here which visualises the audio.
             
