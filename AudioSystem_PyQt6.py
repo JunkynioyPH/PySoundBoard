@@ -1,35 +1,62 @@
 from PyQt6.QtMultimedia import *
 from PyQt6.QtCore import QUrl, QTimer
 from xpfpath import xpfp
-import time, os, rich
+import time, os, rich, sys, enum
 from rich import pretty
 pretty.install()
 
+# Sound Types
+class SoundType(enum.Enum):
+    MASTER_VOLUME = 0
+    AUDIO_MEDIA = 1
+    SOUND_EFFECT = 2
 
-# main
+# Main Heart
 class AudioManager():
-    def __init__(self, device:QAudioDevice, audioVolume:int=14, soundVolume:int=14, musicPoolSize:int=8):
+    def __init__(self, device:QAudioDevice, audioGroups:dict[str, SoundType], masterVolume:int=100, audioVolume:int=14, soundVolume:int=14, audioPoolSize:int=8):
         """The Main Class which holds everything about the Audio System"""
         rich.print(f"\nSupported MIME Types [QSoundEffect]:\n{QSoundEffect.supportedMimeTypes()}\n\nDetected AudioOutputs:\n{[Device.description() for Device in QMediaDevices.audioOutputs()]}\n")
         rich.print(f'Using Device: {device.description() if device is not None else 'System Default'}\n')
-        
-        self.settings:dict[str, QAudioDevice|dict[str, int]] = {"device":device,"volume":{'audio':audioVolume,'sound':soundVolume}}
-        
-        self.multiMode:dict[str, bool] = {'audio':False, 'sound':False}
-        self.loopMode:dict[str, bool] = {'audio':False, 'sound':False}
-        
         self.rollingPoolIndex:int = 0
-        self.audioPool:dict[str, list[SoundEffect|AudioMedia]] = {'audio':[],'sound':[]}
+        
+        # 'audio':audioVolume,'sound':soundVolume
+        self.settings:dict[str, QAudioDevice|dict[str, int]] = {"device":device,"volume":{}}
+        self.audioGroups:dict[str, SoundType] = audioGroups
+        self.multiMode:dict[str, bool] = {}
+        self.loopMode:dict[str, bool] = {}
+        self.audioPool:dict[str, list[SoundEffect|AudioMedia]] = {}
         self.audioIndex:dict[str, dict[str, str]] = {'audio':{},'sound':{}}
+        # init process
+        for each in self.audioGroups:
+            if self.audioGroups.get(each) != SoundType.MASTER_VOLUME:
+                self.multiMode[each] = False
+                self.loopMode[each] = False
+                self.audioPool[each] = []
+            else:
+                self.settings['volume'][each] = masterVolume
+            if self.audioGroups.get(each) == SoundType.AUDIO_MEDIA:
+                self.audioPool[each] = (self._generateAudioMediaPool(audioPoolSize))
+                self.settings['volume'][each] = audioVolume
+            elif self.audioGroups.get(each) == SoundType.SOUND_EFFECT:
+                self.settings['volume'][each] = soundVolume
+            
         
-        self._initAudioMediaPool(musicPoolSize)
-        
-    def _initAudioMediaPool(self, poolCount):
-        self.audioPool['audio'] = []
+    
+    def _generateAudioMediaPool(self, poolCount):
+        pool = []
         for count in range(0,poolCount):
-            self.audioPool['audio'].append(AudioMedia(count, self.settings['device']))
-        pass
-             
+            pool.append(AudioMedia(count, self.settings['device']))
+        return pool
+    
+    def _isValidType(self, type:str):
+        if type.lower() not in ('audio','sound'):
+            return rich.print("[yellow b]*Unknown Type*[/yellow b]")
+        
+    def _isValidMode(self, mode:str):
+        if mode.lower() not in ('multi','loop'):
+            return rich.print('*Unknown Mode*')
+    
+    # bound to break on re-write
     def status(self, cli:bool=True) -> None|str:
         """rich.prints out the current Status of AudioManager"""
         status:str = f"...Index..:\n   Audio: {self.audioIndex['audio']}\n   Sound: {self.audioIndex['sound']}\n\nAudioPool.:\n   Audio:\n{self.audioPool['audio']}\n\n   Sound:\n{self.audioPool['sound']}"
@@ -42,8 +69,7 @@ class AudioManager():
         
     def setVolume(self, type:str, vol:int):
         # Check if type exist
-        if type.lower() not in ('audio','sound'):
-            return rich.print("[yellow b]*Unknown Type*[/yellow b]")
+        self._isValidType(type.lower())
         
         # update AudioManager Setting
         self.settings['volume'][type.lower()] = vol
@@ -61,7 +87,8 @@ class AudioManager():
         for each in self.audioPool['audio']:
             each.device.setDevice(self.settings['device'])
         '' if stopAll else self.resumeAll('audio')
-        
+    
+    ########################## bound to break on re-write
     def audioMediaPos(self, index:int):
         item = self.audioPool['audio'][index]
         dur, pos = round(item.duration()/1000,2), round(item.position()/1000,2)
@@ -80,8 +107,8 @@ class AudioManager():
             return rich.print("[red b]*Path Not Found*[/red b]")
         
         # Check if type exist
-        if type.lower() not in ('audio','sound'):
-            return rich.print("[yellow b]*Unknown Type*[/yellow b]")
+        self._isValidType(type.lower())
+        
         # Check if key exist in dict, say it's a duplicate if it is, and append disriminator
         if  self.audioIndex[type.lower()].get(audioName):
             audioName = f"{audioName}.{len(self.audioIndex['audio'])^len(audioName)}"
@@ -98,8 +125,8 @@ class AudioManager():
     def removeIndex(self, type:str, item:str):
         rich.print(f"[AudioManager] [red]Removed Index:[/red] ({type}) [magenta b]<{item}>[/magenta b] ", end='')
         # Check if type exist
-        if type.lower() not in ('audio','sound'):
-            return rich.print("[yellow b]*Unknown Type*[/yellow b]")
+        self._isValidType(type.lower())
+        
         # If it exists, ever. if not reply already unindexed
         if not self.audioIndex.get(type.lower()) and not self.audioIndex[type.lower()].get(item):
             return rich.print(f"[red b]*Already Removed Index*[/red b]")
@@ -114,10 +141,9 @@ class AudioManager():
     
     def toggleState(self, type:str, mode:str):
         rich.print(f"[AudioManager] ToggleState: ({type}) '{mode}' ", end='')
-        if type.lower() not in ('audio','sound'):
-            return rich.print('[yellow b]*Unknown Type*[/yellow b]')
-        if mode.lower() not in ('multi','loop'):
-            return rich.print('*Unknown Mode*')
+        
+        self._isValidType(type.lower())
+        self._isValidMode(mode.lower())
         
         if mode.lower() == 'multi':
             self.multiMode[type.lower()] = True if self.multiMode[type.lower()] != True else False
@@ -127,14 +153,14 @@ class AudioManager():
             rich.print(f"{self.loopMode[type.lower()]} ", end='')
         rich.print("*Done*")
     
+    ########################## bound to break on re-write
     def play(self, type:str, item:str):
         rich.print(f"[AudioManager] [blue b]Play:[/blue b] ({type}) [magenta b]<{item}>[/magenta b] ", end='')
         
         looping = int(((2**32) / 2) - 1) if self.loopMode[type.lower()] else 1
         
         # Check if type exist in the list
-        if type.lower() not in ('audio','sound'):
-            return rich.print("[yellow b]*Unknown Type*[/yellow b]")
+        self._isValidType(type.lower())
         # Check if the audio actually exist in audioIndex
         audioName = self.audioIndex[type.lower()].get(item)
         if not audioName:
@@ -210,31 +236,33 @@ class AudioManager():
                 _.playingChanged.connect(lambda: _vanish(_))
                 rich.print("*Done*")
     
+    ########################## bound to break on re-write
     def stopAll(self, type:str):
-        if type.lower() not in ('audio','sound'):
-            return rich.print("[yellow b]*Unknown Type*[/yellow b]")
+        self._isValidType(type.lower())
         if type.lower() == 'sound':
             # Brute Force method of stopping all SoundEffect. since if .stop is called, .playingChanged triggers which removes itself
             while self.audioPool.get('sound') != []:
                 rich.print(f'[AudioManager] Stop: {self.audioPool.get('sound')[0]}')
                 
                 # these 3 lines makes no sense to me but it works
-                self.audioPool.get('sound')[0].play() if self.audioPool.get('sound')[0].keptAlive == True else ''
-                self.audioPool.get('sound')[0].keptAlive = False
+                self.audioPool.get('sound')[0].play() if self.audioPool.get('sound')[0].pauseState == True else ''
+                self.audioPool.get('sound')[0].pauseState = False
                 self.audioPool.get('sound')[0].stop()
 
         else:
             # Loop through all items in preindexed pool and stop them + clear Media
+            # print(self.audioPool.get('audio'))
+            # sys.exit()
             for each in self.audioPool.get('audio'):
                 if each.mediaStatus() == QMediaPlayer.MediaStatus.NoMedia:
                     continue
                 rich.print(f'[AudioManager] [red b]Stop: {each}[/red b]')
                 each.stop()
                 each.setSource(QUrl.fromLocalFile(None))
-                
+    
+    ########################## bound to break on re-write 
     def resumeAll(self, type:str):
-        if type.lower() not in ('audio','sound'):
-            return rich.print("[yellow b]*Unknown Type*[/yellow b]")
+        self._isValidType(type.lower())
         # Brute Force method of stopping all SoundEffect. since if .stop iscalled, .playingChanged triggers which removes itself
         if type.lower() == 'sound':
             for each in self.audioPool['sound']:
@@ -252,14 +280,14 @@ class AudioManager():
                 rich.print(f'[AudioManager] [cyan b]Resume: {each}[/cyan b]')
                 each.play()
                 
-    
+    ########################## bound to break on re-write
     def pauseAll(self, type:str):
-        if type.lower() not in ('audio','sound'):
-            return rich.print("[yellow b]*Unknown Type*[/yellow b]")
+        self._isValidType(type.lower())
+        
         if type.lower() == 'sound':
             for each in self.audioPool['sound']:
                 rich.print(f'[AudioManager] Halt: {each}')
-                each.keptAlive = True
+                each.pauseState = True
                 each.stop()
         else:
             for each in self.audioPool.get('audio'):
@@ -267,7 +295,6 @@ class AudioManager():
                     continue
                 rich.print(f'[AudioManager] [yellow b]Pause: {each}[/yellow b]')
                 each.pause()
-            
 
 class SoundEffect(QSoundEffect):
     def __init__(self, file:str, device:QAudioDevice, volume:int, loops:int):
@@ -276,14 +303,13 @@ class SoundEffect(QSoundEffect):
         self.setAudioDevice(device)
         self.setSource(QUrl.fromLocalFile(file))
 
-        self.keptAlive = False
+        self.pauseState = False
         self.setVolume(volume/100)
         self.setLoopCount(loops)
         self.play()
         
     def __repr__(self) -> str:
         return f"{self.name}{' (looped)' if self.loopCount() > 1 else ''}"
-
 ###
 #  Plan to add PlaybackRate. maybe slowmo, or fast-mo functions.
 ###
