@@ -43,7 +43,7 @@ def InitializeAudioSystem():
         for device in QMediaDevices.audioOutputs():
             if device.description() == Settings['AudioDevice']:
                 return device
-    return AS_PYQT6.AudioManager(_getDevice(),{'audio':AS_PYQT6.AudioMedia, 'sound':AS_PYQT6.SoundEffect}, Settings['Volume'])
+    return AS_PYQT6.AudioManager(_getDevice(),{'audio':AS_PYQT6.SoundType.AUDIO_MEDIA}, Settings['Volume'])
     
 def ToggleLoop():
     global LoopState, LoopTextState

@@ -28,10 +28,25 @@ def GenerateSoundIndex(path) -> dict:
     return 0
 
 GenerateSoundIndex('./SoundFiles')
-print('\n AUDIO \n', AudioSystem.audioIndex['audio'], '\n'*2)
-print('\n SOUND \n', AudioSystem.audioIndex['sound'])
-print('\n SETTINGS \n',AudioSystem.settings)
+print('\n AUDIO', AudioSystem.audioIndex['audio'], '\n'*2)
+print('\n SOUND', AudioSystem.audioIndex['sound'])
+print('\n SETTINGS',AudioSystem.settings)
 print("\nGroup Types", AudioSystem.audioGroups)
-print('AudioPools',AudioSystem.audioPool)
-print('MultiMode',AudioSystem.multiMode)
-print('LoopMode',AudioSystem.loopMode)
+print('\nAudioPools',AudioSystem.audioPool)
+print('\nMultiMode',AudioSystem.multiMode)
+print('\nLoopMode',AudioSystem.loopMode)
+
+print('setDevice')
+AudioSystem.setDevice(QMediaDevices.defaultAudioOutput())
+print('mediaControls')
+AudioSystem.resumeAll()
+AudioSystem.pauseAll()
+AudioSystem.stopAll()
+
+print('Test playback of', SoundType.SOUND_EFFECT,'and stopAll for', SoundType.SOUND_EFFECT)
+AudioSystem.test('vineboom')
+
+print('attempt to change audio when SoundEffect is playing a sound.\nneeds to be tested @ Runtime APP.exec()')
+AudioSystem.setDevice(QMediaDevices.defaultAudioOutput())
+
+APP.exec()
