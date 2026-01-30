@@ -1,16 +1,8 @@
 import time, os, json, xpfpath, rich
 from PyQt6.QtMultimedia import QMediaDevices
 from rich import pretty
+from AudioSystem_PyQt6 import *
 pretty.install()
-
-#
-# Might add a toggle to restart with a linux audio workaround
-#
-# # Use standard
-# if os.name=='nt': import AudioSystem_PyQt6 as AS_PYQT6 
-# # Use Linux Pipewire fix
-# else: import AudSys_LinuxPatch as AS_PYQT6
-import AudioSystem_PyQt6 as AS_PYQT6 
 
 buttonIndex = []
 LoopTextState, LoopState,  = "  Looping Disabled", 0
@@ -43,7 +35,7 @@ def InitializeAudioSystem():
         for device in QMediaDevices.audioOutputs():
             if device.description() == Settings['AudioDevice']:
                 return device
-    return AS_PYQT6.AudioManager(_getDevice(),{'audio':AS_PYQT6.SoundType.AUDIO_MEDIA}, Settings['Volume'])
+    return AudioManager(_getDevice(),{'audio':SoundType.AUDIO_MEDIA}, Settings['Volume'])
     
 def ToggleLoop():
     global LoopState, LoopTextState

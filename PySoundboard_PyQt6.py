@@ -7,6 +7,10 @@ import json, os, sys, rich
 from rich import pretty
 pretty.install()
 
+# stfu ffmpeg
+os.environ["QT_LOGGING_RULES"] = "*.debug=false;qt.multimedia.*=false"
+os.environ["QT_FFMPEG_LOG_LEVEL"] = "fatal"
+
 # Initialise Instance of QApp
 APP = QApplication([])
 _ = QMediaDevices.audioOutputs() # Moving the FFMPEG thing

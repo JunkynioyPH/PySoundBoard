@@ -1,3 +1,6 @@
+from os import environ
+environ["QT_FFMPEG_LOG_LEVEL"] = "fatal"
+environ["QT_LOGGING_RULES"] = "*.debug=false;qt.multimedia.*=false"
 from AudioSystem_PyQt6 import *
 from PyQt6.QtMultimedia import QMediaDevices
 import xpfpath
@@ -37,25 +40,26 @@ AudioSystem.status()
 # print('setDevice')
 # AudioSystem.setDevice(QMediaDevices.defaultAudioOutput())
 print('mediaControls')
-AudioSystem.resumeAll()
+AudioSystem.playAll()
 AudioSystem.pauseAll()
 AudioSystem.stopAll()
-# AudioSystem.test('A Maiden Fights')
+# AudioSystem.test('Chaotic Sacrifice')
 # AudioSystem.setDevice(QMediaDevices.defaultAudioOutput(),True)
 # print('\nAudioPools',AudioSystem.audioPool)
 print('\n SETTINGS',AudioSystem.settings)
 
-# AudioSystem.setVolume('master', 2)
-# AudioSystem.setVolume('ambient', 30)
-# AudioSystem.setVolume('music', 7)
+AudioSystem.setVolume('master', 1)
+AudioSystem.setVolume('ambient', 1)
+AudioSystem.setVolume('music', 1)
 # # AudioSystem.setVolume('music', AudioSystem.settings.get('volume')['master'])
-# AudioSystem.setVolume('sfx.name', 15)
-# AudioSystem.setVolume('sfxMaster', 6)
+AudioSystem.setVolume('sfx.name', 1)
+AudioSystem.setVolume('sfxMaster', 1)
 print('\n SETTINGS',AudioSystem.settings['volume'])
 print(AudioSystem.audioMediaPos('music',2))
 print(AudioSystem.audioMediaPos('ambient',0,True))
 # AudioSystem.removeIndex(SoundType.AUDIO_MEDIA,'banger')
 # AudioSystem.removeIndex(SoundType.AUDIO_MEDIA,'banger')
+AudioSystem.toggleLooping('music')
 AudioSystem.toggleLooping('music')
 # AudioSystem.toggleState('music',AudioPlaybackState.MULTIPLE) XXXX
 # print('\nMultiMode',AudioSystem.multiMode)
@@ -68,21 +72,62 @@ AudioSystem.status()
 
 AudioSystem.loadAudioMedia('music','gojo_floating')
 AudioSystem.loadAudioMedia('music','banger')
-AudioSystem.loadAudioMedia('music','A Maiden Fights')
+AudioSystem.loadAudioMedia('music','Chaotic Sacrifice')
 AudioSystem.loadAudioMedia('music','Duh_Short')
 AudioSystem.loadAudioMedia('music','frenchaccordion')
 AudioSystem.loadAudioMedia('music','c_mthrone')
 
 # AudioSystem.toggleState('music',AudioPlaybackState.LOOPING)
 # AudioSystem.toggleState('music',AudioPlaybackState.MULTIPLE)
-AudioSystem.test()
-AudioSystem.togglePoolRollOver()
-AudioSystem.loadAudioMedia('music','A Maiden Fights')
-AudioSystem.loadAudioMedia('music','A Maiden Fights')
+AudioSystem.loadAudioMedia('music','Chaotic Sacrifice')
+AudioSystem.loadAudioMedia('music','Chaotic Sacrifice')
 
-AudioSystem.loadAudioMedia('music','A Maiden Fights')
-AudioSystem.loadAudioMedia('music','A Maiden Fights')
-AudioSystem.loadAudioMedia('music','A Maiden Fights')
-AudioSystem.status()
+AudioSystem.loadAudioMedia('music','Chaotic Sacrifice')
+AudioSystem.loadAudioMedia('music','Chaotic Sacrifice')
+AudioSystem.loadAudioMedia('music','Chaotic Sacrifice')
+
+AudioSystem.togglePoolRollOver('music')
+AudioSystem.togglePoolRollOver('music')
+AudioSystem.togglePoolRollOver('music')
+# print(AudioSystem.rollOverEnabled)
+
+AudioSystem.togglePoolRollOver('ambient')
+AudioSystem.togglePoolRollOver('ambient')
+AudioSystem.togglePoolRollOver('ambient')
+# print(AudioSystem.rollOverEnabled)
+
+AudioSystem.togglePoolRollOver()
+# print(AudioSystem.rollOverEnabled)
+
+AudioSystem.togglePoolRollOver('music')
+# print(AudioSystem.rollOverEnabled)x
+AudioSystem.loadAudioMedia('music','Chaotic Sacrifice')
+AudioSystem.loadAudioMedia('music','Chaotic Sacrifice')
+AudioSystem.loadAudioMedia('music','Chaotic Sacrifice')
+# AudioSystem.test()
+
+AudioSystem.togglePoolRollOver('master')
+
+AudioSystem.loadAudioMedia('ambient','A Maiden Fights',0)
+AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
+AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
+AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
+AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
+AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
+AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
+AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
+AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
+AudioSystem.togglePoolRollOver('ambient')
+
+AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
+AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
+
+AudioSystem.playAll()
+AudioSystem.pauseAll()
+AudioSystem.stopAll()
+AudioSystem.playSlot('music',0)
+AudioSystem.pauseSlot('music',0)
+AudioSystem.stopSlot('music',0)
+# AudioSystem.status()
 
 APP.exec()
