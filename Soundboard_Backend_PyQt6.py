@@ -23,7 +23,7 @@ def InitializeSettings():
             InitializeSettings()
             rich.print("[PySoundboard] settings.json reset complete")
     else:
-        x = {"AudioDevice":None,"Volume":10,"MaxRows":8,"Splash":False}
+        x = {"AudioDevice":None,"Volume":10,"MaxRows":8,"Splash":True}
         with open("Settings.json","a") as DefaultSettingsDump:
             DefaultSettingsDump.write(json.dumps(x))
         InitializeSettings()
@@ -41,18 +41,18 @@ def ToggleLoop():
     global LoopState, LoopTextState
     if LoopState == 0:
         LoopTextState, LoopState = "  Looping  Enabled", -1
-        AudioSystem.toggleState('audio','loop')
     else:
         LoopTextState, LoopState = "  Looping Disabled", 0
-        AudioSystem.toggleState('audio','loop')
+    AudioSystem.toggleLooping('audio')
+        
 def ToggleSpamming():
     global SpammingState, SpammingTextState
     if SpammingState == 0:
         SpammingState, SpammingTextState = 1, "Multi-Mode  ON"
-        AudioSystem.toggleState('audio','multi')
+        # AudioSystem.toggleState('audio','multi')
     else:
         SpammingState, SpammingTextState = 0, "Multi-Mode OFF"
-        AudioSystem.toggleState('audio','multi')
+        # AudioSystem.toggleState('audio','multi')
 
 def GenerateSoundIndex(path) -> dict:
     SubFoldersIndex:list[os.DirEntry] = []
@@ -65,28 +65,29 @@ def GenerateSoundIndex(path) -> dict:
     rich.print(f'[yellow][PySoundboard] Scanning [{path}][/yellow]')
     RootFolderContents = os.scandir(path)
     for File in RootFolderContents:
-        AudioSystem.addIndex('audio',f'{xpfpath.xpfp(File.path)}') if File.is_file() else SubFoldersIndex.append(File.path)
+        AudioSystem.addIndex(SoundType.AUDIO_MEDIA,f'{xpfpath.xpfp(File.path)}') if File.is_file() else SubFoldersIndex.append(File.path)
     # Scan Subfolders
     for Folder in SubFoldersIndex:
         rich.print(f'[blue][PySoundboard] Scanning [{Folder}][/blue]')
         SubFolderContents = os.scandir(Folder)
         for File in SubFolderContents:
-            AudioSystem.addIndex('audio',f'{xpfpath.xpfp(File.path)}') if File.is_file() else SubFoldersIndex.append(File.path)
+            AudioSystem.addIndex(SoundType.AUDIO_MEDIA,f'{xpfpath.xpfp(File.path)}') if File.is_file() else SubFoldersIndex.append(File.path)
     # idk but i did anyways
     del RootFolderContents, SubFoldersIndex
     
     # create index for the GUI generator
     Index:dict[str, list[list[str]]] = {}
-    for each in AudioSystem.audioIndex['audio']:
+    for each in AudioSystem.audioIndex[SoundType.AUDIO_MEDIA]:
         # get path
-        filepath:str = os.path.split(AudioSystem.audioIndex['audio'].get(each))[0]
+        filepath:str = os.path.split(AudioSystem.audioIndex[SoundType.AUDIO_MEDIA].get(each))[0]
         
         # split @ / or \\ to get folder names
         parentdir:list[str] = filepath.split('/' if os.name!='nt' else "\\")
         
         # Readable
         # if len is < 3, then use an index before 2
-        tabName, buttonName, playFunc = parentdir[1 if len(parentdir) < 3 else 2], each, SoundFile(each).Play
+        tabName, buttonName, playFunc = parentdir[2 if len(parentdir) < 4 else 3], each, SoundFile(each).Play
+        print(tabName)
         button = [buttonName,playFunc]
         
         # create if it no exist pls thx
@@ -112,7 +113,8 @@ class SoundFile:
     def Play(self):
         global Title
         Title = f"'{self.file}'"
-        AudioSystem.play('audio',self.file)
+        AudioSystem.loadAudioMedia('audio',self.file)
+        AudioSystem.playAll() # TEMP
         rich.print(f" - {LoopState}/{SpammingState}"+LoopTextState+"/"+SpammingTextState)
     def __repr__(self):
         return self.file

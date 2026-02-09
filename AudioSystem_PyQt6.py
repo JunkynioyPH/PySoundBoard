@@ -1,6 +1,6 @@
 from PyQt6.QtMultimedia import *
-from PyQt6.QtCore import QUrl, QTimer
-import time, os, rich, sys, enum
+from PyQt6.QtCore import QUrl
+import os, rich, enum
 from rich import pretty
 pretty.install()
 
@@ -156,7 +156,7 @@ class AudioManager():
     def audioMediaPos(self, poolName:str, index:int, formatted:bool=False):
         """Inspect position of an AudioMedia item in an AudioMedia pool"""
         if not SoundType.isAudioMedia(self.audioGroups, poolName):
-            rich.print(f'[AudioManager] AudioMedia Position:[red b] Not {SoundType.AUDIO_MEDIA}')
+            rich.print(f'[AudioManager] [b]AudioMedia Position:[red b] ({poolName}) Not {SoundType.AUDIO_MEDIA}')
             return f"Not {SoundType.AUDIO_MEDIA}"
         item = self.audioPool[poolName][index]
         dur, pos = round(item.duration()/1000,2), round(item.position()/1000,2)
@@ -276,7 +276,6 @@ class AudioManager():
         self._audioMediaControlState(pool, slot, AudioPlaybackState.PAUSE)
     
     def stopSlot(self, pool:str, slot:int):
-        """This WILL clear AudioMedia to NoMedia as AudioMedia by design clears media EndOfFile"""
         self._audioMediaControlState(pool, slot, AudioPlaybackState.STOP)
     
     def playSoundEffect(self, poolName:str, sound:str):

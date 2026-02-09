@@ -1,15 +1,14 @@
-from PyQt6.QtCore import Qt, QTimer, QSize
+from PyQt6.QtCore import Qt, QTimer, QSize, QUrl
 from PyQt6.QtGui import QPixmap, QRegion # MAYBE ill get to work this at some point lmao
 from PyQt6.QtMultimedia import QMediaDevices
 from PyQt6.QtWidgets import *
-import Soundboard_Backend_PyQt6 as SoundBackend
 import json, os, sys, rich
+# from os import environ
+# environ["QT_FFMPEG_LOG_LEVEL"] = "fatal"
+# environ["QT_LOGGING_RULES"] = "*.debug=false;qt.multimedia.*=false"
+import Soundboard_Backend_PyQt6 as SoundBackend
 from rich import pretty
 pretty.install()
-
-# stfu ffmpeg
-os.environ["QT_LOGGING_RULES"] = "*.debug=false;qt.multimedia.*=false"
-os.environ["QT_FFMPEG_LOG_LEVEL"] = "fatal"
 
 # Initialise Instance of QApp
 APP = QApplication([])
@@ -57,10 +56,10 @@ def UpdateSettings(Variable,Value):
 
 # Show First-Time Execution then turn off pop up
 # need to replace
-if Settings["Splash"] == 0:
+if Settings["Splash"] == True:
     # os.system('python Splash.py')
     rprint('='*20)
-    UpdateSettings("Splash",0)
+    UpdateSettings("Splash",False)
 
 ## Define Main Window
 AlignFlag = Qt.AlignmentFlag
@@ -216,8 +215,10 @@ class MainWindow(QMainWindow):
             self.Timer = QTimer()
             self.Timer.timeout.connect(self.labelText)
             self.Timer.start(100)
+        ######## TODO: MAKE DYNAMIC ALLOW OTHER SLOTS TOO
         def labelText(self):
-            self.setText(SoundBackend.AudioSystem.audioMediaPos(0))
+            self.setText(SoundBackend.AudioSystem.audioMediaPos('audio',0,True))
+            # print(SoundBackend.AudioSystem.status())
             # self.setText(f"Elapsed: {mixer.music.get_pos()/1000} s") if int(mixer.music.get_pos()/1000) < 60 else self.setText(f"Elapsed: {round(mixer.music.get_pos()/60000,2)} min")
     class Toggles(QHBoxLayout):
         def __init__(self):
@@ -241,11 +242,15 @@ class MainWindow(QMainWindow):
             
     # Typical controls
     def Resume(self):
-        SoundBackend.AudioSystem.resumeAll('audio')
+        SoundBackend.AudioSystem.playAll()
     def Pause(self):
-        SoundBackend.AudioSystem.pauseAll('audio')
+        SoundBackend.AudioSystem.pauseAll()
     def Stop(self):
-        SoundBackend.AudioSystem.stopAll('audio')
+        SoundBackend.AudioSystem.stopAll()
+        for slot in SoundBackend.AudioSystem.audioPool['audio']:
+            if slot.mediaStatus() in SoundBackend.isMediaLoaded:
+                rprint(f'[PySoundboard] [red b]Unloaded:[/red b] [blue b]Slot {slot}')
+                slot.setSource(QUrl(QUrl.fromLocalFile(None)))
         # mixer.fadeout(250)
         # mixer.music.fadeout(250)
     
@@ -303,12 +308,13 @@ ShowSettings()
 MainFrame = MainWindow()
 MainFrame.show()
 # SoundBackend.AudioSystem.status()
-SoundBackend.AudioSystem.addIndex('audio','./boop.wav')
-SoundBackend.AudioSystem.addIndex('audio','./startup.wav')
+SoundBackend.AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./boop.wav')
+SoundBackend.AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./startup.wav')
 
 # try to look for a way to make this not be bound to only .wav files for startup sound!
 # ^^^ In a way, this is already done.
 # ^^^ Because  im using keyNames in Dicts now, which doesnt have file extensions.
-SoundBackend.AudioSystem.play('audio','startup')
+SoundBackend.AudioSystem.loadAudioMedia('audio','startup',0)
+SoundBackend.AudioSystem.playSlot('audio',0)
 
 sys.exit(APP.exec())
