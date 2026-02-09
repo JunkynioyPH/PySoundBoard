@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import QApplication
 
 APP = QApplication([])
 device = [QMediaDevices.audioOutputs()[2],QMediaDevices.defaultAudioOutput()]
-AudioSystem = AudioManager(device[0],
+AudioSystem = AudioManager(device[1],
                             {'master':SoundType.MASTER_VOLUME,
                             'music':SoundType.AUDIO_MEDIA,
                             'ambient':SoundType.AUDIO_MEDIA,
@@ -126,21 +126,28 @@ AudioSystem.loadAudioMedia('ambient','Chaotic Sacrifice',5)
 # AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
 AudioSystem.togglePoolRollOver('ambient')
 
+AudioSystem.toggleLooping('ambient')
+AudioSystem.addIndex(SoundType.AUDIO_MEDIA,'./SoundFiles/Hexyz/A Maiden Fights.mp3')
 AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
 AudioSystem.loadAudioMedia('ambient','A Maiden Fights')
 
 # AudioSystem.playAll()
 # AudioSystem.pauseAll()
 # AudioSystem.stopAll()
-AudioSystem.playSlot('music',0)
+# AudioSystem.playSlot('music',0)
 rich.print(AudioSystem.audioMediaPos('music',0,True))
 # AudioSystem.pauseSlot('music',0)
 # AudioSystem.stopSlot('music',0)
 AudioSystem.addIndex(SoundType.SOUND_EFFECT,'./SoundFiles/Hexyz/Chaotic Sacrifice.mp3')
 # AudioSystem.toggleLooping('sfx.name')
+AudioSystem.playSlot('ambient',2)
+AudioSystem.setPlaybackSpeed('ambient',2,0.95)
+
 
 AudioSystem.playSoundEffect('sfx.name','Dah_Short')
 AudioSystem.playSoundEffect('sfx.name','Chaotic Sacrifice')
+AudioSystem.setPlaybackSpeed('music',0,0.9)
+
 
 # AudioSystem.status()
 # AudioSystem.playAll()

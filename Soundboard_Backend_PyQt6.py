@@ -23,7 +23,7 @@ def InitializeSettings():
             InitializeSettings()
             rich.print("[PySoundboard] settings.json reset complete")
     else:
-        x = {"AudioDevice":None,"Volume":10,"MaxRows":"8","Splash":"1"}
+        x = {"AudioDevice":None,"Volume":10,"MaxRows":8,"Splash":False}
         with open("Settings.json","a") as DefaultSettingsDump:
             DefaultSettingsDump.write(json.dumps(x))
         InitializeSettings()

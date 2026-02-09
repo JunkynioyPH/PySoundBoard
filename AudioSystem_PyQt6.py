@@ -200,7 +200,7 @@ class AudioManager():
         rich.print(f"[AudioManager] Toggle Looping: ({pool}) [b]Looped ", end='')
         if not pool in self.loopMode: return rich.print('[red b] Invalid Pool')
         self.loopMode[pool] = False if self.loopMode[pool] else True
-        rich.print(f"{self.loopMode[pool]} [green b]OK")
+        rich.print(f"{self.loopMode[pool]}")
     
     def loadAudioMedia(self, pool:str, audioName:str, poolIndex:None|int=None):
         """Load the specified audioName into a specified or one of the available slots in a specified pool.
@@ -253,6 +253,12 @@ class AudioManager():
             slot = self.audioPool.get(pool)[poolIndex]
             _setAudioMediaParams(slot, audioPathQUrl)
             rich.print(f'[b]Set [cyan b][Slot {poolIndex}]','[green b]OK[/green b]')
+
+    def setPlaybackSpeed(self, pool:str, slot:int, rate:float):
+            slot:AudioMedia = self.audioPool.get(pool)[slot]
+            rich.print(f"[AudioManager] [blue b]Playback Rate:[/blue b] ({pool}) ", end='')
+            slot.setPlaybackRate(rate)
+            rich.print(f'[b]Set Rate [purple]{rate}x [cyan b][Slot {slot}]','[green b]OK[/green b]')
     
     def stopAll(self):
         self._toggleAllPlaybackState(AudioPlaybackState.STOP)
@@ -377,8 +383,6 @@ class SoundEffect(QSoundEffect):
     def __repr__(self) -> str:
         return f"{self.name}{' (looped)' if self.loopCount() > 1 else ''}"
 ###
-#  Plan to add PlaybackRate. maybe slowmo, or fast-mo functions.
-###
 #  Plan to add a slight delay when playing and unindexing Media,
 #  in the hopes that it would reduce or eliminate crackles when playing audio
 ###
@@ -395,10 +399,16 @@ class AudioMedia(QMediaPlayer):
         if self.mediaStatus() != QMediaPlayer.MediaStatus.EndOfMedia:
             return
         # clear itself
+        self.setLoops(1)
         self.setSource(QUrl(QUrl.fromLocalFile(None)))
-        print({self.name}, 'died')
+        # print({self.name}, 'died')
         
     def __repr__(self) -> str:
         # BufferingMedia == Media is being played.
         # EndOfMedia == Media has finished playing. Still indexed.
-        return f"{self.name}:<{self.source().toString()}>:({str(self.mediaStatus()).split('.')[1]}_{f'Looped' if self.loops() > 1 else ''}{str(self.playbackState()).split('.')[1]})"
+        src = self.source().toString()
+        mediastat = str(self.mediaStatus()).split('.')[1]
+        loopstat = f'Looped' if self.loops() > 1 else ''
+        playstat = str(self.playbackState()).split('.')[1]
+        playrate = round(self.playbackRate(),2)
+        return f"{self.name}:<{src}>:({mediastat}_{loopstat}{playstat})@[{playrate}x]"
