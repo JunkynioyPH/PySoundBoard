@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt, QTimer, QSize, QUrl
 from PyQt6.QtGui import QPixmap, QRegion # MAYBE ill get to work this at some point lmao
 from PyQt6.QtMultimedia import QMediaDevices
 from PyQt6.QtWidgets import *
-import json, os, sys, rich
+import json, os, sys, rich, darkmode
 # from os import environ
 # environ["QT_FFMPEG_LOG_LEVEL"] = "fatal"
 # environ["QT_LOGGING_RULES"] = "*.debug=false;qt.multimedia.*=false"
@@ -35,10 +35,17 @@ def splash():
                         Written By : @Junkynioy - https://github.com/JunkynioyPH
     ''')
 
-# Prelims
-DefaultValSettings = ["CABLE Input (VB-Audio Virtual Cable)","VoiceMeeter Input (VB-Audio VoiceMeeter VAIO)",None]
 # Load Settings
 Settings = SoundBackend.Settings
+
+if not Settings['UseSystemTheme']:
+    APP.setStyle('Fusion')
+    APP.setPalette(darkmode.get_slate_blue_dark_palette())
+    rprint('[PySoundboard] Using Built-in Dark Theme')
+    
+else:
+    rprint('[PySoundboard] Using System Theme')
+    
 def ShowSettings():
     rprint("[PySoundboard] ", end='')
     for i in Settings:
@@ -119,6 +126,7 @@ class MainWindow(QMainWindow):
     class AudioDeviceContent(QHBoxLayout):
         def __init__(self):
             super().__init__()
+            # self.addStretch()
             self.deviceList:list = []
             self.deviceInfo = []
             self.comboList = QComboBox()
@@ -133,7 +141,8 @@ class MainWindow(QMainWindow):
             
             
             # maybe somehow add a custom widget here which visualises the audio.
-            
+        
+        # Plan to overhaul this
         def indexDevices(self):
             # When new devices are added, this adds them automatically
             # but when devices are removed, it still appears on the list
@@ -147,13 +156,14 @@ class MainWindow(QMainWindow):
                 for each in self.deviceInfo:
                     self.deviceList.append(each.description())
                 else:
-                    self.comboList.addItem('Select a Device... or Reload List (Default Output Device)')
+                    self.comboList.addItem('Select Device or Reload List (Default Output Device)')
                     self.comboList.addItems(self.deviceList)
                     # rprint('Audio List Compiled.')
                     # rprint(f"{len(self.deviceInfo)} - {self.comboList.count()-1}")
             # else: 
             #     rprint('No Device Count Changes were made. ')
             # rprint(f"{len(self.deviceInfo)} - {self.comboList.count()-1}")
+            
         def changeDevice(self):
             def _getDevice():
                 for device in self.deviceInfo:
@@ -163,7 +173,8 @@ class MainWindow(QMainWindow):
                 UpdateSettings("AudioDevice",self.comboList.currentText())
                 SoundBackend.AudioSystem.setDevice(_getDevice(), True)
                 # SoundBackend.SoundFile('./startup.wav').Play()
-                SoundBackend.AudioSystem.play('audio','startup')
+                SoundBackend.AudioSystem.loadAudioMedia('audio','startup') ###########
+                SoundBackend.AudioSystem.playAll()######################
                 splash()
                 rprint(f"[PySoundboard] <{f'Default Device"{Settings["AudioDevice"]}"' if Settings["AudioDevice"] is None else self.comboList.currentText()}> Found!\n[PySoundboard] Successfully Bound to Device!")
             except Exception as Err:
@@ -171,7 +182,8 @@ class MainWindow(QMainWindow):
                 rprint('[PySoundboard] System Defaulting!')
                 UpdateSettings("AudioDevice", None)
                 SoundBackend.AudioSystem.setDevice(QMediaDevices.defaultAudioOutput(), True)
-                SoundBackend.AudioSystem.play('audio','startup')
+                SoundBackend.AudioSystem.loadAudioMedia('audio','startup') ###########
+                SoundBackend.AudioSystem.playAll()######################
                 rprint(f"[PySoundboard] [{self.comboList.currentText()}] : {Err}\n[PySoundboard] Restart Soundboard to refresh Dropdown List ") if self.comboList.currentIndex() != 0 else ''
         class VolumeSlider(QHBoxLayout):
             def __init__(self):
@@ -193,15 +205,15 @@ class MainWindow(QMainWindow):
             def saveVolume(self):
                 UpdateSettings("Volume", self.slider.value())
                 # Janky asf but it gets the job done.
-                SoundBackend.AudioSystem.play('audio','boop') if SoundBackend.AudioSystem.audioPool['audio'][0].playbackState() in (SoundBackend.AudioSystem.audioPool['audio'][0].PlaybackState.StoppedState, SoundBackend.AudioSystem.audioPool['audio'][0].PlaybackState.PausedState) else ''
+                # SoundBackend.AudioSystem.play('audio','boop') if SoundBackend.AudioSystem.audioPool['audio'][0].playbackState() in (SoundBackend.AudioSystem.audioPool['audio'][0].PlaybackState.StoppedState, SoundBackend.AudioSystem.audioPool['audio'][0].PlaybackState.PausedState) else ''
     
     ## Controls Section
     def ControlsContent(self):
-        layout = QHBoxLayout()
         ControlButton = FuncButton
+        layout = QHBoxLayout()
         # layout.addStretch(1)
-        layout.addWidget(ControlButton('Resume',self.Resume))
-        layout.addWidget(ControlButton('Pause',self.Pause))
+        # layout.addStretch(1)
+        layout.addWidget(ControlButton('Resume / Pause',self.togglePlaybackState))
         layout.addWidget(ControlButton('Stop',self.Stop))
         layout.addWidget(self.SoundTimeElapsed())
         layout.addLayout(self.Toggles())
@@ -241,16 +253,15 @@ class MainWindow(QMainWindow):
             
             
     # Typical controls
-    def Resume(self):
-        SoundBackend.AudioSystem.playAll()
-    def Pause(self):
-        SoundBackend.AudioSystem.pauseAll()
+    def togglePlaybackState(self):
+        SoundBackend.TogglePlaybackStateAll()
+        # SoundBackend.AudioSystem.playAll()
     def Stop(self):
         SoundBackend.AudioSystem.stopAll()
-        for slot in SoundBackend.AudioSystem.audioPool['audio']:
-            if slot.mediaStatus() in SoundBackend.isMediaLoaded:
-                rprint(f'[PySoundboard] [red b]Unloaded:[/red b] [blue b]Slot {slot}')
-                slot.setSource(QUrl(QUrl.fromLocalFile(None)))
+        # for slot in SoundBackend.AudioSystem.audioPool['audio']:
+        #     if slot.mediaStatus() in SoundBackend.MediaLoaded:
+        #         rprint(f'[PySoundboard] [red b]Unloaded:[/red b] [blue b]Slot {slot}')
+        #         slot.setSource(QUrl(QUrl.fromLocalFile(None)))
         # mixer.fadeout(250)
         # mixer.music.fadeout(250)
     

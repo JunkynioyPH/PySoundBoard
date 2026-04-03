@@ -23,16 +23,24 @@ class SoundType(enum.Enum):
     @staticmethod
     def isMasterVolume(audioGroups:dict, poolName):
         return SoundType.isType((audioGroups, poolName), SoundType.MASTER_VOLUME)
-class AudioPlaybackState(enum.Enum):
+class AudioPlaybackAction(enum.Enum):
     PLAY = 0
     PAUSE = 1
     STOP = 2
     LOOPING = 3
-class isMediaLoaded(enum.Enum):
+class MediaLoaded(enum.Enum):
+    """Use MediaLoaded.LOADING.value to compare .mediastatus():QMediaPlayer.MediaStatus and this class' Values."""
     LOADING = QMediaPlayer.MediaStatus.LoadingMedia
     LOADED = QMediaPlayer.MediaStatus.LoadedMedia
     BUFFERING = QMediaPlayer.MediaStatus.BufferingMedia
     BUFFERED = QMediaPlayer.MediaStatus.BufferedMedia
+    
+class PlaybackStatus(enum.Enum):
+    """Use PlaybackStatus.Playing.value to compare .playbackstate():QMediaPlayer.PlaybackState and this class' Values."""
+    PLAYING = QMediaPlayer.PlaybackState.PlayingState
+    PAUSED = QMediaPlayer.PlaybackState.PausedState
+    STOPPED = QMediaPlayer.PlaybackState.StoppedState
+
 # Main Heart
 class AudioManager():
     def __init__(self, device:QAudioDevice, audioGroups:dict[str, SoundType], masterVolume:int=100, initVolume=14, audioPoolSize:int=8):
@@ -79,7 +87,6 @@ class AudioManager():
         self.rollingPoolIndex[pool] = 0 if self.rollingPoolIndex.get(pool) == self.audioPoolSize else self.rollingPoolIndex.get(pool)
         return index if self.rollingPoolIndex.get(pool) < 1 else self.rollingPoolIndex.get(pool)-1
         
-    # bound to break on re-write
     def status(self, cli:bool=True) -> None|tuple:
         """rich.prints out the current Status of AudioManager"""
         statusIndex:str = f"""
@@ -231,14 +238,14 @@ class AudioManager():
             # load to next available pool slot
             rich.print(f'[yellow b]Using[/yellow b] ', end='')
             for slot in self.audioPool.get(pool):
-                if slot.mediaStatus() in isMediaLoaded: 
+                if slot.mediaStatus() in [status.value for status in MediaLoaded]: 
                     # rich.print(f'[cyan b][{slot.name}][/cyan b][red b]X[/red b] ', end='')
                     continue
                 _setAudioMediaParams(slot, audioPathQUrl)
                 return rich.print(f'[cyan b][Slot {slot.name}][/cyan b] [green b]OK[/green b]')
             else:
                 # by design, this will NEVER ever be able to finish looping to all elements
-                # in the case it does, assume all slots are isMediaLoaded
+                # in the case it does, assume all slots are MediaLoaded
                 # if rollOverEnabled for specific pool == True, override slot with new audioName
                 if self.rollOverEnabled.get(pool):
                     index = self._rolloverIndex(pool)
@@ -261,22 +268,22 @@ class AudioManager():
             rich.print(f'[b]Set Rate [purple]{rate}x [cyan b][Slot {slot}]','[green b]OK[/green b]')
     
     def stopAll(self):
-        self._toggleAllPlaybackState(AudioPlaybackState.STOP)
+        self._toggleAllPlaybackState(AudioPlaybackAction.STOP)
     
     def playAll(self):
-        self._toggleAllPlaybackState(AudioPlaybackState.PLAY)
+        self._toggleAllPlaybackState(AudioPlaybackAction.PLAY)
     
     def pauseAll(self):
-        self._toggleAllPlaybackState(AudioPlaybackState.PAUSE)
+        self._toggleAllPlaybackState(AudioPlaybackAction.PAUSE)
     
     def playSlot(self, pool:str, slot:int):
-        self._audioMediaControlState(pool, slot, AudioPlaybackState.PLAY)
+        self._audioMediaControlState(pool, slot, AudioPlaybackAction.PLAY)
     
     def pauseSlot(self, pool:str, slot:int):
-        self._audioMediaControlState(pool, slot, AudioPlaybackState.PAUSE)
+        self._audioMediaControlState(pool, slot, AudioPlaybackAction.PAUSE)
     
     def stopSlot(self, pool:str, slot:int):
-        self._audioMediaControlState(pool, slot, AudioPlaybackState.STOP)
+        self._audioMediaControlState(pool, slot, AudioPlaybackAction.STOP)
     
     def playSoundEffect(self, poolName:str, sound:str):
         rich.print(f"[AudioManager] [blue b]Play SoundEffect:[/blue b] ({poolName}) [magenta b]<{sound}>[/magenta b] ", end='')
@@ -305,32 +312,32 @@ class AudioManager():
         soundObj.playingChanged.connect(lambda: _cleanUpAfter(poolName, soundObj))
         rich.print('[green b]OK')
     
-    def _audioMediaControlState(self, pool:str, index:int, state:AudioPlaybackState):
+    def _audioMediaControlState(self, pool:str, index:int, state:AudioPlaybackAction):
         if not self._isValidGroup(pool): 
             return rich.print(f'AudioManager] [b]AudioMedia Control: <{pool}> [red b]Invalid Pool')
         
         slot = self.audioPool.get(pool)[index]
         rich.print(f'[AudioManager] [b]AudioMedia Control: ', end='')
         match state:
-            case AudioPlaybackState.PLAY:
+            case AudioPlaybackAction.PLAY:
                 stateColor = 'cyan b'
                 slot.play()
-            case AudioPlaybackState.PAUSE:
+            case AudioPlaybackAction.PAUSE:
                 stateColor = 'yellow b'
                 slot.pause()
-            case AudioPlaybackState.STOP:
+            case AudioPlaybackAction.STOP:
                 stateColor = 'red b'
                 slot.stop()
         rich.print(f'<{pool}> [{stateColor}]{state}[/{stateColor}] [purple]{slot}[/purple]')
         
      
-    def _toggleAllPlaybackState(self, state:AudioPlaybackState):
+    def _toggleAllPlaybackState(self, state:AudioPlaybackAction):
         for pool in self.audioGroups:
             # print(state, pool)
             if SoundType.isMasterVolume(self.audioGroups, pool): continue
             
             # stopping SFX
-            stopSFXPool = True if state == AudioPlaybackState.STOP else False
+            stopSFXPool = True if state == AudioPlaybackAction.STOP else False
             if SoundType.isSoundEffect(self.audioGroups, pool) and len(self.audioPool.get(pool)) != 0 and stopSFXPool:
                 soundEffectPool:list[SoundEffect] = self.audioPool.get(pool)
                 for sound in soundEffectPool:
@@ -340,30 +347,26 @@ class AudioManager():
             elif SoundType.isSoundEffect(self.audioGroups, pool) and stopSFXPool:
                 rich.print(f'[AudioManager] [green b]Playback All States: [/green b]<{pool}> [yellow b]Empty SoundEffect Pool[/yellow b]')
                 continue
-            elif SoundType.isSoundEffect(self.audioGroups, pool) and state in (AudioPlaybackState.PAUSE, AudioPlaybackState.PLAY):
+            elif SoundType.isSoundEffect(self.audioGroups, pool) and state in (AudioPlaybackAction.PAUSE, AudioPlaybackAction.PLAY):
                 continue
                 
             # else if it's AudioMedia
             audioMediaPool:list[AudioMedia] = self.audioPool.get(pool)
+            stateColor = 'b'
             for audio in audioMediaPool:
+                #if it's not even loaded with audio, skip
+                if not audio.mediaStatus() in [status.value for status in MediaLoaded]: continue
                 match state:
-                    case AudioPlaybackState.PLAY:
+                    case AudioPlaybackAction.PLAY:
                         stateColor = 'cyan b'
-                        if audio.playbackState() == QMediaPlayer.PlaybackState.PlayingState: continue
-                        # if audio.playbackState() == QMediaPlayer.PlaybackState.StoppedState: continue
-                        if not audio.mediaStatus() in isMediaLoaded: continue
-                    case AudioPlaybackState.PAUSE:
+                        if audio.playbackState() == PlaybackStatus.PLAYING.value: continue
+                    case AudioPlaybackAction.PAUSE:
                         stateColor = 'yellow b'
-                        if audio.playbackState() == QMediaPlayer.PlaybackState.PausedState: continue
-                        # if audio.playbackState() == QMediaPlayer.PlaybackState.StoppedState: continue
-                        if not audio.mediaStatus() in isMediaLoaded: continue
-                    case AudioPlaybackState.STOP:
+                        if audio.playbackState() == PlaybackStatus.PAUSED.value: continue
+                    case AudioPlaybackAction.STOP:
                         stateColor = 'red b'
-                        # might come to bite me later
-                        # mainly cuz stopping audio playback actually clears
-                        # the source to NoMedia, unloaded. AudioMedia by design
-                        ## IF NOT: LOADED/LOADING BUFFERED/BUFFERRING, Continue
-                        if audio.mediaStatus() not in isMediaLoaded: continue
+                        if audio.playbackState() == PlaybackStatus.STOPPED.value: continue
+                # Control the states now
                 self._audioMediaControlState(pool, audioMediaPool.index(audio), state)
                 # rich.print(f'[AudioManager] Playback State: <{pool}> [{stateColor}]{state}[/{stateColor}]: <{audio}>')
             if not SoundType.isMasterVolume(self.audioGroups, pool) and not SoundType.isSoundEffect(self.audioGroups, pool):

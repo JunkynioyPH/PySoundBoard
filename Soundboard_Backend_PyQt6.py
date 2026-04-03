@@ -5,6 +5,7 @@ from AudioSystem_PyQt6 import *
 pretty.install()
 
 buttonIndex = []
+# Settings:dict
 LoopTextState, LoopState,  = "  Looping Disabled", 0
 SpammingState, SpammingTextState = 0, 'Multi-Mode OFF'
 AudioFolder = xpfpath.xpfp(".\\SoundFiles")
@@ -12,20 +13,30 @@ Title = ''
 
 def InitializeSettings():
     global Settings
-    if os.path.exists("Settings.json") == True:
+    Defaults = {"AudioDevice":None,"Volume":8,"UseSystemTheme":True,"MaxRows":8,"Splash":True}
+    def writeJSONValues(update=False):
+        if update:
+            with open("Settings.json","r") as Dump:
+                data = Dump.read()
+        with open("Settings.json","w") as Dump:
+            Dump.write(json.dumps(Defaults)) if not update else Dump.write(json.dumps(Defaults | json.loads(data)))
+        
+    if os.path.exists("Settings.json"):
         try:
             with open('Settings.json','r') as SettingsValue:
                 Settings = json.loads(SettingsValue.read())
-        except Exception as Err:
-            rich.print(f"\n[PySoundboard] Error: {Err}\n")
-            os.remove("Settings.json")
-            rich.print("[PySoundboard] settings.json is being reset")
+                # Validate
+                check_conf = list(Defaults.keys() - Settings.keys())
+                if len(check_conf) == 0:
+                    rich.print('[PySoundboard] [b]Settings OK !')
+                else:
+                    raise KeyError(f"Missing Key/s: {check_conf}")
+        except (json.decoder.JSONDecodeError, KeyError) as err:
+            rich.print(f"\n[PySoundboard] Settings KeyError: {err}")
+            writeJSONValues(update=True)
             InitializeSettings()
-            rich.print("[PySoundboard] settings.json reset complete")
     else:
-        x = {"AudioDevice":None,"Volume":10,"MaxRows":8,"Splash":True}
-        with open("Settings.json","a") as DefaultSettingsDump:
-            DefaultSettingsDump.write(json.dumps(x))
+        writeJSONValues()
         InitializeSettings()
         
 def InitializeAudioSystem():
@@ -35,8 +46,20 @@ def InitializeAudioSystem():
         for device in QMediaDevices.audioOutputs():
             if device.description() == Settings['AudioDevice']:
                 return device
-    return AudioManager(_getDevice(),{'audio':SoundType.AUDIO_MEDIA}, Settings['Volume'])
-    
+    return AudioManager(_getDevice(),{'audio':SoundType.AUDIO_MEDIA}, initVolume=Settings['Volume'])
+
+def TogglePlaybackStateAll():
+    pool = AudioSystem.audioPool['audio']
+    for slot in pool:
+        if not slot.mediaStatus() in MediaLoaded: continue
+        rich.print(f"[PySoundboard] [yellow]TogglePlayback Status[/yellow]: Set {slot} to ",end='')
+        if slot.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
+            rich.print(f"[b]{PlaybackStatus.PAUSED}[/b]")
+            AudioSystem.pauseSlot('audio',pool.index(slot))
+        else:
+            rich.print(f"[b]{PlaybackStatus.PLAYING}[/b]")
+            AudioSystem.playSlot('audio',pool.index(slot))
+        
 def ToggleLoop():
     global LoopState, LoopTextState
     if LoopState == 0:
@@ -87,7 +110,7 @@ def GenerateSoundIndex(path) -> dict:
         # Readable
         # if len is < 3, then use an index before 2
         tabName, buttonName, playFunc = parentdir[2 if len(parentdir) < 4 else 3], each, SoundFile(each).Play
-        print(tabName)
+        # print(tabName)
         button = [buttonName,playFunc]
         
         # create if it no exist pls thx
@@ -113,8 +136,8 @@ class SoundFile:
     def Play(self):
         global Title
         Title = f"'{self.file}'"
-        AudioSystem.loadAudioMedia('audio',self.file)
-        AudioSystem.playAll() # TEMP
+        AudioSystem.loadAudioMedia('audio',self.file) if SpammingState == 1 else AudioSystem.loadAudioMedia('audio',self.file, 0)
+        AudioSystem.playAll() if SpammingState == 1 else AudioSystem.playSlot("audio",0)
         rich.print(f" - {LoopState}/{SpammingState}"+LoopTextState+"/"+SpammingTextState)
     def __repr__(self):
         return self.file
@@ -122,5 +145,6 @@ class SoundFile:
 
 InitializeSettings()
 AudioSystem = InitializeAudioSystem()
+AudioSystem.togglePoolRollOver('audio')
 buttonIndex = GenerateSoundIndex(AudioFolder)
 time.sleep(1)

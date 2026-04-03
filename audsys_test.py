@@ -54,7 +54,7 @@ AudioSystem.stopAll()
 print('\n SETTINGS',AudioSystem.settings)
 
 AudioSystem.setVolume('master', 2)
-AudioSystem.setVolume('ambient', 2)
+AudioSystem.setVolume('ambient', 7)
 AudioSystem.setVolume('music', 2)
 # # AudioSystem.setVolume('music', AudioSystem.settings.get('volume')['master'])
 AudioSystem.setVolume('sfx.name', 2)
@@ -96,6 +96,7 @@ AudioSystem.togglePoolRollOver('music')
 AudioSystem.togglePoolRollOver('music')
 # print(AudioSystem.rollOverEnabled)
 
+# AudioSystem.setVolume('music',9)
 AudioSystem.togglePoolRollOver('ambient')
 AudioSystem.togglePoolRollOver('ambient')
 AudioSystem.togglePoolRollOver('ambient')
@@ -141,17 +142,19 @@ rich.print(AudioSystem.audioMediaPos('music',0,True))
 AudioSystem.addIndex(SoundType.SOUND_EFFECT,'./SoundFiles/Hexyz/Chaotic Sacrifice.mp3')
 # AudioSystem.toggleLooping('sfx.name')
 AudioSystem.playSlot('ambient',2)
-AudioSystem.setPlaybackSpeed('ambient',2,0.95)
+AudioSystem.setPlaybackSpeed('ambient',2,0.75)
 
 
 AudioSystem.playSoundEffect('sfx.name','Dah_Short')
 AudioSystem.playSoundEffect('sfx.name','Chaotic Sacrifice')
-AudioSystem.setPlaybackSpeed('music',0,0.9)
+# AudioSystem.setPlaybackSpeed('music',0,0.5)
 
 
 # AudioSystem.status()
 # AudioSystem.playAll()
 # AudioSystem.pauseAll()
 # AudioSystem.stopAll()
+AudioSystem.status()
+AudioSystem.playAll()
 
 APP.exec()
