@@ -6,12 +6,12 @@ import json, os, sys, rich, darkmode
 # from os import environ
 # environ["QT_FFMPEG_LOG_LEVEL"] = "fatal"
 # environ["QT_LOGGING_RULES"] = "*.debug=false;qt.multimedia.*=false"
+APP = QApplication([])
 import Soundboard_Backend_PyQt6 as SoundBackend
 from rich import pretty
 pretty.install()
 
 # Initialise Instance of QApp
-APP = QApplication([])
 _ = QMediaDevices.audioOutputs() # Moving the FFMPEG thing
 del _
 
@@ -127,47 +127,26 @@ class MainWindow(QMainWindow):
         def __init__(self):
             super().__init__()
             # self.addStretch()
-            self.deviceList:list = []
-            self.deviceInfo = []
+            self.deviceList:list = [device.description() for device in QMediaDevices.audioOutputs()]
             self.comboList = QComboBox()
             self.comboList.setFixedWidth(370)
-            self.indexDevices()
-            self.comboList.setCurrentText(Settings["AudioDevice"])
-            self.comboList.activated.connect(self.indexDevices)
-            self.addWidget(FuncButton("Set Device", self.changeDevice))
+            self.comboList.setPlaceholderText("Select an output device...")
+            self.comboList.addItems(self.deviceList)
+            # self.indexDevices()
+            # self.comboList.setCurrentText(Settings["AudioDevice"])
+            self.comboList.setCurrentIndex(self.comboList.findText(Settings["AudioDevice"]))
+            self.comboList.activated.connect(self.changeDevice)
+            # self.addWidget(FuncButton("Set Device", self.changeDevice))
             self.addWidget(self.comboList)
             self.addLayout(self.VolumeSlider())
             self.addStretch()
             
-            
-            # maybe somehow add a custom widget here which visualises the audio.
-        
-        # Plan to overhaul this
-        def indexDevices(self):
-            # When new devices are added, this adds them automatically
-            # but when devices are removed, it still appears on the list
-            self.deviceInfo = QMediaDevices.audioOutputs() 
-            # ##### #
-            
-            comboCount, deviceCount = self.comboList.count()-1, len(self.deviceInfo)
-            self.deviceList.clear() if deviceCount != comboCount else '' #rprint('No Device Count Change. deviceList not cleared')
-            self.comboList.clear() if deviceCount != comboCount else '' #rprint('No Device Count Change. comboList not cleared')
-            if deviceCount != comboCount:
-                for each in self.deviceInfo:
-                    self.deviceList.append(each.description())
-                else:
-                    self.comboList.addItem('Select Device or Reload List (Default Output Device)')
-                    self.comboList.addItems(self.deviceList)
-                    # rprint('Audio List Compiled.')
-                    # rprint(f"{len(self.deviceInfo)} - {self.comboList.count()-1}")
-            # else: 
-            #     rprint('No Device Count Changes were made. ')
-            # rprint(f"{len(self.deviceInfo)} - {self.comboList.count()-1}")
-            
         def changeDevice(self):
             def _getDevice():
-                for device in self.deviceInfo:
+                devices = QMediaDevices.audioOutputs()
+                for device in devices:
                     if device.description() == self.comboList.currentText():
+                        print(device, device.description(), self.comboList.currentText())
                         return device
             try:
                 UpdateSettings("AudioDevice",self.comboList.currentText())
@@ -257,11 +236,8 @@ class MainWindow(QMainWindow):
         SoundBackend.TogglePlaybackStateAll()
         # SoundBackend.AudioSystem.playAll()
     def Stop(self):
-        SoundBackend.AudioSystem.stopAll()
-        # for slot in SoundBackend.AudioSystem.audioPool['audio']:
-        #     if slot.mediaStatus() in SoundBackend.MediaLoaded:
-        #         rprint(f'[PySoundboard] [red b]Unloaded:[/red b] [blue b]Slot {slot}')
-        #         slot.setSource(QUrl(QUrl.fromLocalFile(None)))
+        # SoundBackend.AudioSystem.stopAll()
+        SoundBackend.AudioSystem.unloadAllMedia()
         # mixer.fadeout(250)
         # mixer.music.fadeout(250)
     

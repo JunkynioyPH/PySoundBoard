@@ -4,13 +4,13 @@ from PyQt6.QtCore import Qt
 
 def get_slate_blue_dark_palette():
     palette = QPalette()
-    bgDimOffset = 35
-    txtDimOffset = 20
+    bgDimOffset = 40
+    txtDimOffset = 10
     # Colors sampled/approximated from your screenshot
-    window_bg = QColor(58-bgDimOffset, 60-bgDimOffset, 60-bgDimOffset)        # main background
-    base_bg = QColor(45-bgDimOffset, 47-bgDimOffset, 50-bgDimOffset)          # inputs / deeper panels
-    alt_bg = QColor(63-bgDimOffset, 66-bgDimOffset, 70-bgDimOffset)           # slightly raised surfaces
-    border_hint = QColor(90-bgDimOffset, 94-bgDimOffset, 100-bgDimOffset)     # subtle edge contrast
+    window_bg = QColor(58-bgDimOffset, 58-bgDimOffset, 60-bgDimOffset)        # main background
+    base_bg = QColor(45-bgDimOffset, 45-bgDimOffset, 50-bgDimOffset)          # inputs / deeper panels
+    alt_bg = QColor(63-bgDimOffset, 45-bgDimOffset, 70-bgDimOffset)           # slightly raised surfaces
+    border_hint = QColor(90-bgDimOffset, 92-bgDimOffset, 100-bgDimOffset)     # subtle edge contrast
 
     text_color = QColor(210-txtDimOffset, 214-txtDimOffset, 220-txtDimOffset)    # soft light gray (not pure white)
     dim_text = QColor(150-txtDimOffset, 155-txtDimOffset, 160-txtDimOffset)      # secondary text
