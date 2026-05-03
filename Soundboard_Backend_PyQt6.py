@@ -10,9 +10,11 @@ LoopTextState, LoopState,  = "  Looping Disabled", 0
 SpammingState, SpammingTextState = 0, 'Multi-Mode OFF'
 AudioFolder = xpfpath.xpfp(".\\SoundFiles")
 Title = ''
+SelectedSlot:int = 0
 
 def InitializeSettings():
     global Settings
+    # add parameters for button sizes and stuff
     Defaults = {"AudioDevice":None,"Volume":8,"UseSystemTheme":True,"MaxRows":8,"Splash":True}
     def writeJSONValues(update=False):
         if update:
@@ -136,8 +138,8 @@ class SoundFile:
     def Play(self):
         global Title
         Title = f"'{self.file}'"
-        AudioSystem.loadAudioMedia('audio',self.file) if SpammingState == 1 else AudioSystem.loadAudioMedia('audio',self.file, 0)
-        AudioSystem.playAll() if SpammingState == 1 else AudioSystem.playSlot("audio",0)
+        AudioSystem.loadAudioMedia('audio',self.file) if SpammingState == 1 else AudioSystem.loadAudioMedia('audio',self.file, SelectedSlot)
+        AudioSystem.playAll() if SpammingState == 1 else AudioSystem.playSlot("audio",SelectedSlot)
         rich.print(f" - {LoopState}/{SpammingState}"+LoopTextState+"/"+SpammingTextState)
     def __repr__(self):
         return self.file
