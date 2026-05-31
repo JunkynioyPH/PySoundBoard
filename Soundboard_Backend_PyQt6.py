@@ -15,7 +15,7 @@ SelectedSlot:int = 0
 def InitializeSettings():
     global Settings
     # add parameters for button sizes and stuff
-    Defaults = {"AudioDevice":None,"Volume":8,"UseSystemTheme":True,"MaxRows":8,"Splash":True}
+    Defaults = {"AudioDevice":None,"Volume":8,"UseSystemTheme":True,"MaxRows":8,"Splash":True, "SteamDeck":False}
     def writeJSONValues(update=False):
         if update:
             with open("Settings.json","r") as Dump:

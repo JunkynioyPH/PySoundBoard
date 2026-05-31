@@ -35,6 +35,13 @@ def splash():
                         Written By : @Junkynioy - https://github.com/JunkynioyPH
     ''')
 
+
+# Patch to make old code functional
+SoundBackend.InitializeSettings()
+AudioSystem = SoundBackend.InitializeAudioSystem()
+AudioSystem.togglePoolRollOver('audio')
+buttonIndex = SoundBackend.GenerateSoundIndex(AudioSystem, SoundBackend.AudioFolder)
+
 # Load Settings
 Settings = SoundBackend.Settings
 
@@ -119,8 +126,8 @@ class MainWindow(QMainWindow):
     #     VCanvas.addWidget(self.AudioSystemStatusDisplay)
     # # Debug
     # def statusDebug(self):
-    #     self.AudioSystemStatusDisplay.setText(f"{SoundBackend.AudioSystem.status(cli=False)}\n{SoundBackend.AudioSystem.hostAudioPoolStatus() if os.name=='posix' else ''}")
-    #     # SoundBackend.AudioSystem.linkAudioMediaToHost()
+    #     self.AudioSystemStatusDisplay.setText(f"{AudioSystem.status(cli=False)}\n{AudioSystem.hostAudioPoolStatus() if os.name=='posix' else ''}")
+    #     # AudioSystem.linkAudioMediaToHost()
         
     class GlobalTimerQueue(QTimer):
         def __init__(self, parent):
@@ -151,7 +158,7 @@ class MainWindow(QMainWindow):
                 self.setLayout(self.canvas)
                 self.canvas.addLayout(self.controls)
                 self.Updater()
-                self.system = SoundBackend.AudioSystem
+                self.system = AudioSystem
                 self.slotObject = self.system.audioPool.get('audio')[self.slot]
                 
                 addW = self.controls.addWidget
@@ -200,7 +207,7 @@ class MainWindow(QMainWindow):
                 
                 return toggles
                 
-        for slotItem in range(0,SoundBackend.AudioSystem.audioPoolSize):
+        for slotItem in range(0,AudioSystem.audioPoolSize):
             slotMonitoringObject:SlotMonitoring = SlotMonitoring(slotItem)
             layout.addWidget(slotMonitoringObject)
         else:
@@ -237,19 +244,19 @@ class MainWindow(QMainWindow):
                         return device
             try:
                 UpdateSettings("AudioDevice",self.comboList.currentText())
-                SoundBackend.AudioSystem.setDevice(_getDevice(), True)
+                AudioSystem.setDevice(_getDevice(), True)
                 # SoundBackend.SoundFile('./startup.wav').Play()
-                SoundBackend.AudioSystem.loadAudioMedia('audio','startup',0) ###########
-                SoundBackend.AudioSystem.playAll()######################
+                AudioSystem.loadAudioMedia('audio','startup',0) ###########
+                AudioSystem.playAll()######################
                 splash()
                 rprint(f"[PySoundboard] <{f'Default Device"{Settings["AudioDevice"]}"' if Settings["AudioDevice"] is None else self.comboList.currentText()}> Found!\n[PySoundboard] Successfully Bound to Device!")
             except Exception as Err:
                 splash()
                 rprint('[PySoundboard] System Defaulting!')
                 UpdateSettings("AudioDevice", None)
-                SoundBackend.AudioSystem.setDevice(QMediaDevices.defaultAudioOutput(), True)
-                SoundBackend.AudioSystem.loadAudioMedia('audio','startup',0) ###########
-                SoundBackend.AudioSystem.playAll()######################
+                AudioSystem.setDevice(QMediaDevices.defaultAudioOutput(), True)
+                AudioSystem.loadAudioMedia('audio','startup',0) ###########
+                AudioSystem.playAll()######################
                 rprint(f"[PySoundboard] [{self.comboList.currentText()}] : {Err}\n[PySoundboard] Restart Soundboard to refresh Dropdown List ") if self.comboList.currentIndex() != 0 else ''
         class VolumeSlider(QHBoxLayout):
             def __init__(self):
@@ -268,11 +275,11 @@ class MainWindow(QMainWindow):
             def changeVolume(self):
                 Volume = self.slider.value()
                 self.label.setText(f"Volume: {int(Volume)} %")
-                SoundBackend.AudioSystem.setVolume('audio', Volume)
+                AudioSystem.setVolume('audio', Volume)
             def saveVolume(self):
                 UpdateSettings("Volume", self.slider.value())
                 # Janky asf but it gets the job done.
-                # SoundBackend.AudioSystem.play('audio','boop') if SoundBackend.AudioSystem.audioPool['audio'][0].playbackState() in (SoundBackend.AudioSystem.audioPool['audio'][0].PlaybackState.StoppedState, SoundBackend.AudioSystem.audioPool['audio'][0].PlaybackState.PausedState) else ''
+                # AudioSystem.play('audio','boop') if AudioSystem.audioPool['audio'][0].playbackState() in (AudioSystem.audioPool['audio'][0].PlaybackState.StoppedState, AudioSystem.audioPool['audio'][0].PlaybackState.PausedState) else ''
     
     ## Controls Section
     def ControlsContent(self):
@@ -291,7 +298,7 @@ class MainWindow(QMainWindow):
     class SlotSelector(QComboBox):
         def __init__(self, parent:"MainWindow"):
             super().__init__()
-            self.addItems([f"Slot {slot.name}" for slot in SoundBackend.AudioSystem.audioPool['audio']])
+            self.addItems([f"Slot {slot.name}" for slot in AudioSystem.audioPool['audio']])
             self.activated.connect(self.changeSlot)
             parent.updateTimerLoop.updateList.append(self.toggleSelectorDisabled)
             
@@ -312,7 +319,7 @@ class MainWindow(QMainWindow):
             self.setFixedWidth(125)
             parent.updateTimerLoop.updateList.append(self.labelText)
         def labelText(self):
-            self.setText(SoundBackend.AudioSystem.audioMediaPos('audio',SoundBackend.SelectedSlot,True))
+            self.setText(AudioSystem.audioMediaPos('audio',SoundBackend.SelectedSlot,True))
     class Toggles(QHBoxLayout):
         def __init__(self):
             super().__init__()
@@ -336,11 +343,11 @@ class MainWindow(QMainWindow):
             
     # Typical controls
     def togglePlaybackState(self):
-        SoundBackend.TogglePlaybackStateAll()
-        # SoundBackend.AudioSystem.playAll()
+        SoundBackend.TogglePlaybackStateAll(AudioSystem)
+        # AudioSystem.playAll()
     def Stop(self):
-        # SoundBackend.AudioSystem.stopAll()
-        SoundBackend.AudioSystem.unloadAllAudioMedia()
+        # AudioSystem.stopAll()
+        AudioSystem.unloadAllAudioMedia()
         # mixer.fadeout(250)
         # mixer.music.fadeout(250)
     
@@ -354,13 +361,13 @@ class MainWindow(QMainWindow):
         layout.addWidget(tabs)
         indexRange: int = int(Settings["MaxRows"])
         # add them buttons to their own tab
-        for tabName in SoundBackend.buttonIndex:
+        for tabName in buttonIndex:
             content = QWidget() # create a widget which holds all sound buttons for that tab
             layoutH = QHBoxLayout() # button layout
             layoutV = QVBoxLayout() # button layout
             index = 0
             # each entry in SoundBackend.ComDispName
-            for soundButton in SoundBackend.buttonIndex[tabName]:
+            for soundButton in buttonIndex[tabName]:
                 layoutV.addWidget(SoundButton(soundButton[0],soundButton[1]))
                 index += 1
                 # if it reaches max range, add new column
@@ -397,14 +404,14 @@ ShowSettings()
 # Start Window
 MainFrame = MainWindow()
 MainFrame.show()
-# SoundBackend.AudioSystem.status()
-SoundBackend.AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./boop.wav')
-SoundBackend.AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./startup.wav')
+# AudioSystem.status()
+AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./boop.wav')
+AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./startup.wav')
 
 # try to look for a way to make this not be bound to only .wav files for startup sound!
 # ^^^ In a way, this is already done.
 # ^^^ Because  im using keyNames in Dicts now, which doesnt have file extensions.
-SoundBackend.AudioSystem.loadAudioMedia('audio','startup',0)
-SoundBackend.AudioSystem.playSlot('audio',0)
+AudioSystem.loadAudioMedia('audio','startup',0)
+AudioSystem.playSlot('audio',0)
 
 sys.exit(APP.exec())

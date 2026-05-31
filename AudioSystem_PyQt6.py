@@ -45,7 +45,7 @@ class PlaybackStatus(enum.Enum):
 class AudioManager():
     def __init__(self, device:QAudioDevice, audioGroups:dict[str, SoundType], masterVolume:int=100, initVolume=14, audioPoolSize:int=8):
         """The Main Class which holds everything about the Audio System"""
-        rich.print(f'Using Device: {device.description() if device is not None else 'System Default'}\n')
+        rich.print(f'[AudioManager] Using Device: {device.description() if device is not None else 'System Default'}')
         self.rollingPoolIndex:dict[str, int] = {}
         self.rollOverEnabled:dict[str, bool] = {}
         self.audioPoolSize = audioPoolSize
@@ -97,7 +97,7 @@ class AudioManager():
         statusAudioMediaPool = []
         for group in self.audioGroups:
             if SoundType.isMasterVolume(self.audioGroups, group): continue
-            statusAudioMediaPool.append(f"        <{group}> \[{self.audioGroups.get(group)}] :\n\n")
+            statusAudioMediaPool.append(f"        <{group}> {self.audioGroups.get(group)} :\n\n")
             for item in self.audioPool.get(group):
                 statusAudioMediaPool.append(f"{"        "*2}{item}\n")
             statusAudioMediaPool.append('\n')
@@ -418,25 +418,31 @@ class AudioMedia(QMediaPlayer):
     def __init__(self, count, device:QAudioDevice):
         super().__init__()
         self.name = count
+        self.keepLoaded = False
         self.device = QAudioOutput(device)
         self.setAudioOutput(self.device)
         self.mediaStatusChanged.connect(self._clearMedia)
     
     def _clearMedia(self):
         # is it EndOfMedia?
-        if self.mediaStatus() != QMediaPlayer.MediaStatus.EndOfMedia:
+        # do we want to keep it loaded?
+        if self.mediaStatus() != QMediaPlayer.MediaStatus.EndOfMedia and not self.keepLoaded:
             return
         # clear itself
         self.setLoops(1)
         self.setSource(QUrl.fromLocalFile(None))
         # print({self.name}, 'died')
-        
-    def __repr__(self) -> str:
-        # BufferingMedia == Media is being played.
-        # EndOfMedia == Media has finished playing. Still indexed.
+    
+    def getStatus(self) -> tuple:
         src = self.source().toString()
         mediastat = str(self.mediaStatus()).split('.')[1]
         loopstat = f'Looped' if self.loops() > 1 else ''
         playstat = str(self.playbackState()).split('.')[1]
         playrate = round(self.playbackRate(),2)
-        return f"{self.name}:<{src}>:({mediastat}_{loopstat}{playstat})@[{playrate}x]"
+        return self.name, src, mediastat, loopstat, playstat, playrate
+    
+    def __repr__(self) -> str:
+        # BufferingMedia == Media is being played.
+        # EndOfMedia == Media has finished playing. Still indexed.
+        name, src, mediastat, loopstat, playstat, playrate = self.getStatus()
+        return f"{name}:<{src}>:({mediastat}_{loopstat}{playstat})@[{playrate}x]"
