@@ -1,35 +1,44 @@
 import time, os, json, xpfpath, rich
 from PyQt6.QtMultimedia import QMediaDevices
 from rich import pretty
+from AudioSystem_PyQt6 import *
 pretty.install()
 
-# Use standard
-if os.name=='nt': import AudioSystem_PyQt6 as AS_PYQT6 
-# Use Linux Pipewire fix
-else: import AudSys_LinuxPatch as AS_PYQT6
-
-ComDispName = []
+buttonIndex = []
+# Settings:dict
 LoopTextState, LoopState,  = "  Looping Disabled", 0
 SpammingState, SpammingTextState = 0, 'Multi-Mode OFF'
 AudioFolder = xpfpath.xpfp(".\\SoundFiles")
 Title = ''
+SelectedSlot:int = 0
 
 def InitializeSettings():
     global Settings
-    if os.path.exists("Settings.json") == True:
+    # add parameters for button sizes and stuff
+    Defaults = {"AudioDevice":None,"Volume":8,"UseSystemTheme":True,"MaxRows":8,"Splash":True, "SteamDeck":False}
+    def writeJSONValues(update=False):
+        if update:
+            with open("Settings.json","r") as Dump:
+                data = Dump.read()
+        with open("Settings.json","w") as Dump:
+            Dump.write(json.dumps(Defaults)) if not update else Dump.write(json.dumps(Defaults | json.loads(data)))
+        
+    if os.path.exists("Settings.json"):
         try:
             with open('Settings.json','r') as SettingsValue:
                 Settings = json.loads(SettingsValue.read())
-        except Exception as Err:
-            rich.print(f"\n[PySoundboard] Error: {Err}\n")
-            os.remove("Settings.json")
-            rich.print("[PySoundboard] settings.json is being reset")
+                # Validate
+                check_conf = list(Defaults.keys() - Settings.keys())
+                if len(check_conf) == 0:
+                    rich.print('[PySoundboard] [b]Settings OK !')
+                else:
+                    raise KeyError(f"Missing Key/s: {check_conf}")
+        except (json.decoder.JSONDecodeError, KeyError) as err:
+            rich.print(f"\n[PySoundboard] Settings KeyError: {err}")
+            writeJSONValues(update=True)
             InitializeSettings()
-            rich.print("[PySoundboard] settings.json reset complete")
     else:
-        x = {"AudioDevice":None,"Volume":10,"MaxRows":"8","Splash":"1"}
-        with open("Settings.json","a") as DefaultSettingsDump:
-            DefaultSettingsDump.write(json.dumps(x))
+        writeJSONValues()
         InitializeSettings()
         
 def InitializeAudioSystem():
@@ -39,73 +48,102 @@ def InitializeAudioSystem():
         for device in QMediaDevices.audioOutputs():
             if device.description() == Settings['AudioDevice']:
                 return device
-    return AS_PYQT6.AudioManager(_getDevice(), Settings['Volume'])
-    
-def ToggleLoop():
+    return AudioManager(_getDevice(),{'audio':SoundType.AUDIO_MEDIA}, initVolume=Settings['Volume'])
+
+def TogglePlaybackStateAll(AudioSystem:AudioManager):
+    pool = AudioSystem.audioPool['audio']
+    for slot in pool:
+        if not slot.mediaStatus() in MediaLoaded: continue
+        rich.print(f"[PySoundboard] [yellow]TogglePlayback Status[/yellow]: Set {slot} to ",end='')
+        if slot.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
+            rich.print(f"[b]{PlaybackStatus.PAUSED}[/b]")
+            AudioSystem.pauseSlot('audio',pool.index(slot))
+        else:
+            rich.print(f"[b]{PlaybackStatus.PLAYING}[/b]")
+            AudioSystem.playSlot('audio',pool.index(slot))
+       
+# might change 
+def ToggleLoop(AudioSystem:AudioManager):
     global LoopState, LoopTextState
     if LoopState == 0:
         LoopTextState, LoopState = "  Looping  Enabled", -1
-        AudioSystem.toggleState('audio','loop')
     else:
         LoopTextState, LoopState = "  Looping Disabled", 0
-        AudioSystem.toggleState('audio','loop')
+    AudioSystem.toggleLooping('audio')
+        
 def ToggleSpamming():
     global SpammingState, SpammingTextState
     if SpammingState == 0:
         SpammingState, SpammingTextState = 1, "Multi-Mode  ON"
-        AudioSystem.toggleState('audio','multi')
+        # AudioSystem.toggleState('audio','multi')
     else:
         SpammingState, SpammingTextState = 0, "Multi-Mode OFF"
-        AudioSystem.toggleState('audio','multi')
+        # AudioSystem.toggleState('audio','multi')
 
-# It now only scans ./SoundFiles and its folders, Not Recursive!
-# no more nested folders
-def GenerateSoundIndex(path) -> tuple:
-    AudioFilesIndex:list = []
-    SubFoldersIndex:list = []
-    rich.print(f'[PySoundboard] Scanning [{path}]')
-    try:
-        FolderContents = os.scandir(path)
-    except:
+def GenerateSoundIndex(AudioSystem:AudioManager, path) -> dict:
+    SubFoldersIndex:list[os.DirEntry] = []
+    if not os.path.exists(path):
+        rich.print(f'[yellow][PySoundboard] Checking: <{path}>[/yellow][red] Not Found[/red]')
         os.mkdir(AudioFolder)
-        FolderContents = os.scandir(path)
-    def add(_):
-        name:str = str(_.name.rsplit(".",1)[0]) # omit file extension.
-        folder:str = str(_.path).rsplit(f"{'\\' if os.name=='nt' else '/'}",2)[1] # Get actual folder where file is located.
-        AudioFilesIndex.append([folder,name,SoundFile(Entry.path).Play])
-        rich.print(f"[GUI] [blue][Tab: {folder}][/blue] [cyan](Button: {name})[/cyan]")
-    # scan "Root" ./SoundFiles Folder for files and Folders
-    for Entry in FolderContents:
-        add(Entry) if Entry.is_file() else SubFoldersIndex.append(Entry.path)
-    # scan "SubFolders" for files and add()
-    for folder in SubFoldersIndex:
-        FolderContents = os.scandir(folder)
-        for Entry in FolderContents:
-            add(Entry) if Entry.is_file() else ''
-    return tuple(AudioFilesIndex)
+        rich.print(f'[yellow][PySoundboard] Checking: <{path}>[/yellow][green] Created[/green]')
+        
+    # Scan Root ./SoundFiles
+    rich.print(f'[yellow][PySoundboard] Scanning [{path}][/yellow]')
+    RootFolderContents = os.scandir(path)
+    for File in RootFolderContents:
+        AudioSystem.addIndex(SoundType.AUDIO_MEDIA,f'{xpfpath.xpfp(File.path)}') if File.is_file() else SubFoldersIndex.append(File.path)
+    # Scan Subfolders
+    for Folder in SubFoldersIndex:
+        rich.print(f'[blue][PySoundboard] Scanning [{Folder}][/blue]')
+        SubFolderContents = os.scandir(Folder)
+        for File in SubFolderContents:
+            AudioSystem.addIndex(SoundType.AUDIO_MEDIA,f'{xpfpath.xpfp(File.path)}') if File.is_file() else SubFoldersIndex.append(File.path)
+    # idk but i did anyways
+    del RootFolderContents, SubFoldersIndex
+    
+    # create index for the GUI generator
+    Index:dict[str, list[list[str]]] = {}
+    for each in AudioSystem.audioIndex[SoundType.AUDIO_MEDIA]:
+        # get path
+        filepath:str = os.path.split(AudioSystem.audioIndex[SoundType.AUDIO_MEDIA].get(each))[0]
+        
+        # split @ / or \\ to get folder names
+        parentdir:list[str] = filepath.split('/' if os.name!='nt' else "\\")
+        
+        # Readable
+        # if len is < 3, then use an index before 2
+        # this caused some issues when i did A:\\ as base root, index out of range.
+        # might fix some point :P
+        tabName, buttonName, playFunc = parentdir[2 if len(parentdir) < 4 else 3], each, SoundFile(each, AudioSystem).Play
+        # print(tabName)
+        button = [buttonName,playFunc]
+        
+        # create if it no exist pls thx
+        if not Index.get(tabName): Index[tabName] = []
+        
+        # append
+        Index.get(tabName).append(button)
+        
+        rich.print(f'[GUI] Button Indexing: <Tab_[blue bold]{tabName}[/blue bold]> << {button} ')
+        
+    # sorting
+    for each in Index:
+        rich.print(f"[GUI] Button Sorting: <Tab_[yellow bold]{each}[/yellow bold]>")
+        Index[each] = sorted(Index[each])
+        
+    # Return dict {tabName:[buttonName, playFunc]}
+    return Index
 
 # PyQt Sound System
 class SoundFile:
-    def __init__(self, filepath:str):
-        self.file = filepath
-        self.audioName = ''
-        if  AudioSystem.audioIndex['audio'].get(os.path.splitext(os.path.basename(self.file))[0]):
-            self.audioName = (os.path.splitext(os.path.basename(self.file))[0])
-            self.audioName = f"{len(AudioSystem.audioIndex['audio'])^len(self.audioName)}_{self.audioName}"
-            AudioSystem.load('audio',self.file)
-            rich.print(f'[GUI] [cyan][Button] set to <{self.audioName}>[/cyan]')
-        else:
-            AudioSystem.load('audio',self.file)
+    def __init__(self, filepath:str, AudioSystem:AudioManager):
+        self.file = filepath # Its keyName on dictionary
+        self.AudioSystem = AudioSystem
     def Play(self):
         global Title
         Title = f"'{self.file}'"
-        AudioSystem.play('audio',os.path.splitext(os.path.basename(self.file if self.audioName == '' else self.audioName))[0])
+        self.AudioSystem.loadAudioMedia('audio',self.file) if SpammingState == 1 else self.AudioSystem.loadAudioMedia('audio',self.file, SelectedSlot)
+        self.AudioSystem.playAll() if SpammingState == 1 else self.AudioSystem.playSlot("audio",SelectedSlot)
         rich.print(f" - {LoopState}/{SpammingState}"+LoopTextState+"/"+SpammingTextState)
     def __repr__(self):
         return self.file
-
-
-InitializeSettings()
-AudioSystem = InitializeAudioSystem()
-ComDispName = GenerateSoundIndex(AudioFolder)
-time.sleep(1)
