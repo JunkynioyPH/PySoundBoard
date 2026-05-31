@@ -50,7 +50,7 @@ def InitializeAudioSystem():
                 return device
     return AudioManager(_getDevice(),{'audio':SoundType.AUDIO_MEDIA}, initVolume=Settings['Volume'])
 
-def TogglePlaybackStateAll():
+def TogglePlaybackStateAll(AudioSystem:AudioManager):
     pool = AudioSystem.audioPool['audio']
     for slot in pool:
         if not slot.mediaStatus() in MediaLoaded: continue
@@ -61,8 +61,9 @@ def TogglePlaybackStateAll():
         else:
             rich.print(f"[b]{PlaybackStatus.PLAYING}[/b]")
             AudioSystem.playSlot('audio',pool.index(slot))
-        
-def ToggleLoop():
+       
+# might change 
+def ToggleLoop(AudioSystem:AudioManager):
     global LoopState, LoopTextState
     if LoopState == 0:
         LoopTextState, LoopState = "  Looping  Enabled", -1
@@ -79,7 +80,7 @@ def ToggleSpamming():
         SpammingState, SpammingTextState = 0, "Multi-Mode OFF"
         # AudioSystem.toggleState('audio','multi')
 
-def GenerateSoundIndex(path) -> dict:
+def GenerateSoundIndex(AudioSystem:AudioManager, path) -> dict:
     SubFoldersIndex:list[os.DirEntry] = []
     if not os.path.exists(path):
         rich.print(f'[yellow][PySoundboard] Checking: <{path}>[/yellow][red] Not Found[/red]')
@@ -111,7 +112,9 @@ def GenerateSoundIndex(path) -> dict:
         
         # Readable
         # if len is < 3, then use an index before 2
-        tabName, buttonName, playFunc = parentdir[2 if len(parentdir) < 4 else 3], each, SoundFile(each).Play
+        # this caused some issues when i did A:\\ as base root, index out of range.
+        # might fix some point :P
+        tabName, buttonName, playFunc = parentdir[2 if len(parentdir) < 4 else 3], each, SoundFile(each, AudioSystem).Play
         # print(tabName)
         button = [buttonName,playFunc]
         
@@ -128,25 +131,19 @@ def GenerateSoundIndex(path) -> dict:
         rich.print(f"[GUI] Button Sorting: <Tab_[yellow bold]{each}[/yellow bold]>")
         Index[each] = sorted(Index[each])
         
-    # Return {tabName:[buttonName, playFunc]}
+    # Return dict {tabName:[buttonName, playFunc]}
     return Index
 
 # PyQt Sound System
 class SoundFile:
-    def __init__(self, filepath:str):
+    def __init__(self, filepath:str, AudioSystem:AudioManager):
         self.file = filepath # Its keyName on dictionary
+        self.AudioSystem = AudioSystem
     def Play(self):
         global Title
         Title = f"'{self.file}'"
-        AudioSystem.loadAudioMedia('audio',self.file) if SpammingState == 1 else AudioSystem.loadAudioMedia('audio',self.file, SelectedSlot)
-        AudioSystem.playAll() if SpammingState == 1 else AudioSystem.playSlot("audio",SelectedSlot)
+        self.AudioSystem.loadAudioMedia('audio',self.file) if SpammingState == 1 else self.AudioSystem.loadAudioMedia('audio',self.file, SelectedSlot)
+        self.AudioSystem.playAll() if SpammingState == 1 else self.AudioSystem.playSlot("audio",SelectedSlot)
         rich.print(f" - {LoopState}/{SpammingState}"+LoopTextState+"/"+SpammingTextState)
     def __repr__(self):
         return self.file
-
-
-InitializeSettings()
-AudioSystem = InitializeAudioSystem()
-AudioSystem.togglePoolRollOver('audio')
-buttonIndex = GenerateSoundIndex(AudioFolder)
-time.sleep(1)

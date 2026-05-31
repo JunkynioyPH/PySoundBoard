@@ -261,12 +261,12 @@ class AudioManager():
             _setAudioMediaParams(slot, audioPathQUrl)
             rich.print(f'[b]Set [cyan b][Slot {poolIndex}]','[green b]OK[/green b]')
     
-    def unloadAllMedia(self, type:SoundType|None=None):
-        if not type in (SoundType.SOUND_EFFECT, SoundType.AUDIO_MEDIA, None): return rich.print(f"[AudioManager] [red b]Unload All Media:[/red b] [b]({type})[/b] [yellow]Invalid Type.[/yellow] [red b]NOT[/red b] [magenta]{(SoundType.SOUND_EFFECT, SoundType.AUDIO_MEDIA)}")
+    def unloadAllAudioMedia(self, type:SoundType|None=None):
+        if not type in (SoundType.SOUND_EFFECT, SoundType.AUDIO_MEDIA, None): return rich.print(f"[AudioManager] [red b]Unload All AudioMedia:[/red b] [b]({type})[/b] [yellow]Invalid Type.[/yellow] [red b]NOT[/red b] [magenta]{(SoundType.SOUND_EFFECT, SoundType.AUDIO_MEDIA)}")
         for pool in self.audioPool:
             if type is None: pass
             elif not self.audioGroups.get(pool) is type: continue
-            rich.print(f"[AudioManager] [red b]Unload All Media:[/red b] ({pool}) [blue]Slots[/blue] ",end='')
+            rich.print(f"[AudioManager] [red b]Unload All AudioMedia:[/red b] ({pool}) [blue]Slots[/blue] ",end='')
             for slot in self.audioPool.get(pool):
                 if not self.audioGroups.get(pool) is SoundType.SOUND_EFFECT:
                     if not slot.mediaStatus() in [status.value for status in MediaLoaded]: continue
@@ -276,10 +276,10 @@ class AudioManager():
             else:
                 rich.print(f"[green]OK")
         else:
-            rich.print(f"[AudioManager] [red b]Unload All Media:[/red b] ({type if type is not None else "ALL"}) Slots Unloaded!",)
+            rich.print(f"[AudioManager] [red b]Unload AudioMedia:[/red b] ({type if type is not None else "ALL"}) Slots Unloaded!",)
       
-    def unloadAudioMedia(self, pool:str, poolIndex:None|int=None):
-        rich.print(f"[AudioManager] [red b]Unload AudioMedia:[/red b] ({pool}) ", end='')        
+    def unloadAudioMediaSlot(self, pool:str, poolIndex:None|int=None):
+        rich.print(f"[AudioManager] [red b]Unload AudioMedia Slot:[/red b] ({pool}) ", end='')        
         if not self._isValidGroup(pool): 
             return rich.print(f'[red b]Invalid Pool')
         if not SoundType.isAudioMedia(self.audioGroups, pool): return rich.print('[red b]NOT', SoundType.AUDIO_MEDIA)
