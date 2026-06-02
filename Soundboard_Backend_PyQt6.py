@@ -4,7 +4,7 @@ from rich import pretty
 from AudioSystem_PyQt6 import *
 pretty.install()
 
-buttonIndex = []
+Settings:dict = {}
 # Settings:dict
 LoopTextState, LoopState,  = "  Looping Disabled", 0
 SpammingState, SpammingTextState = 0, 'Multi-Mode OFF'
