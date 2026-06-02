@@ -142,8 +142,8 @@ class SoundFile:
     def Play(self):
         global Title
         Title = f"'{self.file}'"
-        self.AudioSystem.loadAudioMedia('audio',self.file) if SpammingState == 1 else self.AudioSystem.loadAudioMedia('audio',self.file, SelectedSlot)
-        self.AudioSystem.playAll() if SpammingState == 1 else self.AudioSystem.playSlot("audio",SelectedSlot)
+        self.AudioSystem.loadAudioMedia('audio', self.file) if SpammingState == 1 else self.AudioSystem.loadAudioMedia('audio',self.file, SelectedSlot)
+        self.AudioSystem.playAll() if SpammingState == 1 else self.AudioSystem.playSlot("audio", SelectedSlot)
         rich.print(f" - {LoopState}/{SpammingState}"+LoopTextState+"/"+SpammingTextState)
     def __repr__(self):
         return self.file

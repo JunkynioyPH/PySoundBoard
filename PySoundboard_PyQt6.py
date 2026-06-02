@@ -2,27 +2,23 @@ from PyQt6.QtCore import Qt, QTimer, QSize, QUrl, QObject, QEvent
 from PyQt6.QtGui import QPixmap, QRegion # MAYBE ill get to work this at some point lmao
 from PyQt6.QtMultimedia import QMediaDevices
 from PyQt6.QtWidgets import *
-import json, os, sys, rich, darkmode
-# from os import environ
-# environ["QT_FFMPEG_LOG_LEVEL"] = "fatal"
-# environ["QT_LOGGING_RULES"] = "*.debug=false;qt.multimedia.*=false"
+import json, os, sys, rich
 APP = QApplication([])
 import Soundboard_Backend_PyQt6 as SoundBackend
 from rich import pretty
 pretty.install()
 
 # Initialise Instance of QApp
-_ = QMediaDevices.audioOutputs() # Moving the FFMPEG thing
-del _
+_ = QMediaDevices.audioOutputs(); del _ # Moving the FFMPEG thing
 # Load Settings
 SoundBackend.InitializeSettings()
 Settings = SoundBackend.Settings
 
 if not Settings['UseSystemTheme']:
+    import darkmode
     APP.setStyle('Fusion')
     APP.setPalette(darkmode.get_slate_blue_dark_palette())
     rich.print('[PySoundboard] Using Built-in Dark Theme')
-    
 else:
     rich.print('[PySoundboard] Using System Theme')
     
@@ -46,7 +42,7 @@ def ShowSettings():
     for i in Settings:
         rich.print(f"[yellow][{i}:{Settings[i]}][/yellow] ", end='')
     else:
-        rich.print()
+        print()
 
 def UpdateSettings(Variable,Value):
     rich.print(f"[PySoundboard] [green]Update Setting:[/green] <{Variable}> to '{Value}'")
@@ -73,12 +69,9 @@ class updateTimerQueue(QTimer):
         self.start(ticks) if ticks else self.start(250)
     
     def update(self):
-        # rich.print(f'[PySoundboard] UpdaterTimerQueue {self.interval()}ms Elapsed')
         for item in self.updateList:
             item()
-        # else:
-        #     rich.print('[PySoundboard] UpdateTimerQueue: Update Finished')
-    
+            
     def appendToQueue(self, _callable):
         rich.print('[PySoundboard] UpdateTimerQueue: ', end='')
         if not callable(_callable):
@@ -116,9 +109,6 @@ class ArrowKeysFilter_SaveVolume(QObject):
                 case Qt.Key.Key_Left | Qt.Key.Key_Right | Qt.Key.Key_Up | Qt.Key.Key_Down:
                     rich.print('[PySoundboard] KeyPress: <ARROW_KEY>')
                     self.callback()
-                # case _:
-                    # rich.print("[PySoundboard] Global key:", event.modifiers() , event.text(), event.key())
-        # super().eventFilter(obj, event) 
         return False   
 # Ai Assisted, Keyfilter code END
 
@@ -128,7 +118,15 @@ class MainWindow(QMainWindow):
         self.updaterLoop = updateTimerQueue(self)
         self.updaterLoop.appendToQueue(self._updateTopBarTitle)
         self.setWindowTitle('PySoundboard PyQt6 GUI')
-        
+#         self.setObjectName('baseCanvas')
+#         ## To keep ASPECT_RATIO use:
+#         # background-image: url(image.png);
+#         self.setStyleSheet("""
+#     QWidget#baseCanvas {
+#         border-image: url(test.png) 0 0 0 0 stretch stretch;
+#         background-position: center;
+#         }
+# """)
         # Set adressable space
         BaseCanvas = QWidget()
         self.setCentralWidget(BaseCanvas)
@@ -158,6 +156,8 @@ class MainWindow(QMainWindow):
             VerticalCanvas.addWidget(widget)
         else:
             self.bakeGroupContents()
+        VerticalCanvas.addStretch(1)
+        
     
     def bakeGroupContents(self):
         self._audioDeviceControlsContent()
@@ -172,6 +172,7 @@ class MainWindow(QMainWindow):
     def _audioDeviceControlsContent(self):
         audioDeviceCanvas = QHBoxLayout()
         self.audioDeviceControlsGroup.setLayout(audioDeviceCanvas)
+        audioDeviceCanvas.addStretch(1)
         
         # Audio Device Select Combo Box START
         audioDeviceSelectCanvas = QVBoxLayout()
@@ -202,7 +203,7 @@ class MainWindow(QMainWindow):
                 AudioSystem.playSlot('audio',0)
                 rich.print(f"[PySoundboard] [{self.audioDeviceSelectComboBox.currentText()}] : {repr(ERR)}\n[PySoundboard] Restart Soundboard to refresh Dropdown List ") if self.audioDeviceSelectComboBox.currentIndex() != 0 else ''
                 
-        self.audioDeviceSelectComboBox.setFixedSize(370, 24)
+        self.audioDeviceSelectComboBox.setFixedSize(370, 42)
         self.audioDeviceSelectComboBox.setPlaceholderText('Defaulting, Select an Output Device...')
         self.audioDeviceSelectComboBox.addItems([device.description() for device in QMediaDevices.audioOutputs()])
         self.audioDeviceSelectComboBox.setCurrentIndex(self.audioDeviceSelectComboBox.findText(Settings["AudioDevice"]))
@@ -220,6 +221,7 @@ class MainWindow(QMainWindow):
         self.audioDeviceVolumeLabel = QLabel(f"Volume: {Settings.get('Volume')}%")
         audioDeviceVolumeControlCanvas.addWidget(self.audioDeviceVolumeLabel)
         self.audioDeviceVolumeSlider = QSlider(Qt.Orientation.Horizontal)
+        self.audioDeviceVolumeSlider.setFixedSize(200,11)
         self.audioDeviceVolumeSlider.setRange(0, 100)
         audioDeviceVolumeControlCanvas.addWidget(self.audioDeviceVolumeSlider)
         self.audioDeviceVolumeSlider.setValue(int(Settings['Volume']))
@@ -231,17 +233,52 @@ class MainWindow(QMainWindow):
         self.audioDeviceVolumeSlider.sliderReleased.connect(_saveVolume)
         audioDeviceCanvas.addLayout(audioDeviceVolumeControlCanvas)
         # Audio Device Volume Control END
-        # Audio Device Global PlaybackSpeed START
+        # Audio Device Global PlaybackSettings START
+        ## TODO: ADD GLOBAL PLAYBACKSPEED SLIDER
+        audioDevicePlaySpeedCanvas = audioDeviceVolumeControlCanvas
+        def _changeSpeed():
+            self.audioDeviceSpeedLabel.setText(f"Playback Speed: x{self.audioDeviceSpeedSlider.value()/100}")
         
-        # Audio Device Global PlaybackSpeed END
+        self.audioDeviceSpeedSlider = QSlider(Qt.Orientation.Horizontal)
+        self.audioDeviceSpeedLabel = QLabel('Playback Speed: x1.0')
+        audioDevicePlaySpeedCanvas.addWidget(self.audioDeviceSpeedLabel)
+        audioDevicePlaySpeedCanvas.addWidget(self.audioDeviceSpeedSlider)
+        # self.audioDeviceSpeedSlider.setFixedWidth(200)
+        self.audioDeviceSpeedSlider.setFixedSize(200,11)
+        
+        self.audioDeviceSpeedSlider.setRange(0, 500)
+        self.audioDeviceSpeedSlider.setValue(100)
+        # better test some point whether if it's better to apply real-time or after released
+        self.audioDeviceSpeedSlider.valueChanged.connect(_changeSpeed)
+        # self.audioDeviceSpeedSlider.sliderReleased.connect(_changeSpeed)
+        
+        
+        audioDeviceToggles = QVBoxLayout()
+        def _toggleGlobalLoopMod():
+            print('GLOBAL LOOP TOGGLE')
+        def _toggleGlobalMultiMode():
+            print('GLOBAL MULTI TOGGLE')
+        ## TODO: ADD GLOBAL LOOPING MODE
+        self.audioDeviceLoopButton = FuncButton(SoundBackend.LoopTextState, _toggleGlobalLoopMod)
+        self.audioDeviceLoopButton.setCheckable(True)
+        
+        ## TODO: ADD MULTI MODE
+        self.audioDeviceMultiButton = FuncButton(SoundBackend.SpammingTextState, _toggleGlobalMultiMode)
+        self.audioDeviceMultiButton.setCheckable(True)
+        
+        audioDeviceToggles.addWidget(self.audioDeviceLoopButton)
+        audioDeviceToggles.addWidget(self.audioDeviceMultiButton)
+        audioDeviceCanvas.addLayout(audioDevicePlaySpeedCanvas)
+        audioDeviceCanvas.addLayout(audioDeviceToggles)
+        # Audio Device Global Togglables END
         audioDeviceCanvas.addStretch(1)
         
     def _mediaControlsContent(self):
         pass
     def _soundboardTabsContent(self):
         # might not need a self var some of these
-        self.soundboardTab = sections.SoundButtons("")
-        self.slotsMonitorTab = sections.SlotStatusMonitor("")
+        self.soundboardTab = sections.SoundButtons('')
+        self.slotsMonitorTab = sections.SlotStatusMonitor('')
         self.appSettingsTab = sections.PySoundboardSettings('')
         self.audioIndexMonitorTab = sections.AudioIndexMonitor('')
         
@@ -258,15 +295,15 @@ class MainWindow(QMainWindow):
 class FuncButton(QPushButton):
     def __init__(self, Name:str, callback, wh:tuple|None=None):
         super().__init__()
-        if not wh:
+        if wh:
             width, height = wh
         else:
             width, height = 125, None
         # self.Method = Method
         self.setText(Name)
         self.setStyleSheet("text-align: left; padding: 5%; margin: 0%;")
-        self.setFixedWidth(width)
-        self.setFixedHeight(height) if not height else ''
+        self.setFixedWidth(width) if width else ''
+        self.setFixedHeight(height) if height else ''
         if not callable(callback):
             raise TypeError(f'{callback} Not Callable Method')
         self.clicked.connect(callback)
