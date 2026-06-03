@@ -216,7 +216,7 @@ class AudioManager():
         slotItem.setPosition(slotItem_currentPos)
         slotItem.play()
         del slotItem_currentPos
-        rich.print(f"Set {slotItem.loops() >= 2} {self.audioPool.get(pool)[slot]}")
+        rich.print(f"Set to {slotItem.loops() >= 2} {self.audioPool.get(pool)[slot]}")
         
     def loadAudioMedia(self, pool:str, audioName:str, poolIndex:None|int=None):
         """Load the specified audioName into a specified or one of the available slots in a specified pool.

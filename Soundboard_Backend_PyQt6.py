@@ -62,7 +62,7 @@ def InitializeAudioSystem():
                 return device
     return AudioManager(_getDevice(),{'audio':SoundType.AUDIO_MEDIA}, initVolume=Settings['Volume'])
 
-def TogglePlaybackStateAll(AudioSystem:AudioManager):
+def togglePlaybackStateAll(AudioSystem:AudioManager):
     pool = AudioSystem.audioPool['audio']
     for slot in pool:
         if not slot.mediaStatus() in MediaLoaded: continue

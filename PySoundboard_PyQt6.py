@@ -59,7 +59,6 @@ if Settings["Splash"] == True:
     rich.print('='*20)
     UpdateSettings("Splash",False)
 
-## Define Main Window
 AlignFlag = Qt.AlignmentFlag
 class updateTimerQueue(QTimer):
     def __init__(self, parent=None, ticks:int|None=None):
@@ -111,10 +110,12 @@ class ArrowKeysFilter_Callback(QObject):
                     self.callback()
         return False   
 # Ai Assisted, Keyfilter code END
+
+## Define Main Window
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.updaterLoop = updateTimerQueue(self)
+        self.updaterLoop = updateTimerQueue(self, 125)
         self.updaterLoop.appendToQueue(self._updateTopBarTitle)
         self.setWindowTitle('PySoundboard PyQt6 GUI')
 #         self.setObjectName('baseCanvas')
@@ -167,7 +168,6 @@ class MainWindow(QMainWindow):
         audioDeviceCanvas = QHBoxLayout()
         self.audioDeviceControlsGroup.setLayout(audioDeviceCanvas)
         audioDeviceCanvas.addStretch(1)
-        
         # Audio Device Select Combo Box START
         audioDeviceSelectCanvas = QVBoxLayout()
         self.audioDeviceSelectComboBox = QComboBox()
@@ -195,8 +195,7 @@ class MainWindow(QMainWindow):
                 AudioSystem.setDevice(QMediaDevices.defaultAudioOutput(), True)
                 AudioSystem.loadAudioMedia('audio','startup',0)
                 AudioSystem.playSlot('audio',0)
-                rich.print(f"[PySoundboard] [{self.audioDeviceSelectComboBox.currentText()}] : {repr(ERR)}\n[PySoundboard] Restart Soundboard to refresh Dropdown List ") if self.audioDeviceSelectComboBox.currentIndex() != 0 else ''
-                
+                rich.print(f"[PySoundboard] [{self.audioDeviceSelectComboBox.currentText()}] : {repr(ERR)}\n[PySoundboard] Restart Soundboard to refresh Dropdown List ") if self.audioDeviceSelectComboBox.currentIndex() != 0 else ''      
         self.audioDeviceSelectComboBox.setFixedSize(370, 42)
         self.audioDeviceSelectComboBox.setPlaceholderText('Defaulting, Select an Output Device...')
         self.audioDeviceSelectComboBox.addItems([device.description() for device in QMediaDevices.audioOutputs()])
@@ -241,7 +240,6 @@ class MainWindow(QMainWindow):
             rich.print("[PySoundboard] PlaybackSpeed Sync:", SoundBackend.SyncSpeedState)
             for slot in range(0, AudioSystem.audioPoolSize):
                 AudioSystem.setPlaybackSpeed('audio', slot, 1) if not SoundBackend.SyncSpeedState else AudioSystem.setPlaybackSpeed('audio', slot, self.audioDeviceSpeedSlider.value()/100)
-        
         self.audioDeviceSpeedSlider = QSlider(Qt.Orientation.Horizontal)
         audioDeviceSpeedLabelCanvas = QHBoxLayout() # main canvas
         audioDeviceSpeedSyncToggleCanvas = QHBoxLayout() # canvas for speed display + sync toggle
@@ -258,10 +256,9 @@ class MainWindow(QMainWindow):
         audioDevicePlaySpeedCanvas.addLayout(audioDeviceSpeedLabelCanvas) # add to main canvas
         audioDevicePlaySpeedCanvas.addWidget(self.audioDeviceSpeedSlider) # speed Slider
         self.audioDeviceSpeedSlider.setFixedSize(200,11)
-        self.audioDeviceSpeedSlider.setRange(1, 500)
+        self.audioDeviceSpeedSlider.setRange(5, 500)
         self.audioDeviceSpeedSlider.setValue(100)
         self.audioDeviceSpeedSlider.valueChanged.connect(_changeSpeed)
-        
         # Audio Device Global PlaybackSpeed END
         # Audio Device Global Toggles START
         audioDeviceToggles = QVBoxLayout()
@@ -270,21 +267,77 @@ class MainWindow(QMainWindow):
             self.audioDeviceLoopButton.setText(SoundBackend.LoopTextState)
         def _toggleMultiMode():
             SoundBackend.ToggleSpamming()
+            self.mediaSlotSelector.setDisabled(True) if SoundBackend.SpammingState == 1 else self.mediaSlotSelector.setDisabled(False)
+            self.mediaCurrentPositionSlider.setDisabled(True) if SoundBackend.SpammingState == 1 else self.mediaCurrentPositionSlider.setDisabled(False)
+            self.mediaSlotSelector.setToolTip('This is disabled as Multi-Mode Automagically manages slot selection.') if SoundBackend.SpammingState == 1 else self.mediaSlotSelector.setToolTip('')
             self.audioDeviceMultiButton.setText(SoundBackend.SpammingTextState)
-        self.audioDeviceLoopButton = FuncButton(SoundBackend.LoopTextState, _toggleGlobalLoopMod)
+        self.audioDeviceLoopButton = FuncButton(SoundBackend.LoopTextState, _toggleGlobalLoopMod, w=120)
         self.audioDeviceLoopButton.setCheckable(True)
         self.audioDeviceMultiButton = FuncButton(SoundBackend.SpammingTextState, _toggleMultiMode)
         self.audioDeviceMultiButton.setCheckable(True)
         audioDeviceToggles.addWidget(self.audioDeviceLoopButton)
         audioDeviceToggles.addWidget(self.audioDeviceMultiButton)
-        audioDeviceCanvas.addLayout(audioDevicePlaySpeedCanvas)
         audioDeviceCanvas.addLayout(audioDeviceToggles)
         # Audio Device Global Toggles END
         audioDeviceCanvas.addStretch(1)
         
     def _mediaControlsContent(self):
-        pass
-    
+        mediaControlsCanvas = QHBoxLayout()
+        mediaControlsCanvas.addStretch(1)
+        self.mediaControlsGroup.setLayout(mediaControlsCanvas)
+        # Select Slot START
+        self.mediaSlotSelector = QComboBox()
+        def _changeSlot():
+            SoundBackend.SelectedSlot = self.mediaSlotSelector.currentIndex()
+        self.mediaSlotSelector.addItems([f"Slot {slot.name}" for slot in AudioSystem.audioPool['audio']])
+        self.mediaSlotSelector.activated.connect(_changeSlot)
+        self.mediaSlotSelector.setFixedHeight(30)
+        mediaControlsCanvas.addWidget(self.mediaSlotSelector)
+        # Select Slot END
+        # Play Resume Stop Button START
+        def _toggleAllPlayPauseState():
+            SoundBackend.togglePlaybackStateAll(AudioSystem)
+        def _stopAllPlayback():
+            AudioSystem.unloadAllAudioMedia()
+        self.mediaResumePauseButton = FuncButton('Resume / Pause', _toggleAllPlayPauseState, w=120, h=30)
+        self.mediaStopButton = FuncButton('Stop', _stopAllPlayback, w=120, h=30)
+        mediaControlsCanvas.addWidget(self.mediaResumePauseButton)
+        mediaControlsCanvas.addWidget(self.mediaStopButton)
+        # Play Resume Stop Button END
+        # Media position START
+        def _updateMediaPositionSlider():
+            index, dur, pos = AudioSystem.audioMediaPos('audio',SoundBackend.SelectedSlot)
+            self.mediaCurrentPositionSlider.setRange(0, int(dur))
+            self.mediaCurrentPositionSlider.setValue(int(pos)) if not self._pauseMediaPosUpdate else ''
+        def _seekMedia():
+            AudioSystem.audioPool['audio'][SoundBackend.SelectedSlot].setPosition(self.mediaCurrentPositionSlider.value()*1000)
+            self._pauseMediaPosUpdate = False
+        def _pauseMedia():
+            self._pauseMediaPosUpdate = True
+        def _updatePosDisplay(): 
+            pos = self.mediaCurrentPositionSlider.value()
+            self.mediaElapsedTimeLabel.setText(f"{pos} s" if pos < 60 else f"{round(pos/60,2)} min")
+        self._pauseMediaPosUpdate = False
+        self.mediaCurrentPositionSlider = QSlider(Qt.Orientation.Horizontal)
+        self.mediaCurrentPositionSlider.setFixedWidth(245)
+        self.updaterLoop.appendToQueue(_updateMediaPositionSlider)
+        self.mediaCurrentPositionSlider.sliderPressed.connect(_pauseMedia)
+        self.mediaCurrentPositionSlider.sliderMoved.connect(_updatePosDisplay)
+        self.mediaCurrentPositionSlider.sliderReleased.connect(_seekMedia)
+        
+        mediaControlsCanvas.addWidget(self.mediaCurrentPositionSlider)
+        # Media position END
+        # Elapsed time START
+        self.mediaElapsedTimeLabel = QLabel('---')
+        self.mediaElapsedTimeLabel.setFixedWidth(125)
+        def _updateElapsedTimeDisplay():
+            self.mediaElapsedTimeLabel.setText(AudioSystem.audioMediaPos('audio', SoundBackend.SelectedSlot, True)) if not self._pauseMediaPosUpdate else ''
+        self.updaterLoop.appendToQueue(_updateElapsedTimeDisplay)
+        mediaControlsCanvas.addWidget(self.mediaElapsedTimeLabel)
+        # Elapsed time END
+        mediaControlsCanvas.addStretch(1)
+        
+        
     def _soundboardTabsContent(self):
         # might not need a self var some of these
         self.soundboardTab = sections.SoundButtons('')
@@ -303,17 +356,13 @@ class MainWindow(QMainWindow):
 # Text and .clicked.connect() declaration
 # on the same line
 class FuncButton(QPushButton):
-    def __init__(self, Name:str, callback, wh:tuple|None=None):
+    def __init__(self, Name:str, callback, w:int|None=None, h:int|None=None):
         super().__init__()
-        if wh:
-            width, height = wh
-        else:
-            width, height = 125, None
         # self.Method = Method
         self.setText(Name)
-        self.setStyleSheet("text-align: left; padding: 5%; margin: 0%;")
-        self.setFixedWidth(width) if width else ''
-        self.setFixedHeight(height) if height else ''
+        self.setStyleSheet("text-align: left; padding: 5%;") #  margin: 0%;
+        self.setFixedWidth(w) if w else ''
+        self.setFixedHeight(h) if h else ''
         if not callable(callback):
             raise TypeError(f'{callback} Not Callable Method')
         self.clicked.connect(callback)

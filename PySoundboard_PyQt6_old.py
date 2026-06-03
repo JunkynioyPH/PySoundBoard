@@ -343,7 +343,7 @@ class MainWindow(QMainWindow):
             
     # Typical controls
     def togglePlaybackState(self):
-        SoundBackend.TogglePlaybackStateAll(AudioSystem)
+        SoundBackend.togglePlaybackStateAll(AudioSystem)
         # AudioSystem.playAll()
     def Stop(self):
         # AudioSystem.stopAll()
