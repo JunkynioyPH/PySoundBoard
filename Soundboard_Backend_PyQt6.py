@@ -6,24 +6,29 @@ pretty.install()
 
 Settings:dict = {}
 # Settings:dict
-LoopTextState, LoopState,  = "  Looping Disabled", 0
+LoopTextState, GlobalLoopState,  = "Looping ALL OFF", 0
 SpammingState, SpammingTextState = 0, 'Multi-Mode OFF'
 AudioFolder = xpfpath.xpfp(".\\SoundFiles")
 Title = ''
+SyncSpeedState:bool = True
 SelectedSlot:int = 0
 
 def InitializeSettings():
     global Settings
     # add parameters for button sizes and stuff
     Defaults = {"AudioDevice":None,"Volume":8,"UseSystemTheme":True,"MaxRows":8,"Splash":True, "SteamDeck":False}
-    def writeJSONValues(update=False):
+    def writeNewJSONValues(update=False):
         if update:
             with open("Settings.json","r") as Dump:
                 data = Dump.read()
         with open("Settings.json","w") as Dump:
             Dump.write(json.dumps(Defaults)) if not update else Dump.write(json.dumps(Defaults | json.loads(data)))
-        
+    
+    # add checks for deprecated keys and remove them.
+    # not really necessary, but i think it'd help make sure
+    # that the json is clean from all changes ill make in the future.
     if os.path.exists("Settings.json"):
+        # Check for missing Keys
         try:
             with open('Settings.json','r') as SettingsValue:
                 Settings = json.loads(SettingsValue.read())
@@ -34,11 +39,18 @@ def InitializeSettings():
                 else:
                     raise KeyError(f"Missing Key/s: {check_conf}")
         except (json.decoder.JSONDecodeError, KeyError) as err:
-            rich.print(f"\n[PySoundboard] Settings KeyError: {err}")
-            writeJSONValues(update=True)
+            rich.print(f"\n[PySoundboard] Settings: {repr(err)}")
+            writeNewJSONValues(update=True)
+            InitializeSettings()
+        # Check for Deprecated keys
+        try:
+            ...
+        except (json.decoder.JSONDecodeError, KeyError) as err:
+            rich.print(f"\n[PySoundboard] Settings: {repr(err)}")
+            print('OMIT OLD KEYS') # STUB
             InitializeSettings()
     else:
-        writeJSONValues()
+        writeNewJSONValues()
         InitializeSettings()
         
 def InitializeAudioSystem():
@@ -63,22 +75,25 @@ def TogglePlaybackStateAll(AudioSystem:AudioManager):
             AudioSystem.playSlot('audio',pool.index(slot))
        
 # might change 
-def ToggleLoop(AudioSystem:AudioManager):
-    global LoopState, LoopTextState
-    if LoopState == 0:
-        LoopTextState, LoopState = "  Looping  Enabled", -1
+def ToggleLoopSync(AudioSystem:AudioManager):
+    global GlobalLoopState, LoopTextState
+    if GlobalLoopState == 0:
+        LoopTextState, GlobalLoopState = "Looping ALL ON", -1
     else:
-        LoopTextState, LoopState = "  Looping Disabled", 0
-    AudioSystem.toggleLooping('audio')
+        LoopTextState, GlobalLoopState = "Looping ALL OFF", 0
+    # AudioSystem.toggleLooping('audio') ### WILL BREAK ... ?
+    for slot in range(0,AudioSystem.audioPoolSize):
+        AudioSystem.toggleLoopAudioMediaSlot('audio', slot)
         
 def ToggleSpamming():
     global SpammingState, SpammingTextState
     if SpammingState == 0:
-        SpammingState, SpammingTextState = 1, "Multi-Mode  ON"
-        # AudioSystem.toggleState('audio','multi')
+        SpammingState, SpammingTextState = 1, "Multi-Mode ON"
+        rich.print('[PySoundboard] Toggle MultiMode: [green b]True[/green b]')
+
     else:
         SpammingState, SpammingTextState = 0, "Multi-Mode OFF"
-        # AudioSystem.toggleState('audio','multi')
+        rich.print('[PySoundboard] Toggle MultiMode: [red b]False[/red b]')
 
 def GenerateSoundIndex(AudioSystem:AudioManager, path) -> dict:
     SubFoldersIndex:list[os.DirEntry] = []
@@ -144,6 +159,6 @@ class SoundFile:
         Title = f"'{self.file}'"
         self.AudioSystem.loadAudioMedia('audio', self.file) if SpammingState == 1 else self.AudioSystem.loadAudioMedia('audio',self.file, SelectedSlot)
         self.AudioSystem.playAll() if SpammingState == 1 else self.AudioSystem.playSlot("audio", SelectedSlot)
-        rich.print(f" - {LoopState}/{SpammingState}"+LoopTextState+"/"+SpammingTextState)
+        rich.print(f" - {GlobalLoopState}/{SpammingState}"+LoopTextState+"/"+SpammingTextState)
     def __repr__(self):
         return self.file

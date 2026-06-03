@@ -52,13 +52,11 @@ class AudioManager():
         
         self.settings:dict[str, QAudioDevice|dict[str, int]] = {"device":device,"volume":{}}
         self.audioGroups:dict[str, SoundType] = audioGroups
-        self.loopMode:dict[str, bool] = {}
         self.audioPool:dict[str, list[SoundEffect|AudioMedia]] = {}
         self.audioIndex:dict[SoundType, dict[str, str]] = {SoundType.AUDIO_MEDIA:{},SoundType.SOUND_EFFECT:{}}
         # init process
         for each in self.audioGroups:
             if not self.audioGroups.get(each) is SoundType.MASTER_VOLUME:
-                self.loopMode[each] = False
                 self.audioPool[each] = []
                 self.settings['volume'][each] = initVolume
                 if not self.audioGroups.get(each) is SoundType.SOUND_EFFECT:
@@ -111,7 +109,6 @@ class AudioManager():
             # for item2 in statusSoundEffectPool:
             #     rich.print('       ', item2)
             rich,print('Volume:',self.settings['volume'])
-            rich.print('Looping:',self.loopMode)
             rich.print('Roll-Over:',self.rollOverEnabled,self.rollingPoolIndex)
             rich.print('++ -------------- ++')
         else:
@@ -203,12 +200,24 @@ class AudioManager():
         self.audioIndex[type].pop(item)
         rich.print(f"[green b]OK[/green b]")
     
-    def toggleLooping(self,  pool:str):
-        rich.print(f"[AudioManager] Toggle Looping: ({pool}) [b]Looped ", end='')
-        if not pool in self.loopMode: return rich.print('[red b] Invalid Pool')
-        self.loopMode[pool] = False if self.loopMode[pool] else True
-        rich.print(f"{self.loopMode[pool]}")
+    # will need to add individual adressing of each slots
+    # will need to re-write some parts of loadAudioMedia() related to LOOPING
+    #   > set looping True/False or use the PyQt6 INFINITE thing
+    # will need to built-in LOOPING check or something to AudioMedia/SoundEffect
     
+    def toggleLoopAudioMediaSlot(self, pool:str, slot:int):
+        rich.print(f"[AudioManager] Toggle Looping: ({pool}) ", end='')
+        if not self._isValidGroup(pool): 
+            return rich.print(f'[red b]Invalid Pool')
+        slotItem = self.audioPool.get(pool)[slot]
+        slotItem_currentPos = slotItem.position()
+        slotItem.stop()
+        slotItem.setLoops(int(((2**32) / 2) - 1) if slotItem.loops() <= 1 else 1)
+        slotItem.setPosition(slotItem_currentPos)
+        slotItem.play()
+        del slotItem_currentPos
+        rich.print(f"Set {slotItem.loops() >= 2} {self.audioPool.get(pool)[slot]}")
+        
     def loadAudioMedia(self, pool:str, audioName:str, poolIndex:None|int=None):
         """Load the specified audioName into a specified or one of the available slots in a specified pool.
         
@@ -218,7 +227,7 @@ class AudioManager():
             return rich.print(f'[red b]Invalid Pool')
         if not SoundType.isAudioMedia(self.audioGroups, pool): return rich.print('[red b] NOT', SoundType.AUDIO_MEDIA)
         
-        looping = int(((2**32) / 2) - 1) if self.loopMode[pool] else 1
+        # looping = int(((2**32) / 2) - 1) if self.loopMode[pool] else 1
         
         # Check if the audioName actually exist in audioIndex
         audioPath = self.audioIndex[SoundType.AUDIO_MEDIA].get(audioName)
@@ -230,7 +239,6 @@ class AudioManager():
         
         def _setAudioMediaParams(slot:AudioMedia, source:QUrl):
                 slot.setSource(source)
-                slot.setLoops(looping)
                 slot.device.setVolume(self.settings['volume'].get(pool)/100)
         
         # if no poolIndex is specified
@@ -324,14 +332,14 @@ class AudioManager():
         if not sound:
             rich.print(f'[red b]NOT INDEXED[/red b]')
             return 
-        
-        looping = int(((2**32) / 2) - 1) if self.loopMode.get(poolName) else 1
+
+        # looping = int(((2**32) / 2) - 1) if self.loopMode.get(poolName) else 1
         
         def _cleanUpAfter(pool, sound:SoundEffect):
             pool = self.audioPool.get(pool)
             pool.remove(sound)
         # create new instance of SoundEffect
-        soundObj = SoundEffect(sound, self.settings.get('device'), self.settings['volume'][poolName], looping)
+        soundObj = SoundEffect(sound, self.settings.get('device'), self.settings['volume'][poolName], 1) # looping
         
         # add to pool and delete instance once audio finishes
         self.audioPool[poolName].append(soundObj)
@@ -429,7 +437,7 @@ class AudioMedia(QMediaPlayer):
         if self.mediaStatus() != QMediaPlayer.MediaStatus.EndOfMedia and not self.keepLoaded:
             return
         # clear itself
-        self.setLoops(1)
+        # self.setLoops(1)
         self.setSource(QUrl.fromLocalFile(None))
         # print({self.name}, 'died')
     

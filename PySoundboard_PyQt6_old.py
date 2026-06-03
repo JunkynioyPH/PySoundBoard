@@ -334,7 +334,7 @@ class MainWindow(QMainWindow):
             self.multiToggle.setCheckable(True)
             self.addWidget(self.multiToggle)
         def Loop(self):
-            SoundBackend.ToggleLoop()
+            SoundBackend.ToggleLoopSync(AudioSystem)
             self.loopToggle.setText(f"{SoundBackend.LoopTextState}")
         def Multi(self):
             SoundBackend.ToggleSpamming()

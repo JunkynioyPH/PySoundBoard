@@ -97,7 +97,7 @@ class sections:
             super().__init__(title, parent)
 
 # Ai Assisted, Keyfilter code START
-class ArrowKeysFilter_SaveVolume(QObject):
+class ArrowKeysFilter_Callback(QObject):
     def __init__(self, callback):
         super().__init__()
         if not callable(callback):
@@ -111,7 +111,6 @@ class ArrowKeysFilter_SaveVolume(QObject):
                     self.callback()
         return False   
 # Ai Assisted, Keyfilter code END
-
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -138,7 +137,7 @@ class MainWindow(QMainWindow):
         # GUI sections
         topBarCanvas = QHBoxLayout()
         self.topBarStatus = QLabel()
-        topBarCanvas.addWidget(QLabel("PySoundboard PyQt6 - @junkynioy :"))
+        topBarCanvas.addWidget(QLabel("PySoundboard PyQt6 - @junkynioy"))
         topBarCanvas.addWidget(self.topBarStatus)
         self.topBarStatus.setAlignment(AlignFlag.AlignHCenter)
         
@@ -147,18 +146,13 @@ class MainWindow(QMainWindow):
         self.soundboardTabsGroup = QTabWidget()
         
         VerticalCanvas.addLayout(topBarCanvas)
-        widgets = [
-            self.audioDeviceControlsGroup,
-            self.mediaControlsGroup,
-            self.soundboardTabsGroup
-        ]
+        widgets = [self.audioDeviceControlsGroup, self.mediaControlsGroup, self.soundboardTabsGroup]
         for widget in widgets:
             VerticalCanvas.addWidget(widget)
         else:
             self.bakeGroupContents()
         VerticalCanvas.addStretch(1)
         
-    
     def bakeGroupContents(self):
         self._audioDeviceControlsContent()
         self._mediaControlsContent()
@@ -177,6 +171,7 @@ class MainWindow(QMainWindow):
         # Audio Device Select Combo Box START
         audioDeviceSelectCanvas = QVBoxLayout()
         self.audioDeviceSelectComboBox = QComboBox()
+        audioDeviceSelectCanvas.addStretch(1)
         audioDeviceSelectCanvas.addWidget(QLabel("Current Device:"))
         audioDeviceSelectCanvas.addWidget(self.audioDeviceSelectComboBox)
         def _changeDevice():
@@ -193,7 +188,6 @@ class MainWindow(QMainWindow):
                 AudioSystem.playSlot('audio',0)
                 splash()
                 rich.print(f"[PySoundboard] <{f'Default Device"{Settings["AudioDevice"]}"' if Settings["AudioDevice"] is None else self.audioDeviceSelectComboBox.currentText()}> Found!\n[PySoundboard] Successfully Bound to Device!")
-                
             except Exception as ERR:
                 splash()
                 rich.print('[PySoundboard] System Defaulting!')
@@ -208,6 +202,7 @@ class MainWindow(QMainWindow):
         self.audioDeviceSelectComboBox.addItems([device.description() for device in QMediaDevices.audioOutputs()])
         self.audioDeviceSelectComboBox.setCurrentIndex(self.audioDeviceSelectComboBox.findText(Settings["AudioDevice"]))
         self.audioDeviceSelectComboBox.activated.connect(_changeDevice)
+        audioDeviceSelectCanvas.addStretch(1)
         audioDeviceCanvas.addLayout(audioDeviceSelectCanvas)
         # Audio Device Select Combo Box END
         # Audio Device Volume Control START
@@ -227,54 +222,69 @@ class MainWindow(QMainWindow):
         self.audioDeviceVolumeSlider.setValue(int(Settings['Volume']))
         self.audioDeviceVolumeSlider.valueChanged.connect(_changeVolume)
         ### KeyFilter Event, Ai Assisted code START
-        self.arrowKeys_saveVolume = ArrowKeysFilter_SaveVolume(_saveVolume)
+        self.arrowKeys_saveVolume = ArrowKeysFilter_Callback(_saveVolume)
         self.audioDeviceVolumeSlider.installEventFilter(self.arrowKeys_saveVolume)
         ### Keyfilter Event, Ai Assisted code END
         self.audioDeviceVolumeSlider.sliderReleased.connect(_saveVolume)
         audioDeviceCanvas.addLayout(audioDeviceVolumeControlCanvas)
         # Audio Device Volume Control END
-        # Audio Device Global PlaybackSettings START
-        ## TODO: ADD GLOBAL PLAYBACKSPEED SLIDER
+        # Audio Device Global PlaybackSpeed START
         audioDevicePlaySpeedCanvas = audioDeviceVolumeControlCanvas
         def _changeSpeed():
             self.audioDeviceSpeedLabel.setText(f"Playback Speed: x{self.audioDeviceSpeedSlider.value()/100}")
+            # if not SoundBackend.SyncSpeedState: return
+            for slot in range(0, AudioSystem.audioPoolSize):
+                AudioSystem.setPlaybackSpeed('audio', slot, self.audioDeviceSpeedSlider.value()/100)
+        def _speedSpeedToggle():
+            self.audioDeviceSpeedSlider.setDisabled(False) if self.audioDeviceSpeedSyncToggle.isChecked() else self.audioDeviceSpeedSlider.setDisabled(True)
+            SoundBackend.SyncSpeedState = False if SoundBackend.SyncSpeedState else True
+            rich.print("[PySoundboard] PlaybackSpeed Sync:", SoundBackend.SyncSpeedState)
+            for slot in range(0, AudioSystem.audioPoolSize):
+                AudioSystem.setPlaybackSpeed('audio', slot, 1) if not SoundBackend.SyncSpeedState else AudioSystem.setPlaybackSpeed('audio', slot, self.audioDeviceSpeedSlider.value()/100)
         
         self.audioDeviceSpeedSlider = QSlider(Qt.Orientation.Horizontal)
-        self.audioDeviceSpeedLabel = QLabel('Playback Speed: x1.0')
-        audioDevicePlaySpeedCanvas.addWidget(self.audioDeviceSpeedLabel)
-        audioDevicePlaySpeedCanvas.addWidget(self.audioDeviceSpeedSlider)
-        # self.audioDeviceSpeedSlider.setFixedWidth(200)
+        audioDeviceSpeedLabelCanvas = QHBoxLayout() # main canvas
+        audioDeviceSpeedSyncToggleCanvas = QHBoxLayout() # canvas for speed display + sync toggle
+        self.audioDeviceSpeedLabel = QLabel('Playback Speed: x1.00')
+        self.audioDeviceSpeedSyncToggle = QRadioButton()
+        self.audioDeviceSpeedSyncToggle.setCheckable(True)
+        self.audioDeviceSpeedSyncToggle.setChecked(True)
+        self.audioDeviceSpeedSyncToggle.clicked.connect(_speedSpeedToggle)
+        audioDeviceSpeedSyncToggleCanvas.addWidget(self.audioDeviceSpeedSyncToggle) # add toggle to speedsynccanvas
+        audioDeviceSpeedSyncToggleCanvas.addWidget(QLabel('Sync')) # add toggle label for sync to speedsynccanvas
+        audioDeviceSpeedLabelCanvas.addLayout(audioDeviceSpeedSyncToggleCanvas) # sync toggle + speed label to speedlabelcanvas
+        audioDeviceSpeedLabelCanvas.addWidget(self.audioDeviceSpeedLabel) # add speed display to speedlabelcanvas
+        audioDeviceSpeedLabelCanvas.addStretch(1)
+        audioDevicePlaySpeedCanvas.addLayout(audioDeviceSpeedLabelCanvas) # add to main canvas
+        audioDevicePlaySpeedCanvas.addWidget(self.audioDeviceSpeedSlider) # speed Slider
         self.audioDeviceSpeedSlider.setFixedSize(200,11)
-        
-        self.audioDeviceSpeedSlider.setRange(0, 500)
+        self.audioDeviceSpeedSlider.setRange(1, 500)
         self.audioDeviceSpeedSlider.setValue(100)
-        # better test some point whether if it's better to apply real-time or after released
         self.audioDeviceSpeedSlider.valueChanged.connect(_changeSpeed)
-        # self.audioDeviceSpeedSlider.sliderReleased.connect(_changeSpeed)
         
-        
+        # Audio Device Global PlaybackSpeed END
+        # Audio Device Global Toggles START
         audioDeviceToggles = QVBoxLayout()
         def _toggleGlobalLoopMod():
-            print('GLOBAL LOOP TOGGLE')
-        def _toggleGlobalMultiMode():
-            print('GLOBAL MULTI TOGGLE')
-        ## TODO: ADD GLOBAL LOOPING MODE
+            SoundBackend.ToggleLoopSync(AudioSystem) # Need to detatch AudioSystem sometime later
+            self.audioDeviceLoopButton.setText(SoundBackend.LoopTextState)
+        def _toggleMultiMode():
+            SoundBackend.ToggleSpamming()
+            self.audioDeviceMultiButton.setText(SoundBackend.SpammingTextState)
         self.audioDeviceLoopButton = FuncButton(SoundBackend.LoopTextState, _toggleGlobalLoopMod)
         self.audioDeviceLoopButton.setCheckable(True)
-        
-        ## TODO: ADD MULTI MODE
-        self.audioDeviceMultiButton = FuncButton(SoundBackend.SpammingTextState, _toggleGlobalMultiMode)
+        self.audioDeviceMultiButton = FuncButton(SoundBackend.SpammingTextState, _toggleMultiMode)
         self.audioDeviceMultiButton.setCheckable(True)
-        
         audioDeviceToggles.addWidget(self.audioDeviceLoopButton)
         audioDeviceToggles.addWidget(self.audioDeviceMultiButton)
         audioDeviceCanvas.addLayout(audioDevicePlaySpeedCanvas)
         audioDeviceCanvas.addLayout(audioDeviceToggles)
-        # Audio Device Global Togglables END
+        # Audio Device Global Toggles END
         audioDeviceCanvas.addStretch(1)
         
     def _mediaControlsContent(self):
         pass
+    
     def _soundboardTabsContent(self):
         # might not need a self var some of these
         self.soundboardTab = sections.SoundButtons('')
@@ -318,14 +328,16 @@ Main.show()
 # SoundBackend.AudioSystem.status()
 splash()
 ShowSettings()
-AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./boop.wav')
-AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./startup.wav')
+# AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./boop.wav')
+# AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./startup.wav')
+AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'SoundFiles\\Hexyz\\A Maiden Fights.mp3')
 
 # try to look for a way to make this not be bound to only .wav files for startup sound!
 # ^^^ In a way, this is already done.
 # ^^^ Because  im using keyNames in Dicts now, which doesnt have file extensions.
 # AudioSystem.toggleLooping('audio')
-AudioSystem.loadAudioMedia('audio','startup',0)
+# AudioSystem.loadAudioMedia('audio','startup',0)
+AudioSystem.loadAudioMedia('audio','A Maiden Fights',0)
 AudioSystem.playSlot('audio',0)
 
 sys.exit(APP.exec())
