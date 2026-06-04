@@ -230,7 +230,7 @@ class MainWindow(QMainWindow):
         # Audio Device Global PlaybackSpeed START
         audioDevicePlaySpeedCanvas = audioDeviceVolumeControlCanvas
         def _changeSpeed():
-            self.audioDeviceSpeedLabel.setText(f"Playback Speed: x{self.audioDeviceSpeedSlider.value()/100}")
+            self.audioDeviceSpeedLabel.setText(f"Playback Speed: {self.audioDeviceSpeedSlider.value()/100}x")
             # if not SoundBackend.SyncSpeedState: return
             for slot in range(0, AudioSystem.audioPoolSize):
                 AudioSystem.setPlaybackSpeed('audio', slot, self.audioDeviceSpeedSlider.value()/100)
@@ -243,7 +243,7 @@ class MainWindow(QMainWindow):
         self.audioDeviceSpeedSlider = QSlider(Qt.Orientation.Horizontal)
         audioDeviceSpeedLabelCanvas = QHBoxLayout() # main canvas
         audioDeviceSpeedSyncToggleCanvas = QHBoxLayout() # canvas for speed display + sync toggle
-        self.audioDeviceSpeedLabel = QLabel('Playback Speed: x1.00')
+        self.audioDeviceSpeedLabel = QLabel('Playback Speed: 1.00x')
         self.audioDeviceSpeedSyncToggle = QRadioButton()
         self.audioDeviceSpeedSyncToggle.setCheckable(True)
         self.audioDeviceSpeedSyncToggle.setChecked(True)
@@ -324,7 +324,6 @@ class MainWindow(QMainWindow):
         self.mediaCurrentPositionSlider.sliderPressed.connect(_pauseMedia)
         self.mediaCurrentPositionSlider.sliderMoved.connect(_updatePosDisplay)
         self.mediaCurrentPositionSlider.sliderReleased.connect(_seekMedia)
-        
         mediaControlsCanvas.addWidget(self.mediaCurrentPositionSlider)
         # Media position END
         # Elapsed time START
@@ -350,8 +349,6 @@ class MainWindow(QMainWindow):
         self.soundboardTabsGroup.addTab(self.appSettingsTab, 'Settings')
         self.soundboardTabsGroup.addTab(self.audioIndexMonitorTab, 'AudioIndex')
         
-        
-
 # Generic Button which allows for 
 # Text and .clicked.connect() declaration
 # on the same line
@@ -379,7 +376,7 @@ splash()
 ShowSettings()
 # AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./boop.wav')
 # AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./startup.wav')
-AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'SoundFiles\\Hexyz\\A Maiden Fights.mp3')
+AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./SoundFiles/Hexyz/A Maiden Fights.mp3')
 
 # try to look for a way to make this not be bound to only .wav files for startup sound!
 # ^^^ In a way, this is already done.

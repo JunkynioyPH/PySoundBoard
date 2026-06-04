@@ -210,11 +210,12 @@ class AudioManager():
         if not self._isValidGroup(pool): 
             return rich.print(f'[red b]Invalid Pool')
         slotItem = self.audioPool.get(pool)[slot]
+        originalPlayingState = slotItem.playbackState()
         slotItem_currentPos = slotItem.position()
         slotItem.stop()
         slotItem.setLoops(int(((2**32) / 2) - 1) if slotItem.loops() <= 1 else 1)
         slotItem.setPosition(slotItem_currentPos)
-        slotItem.play()
+        slotItem.pause() if originalPlayingState != PlaybackStatus.PLAYING.value else slotItem.play()
         del slotItem_currentPos
         rich.print(f"Set to {slotItem.loops() >= 2} {self.audioPool.get(pool)[slot]}")
         
