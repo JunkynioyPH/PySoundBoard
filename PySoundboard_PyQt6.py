@@ -94,7 +94,6 @@ class sections:
         def generateButtonIndex(self):
             return SoundBackend.GenerateSoundIndex(AudioSystem, SoundBackend.AudioFolder)
         def bakeButtons(self):
-            # buttonColumnCount = 0
             self.buttonsIndex = self.generateButtonIndex()
             for _tabItem in self.buttonsIndex:
                 tabCanvas = QWidget()
@@ -104,14 +103,15 @@ class sections:
                 # tabCanvas.setLayout(tabContents)
                 for _buttonItem in self.buttonsIndex[_tabItem]:
                     if buttonColumnCounter < Settings['MaxRows']:
-                        print(_buttonItem)
                         buttonColumnCanvas.addWidget(FuncButton(_buttonItem[0], _buttonItem[1], 120, styleSheet='text-align: left'))
                         buttonColumnCounter += 1
                     else:
+                        # rich.print(f"[yellow b]Overflow[/yellow b] [red]{buttonColumnCounter, _tabItem, _buttonItem}")
                         buttonColumnCanvas.addStretch(0)
                         tabContents.addLayout(buttonColumnCanvas)
                         buttonColumnCanvas = QVBoxLayout()
-                        buttonColumnCounter = 0
+                        buttonColumnCanvas.addWidget(FuncButton(_buttonItem[0], _buttonItem[1], 120, styleSheet='text-align: left'))
+                        buttonColumnCounter = 1 ## 1 since i added a button from overflow of prev column
                 else:
                     tabContents.addLayout(buttonColumnCanvas) if buttonColumnCounter != 0 else rich.print(f'[GUI] [green]Adding: Completed MaxRow[/green] [magenta b]<{_tabItem}>[/magenta b]')
                     tabContents.addStretch(0)
@@ -257,7 +257,7 @@ class MainWindow(QMainWindow):
         self.audioDeviceVolumeLabel = QLabel(f"Volume: {Settings.get('Volume')}%")
         audioDeviceVolumeControlCanvas.addWidget(self.audioDeviceVolumeLabel)
         self.audioDeviceVolumeSlider = QSlider(Qt.Orientation.Horizontal)
-        self.audioDeviceVolumeSlider.setFixedSize(200,11)
+        self.audioDeviceVolumeSlider.setFixedSize(260,11)
         self.audioDeviceVolumeSlider.setRange(0, 100)
         audioDeviceVolumeControlCanvas.addWidget(self.audioDeviceVolumeSlider)
         self.audioDeviceVolumeSlider.setValue(int(Settings['Volume']))
@@ -295,7 +295,7 @@ class MainWindow(QMainWindow):
         audioDeviceSpeedLabelCanvas.addStretch(1)
         audioDevicePlaySpeedCanvas.addLayout(audioDeviceSpeedLabelCanvas) # add to main canvas
         audioDevicePlaySpeedCanvas.addWidget(self.audioDeviceSpeedSlider) # speed Slider
-        self.audioDeviceSpeedSlider.setFixedSize(200,11)
+        self.audioDeviceSpeedSlider.setFixedHeight(11)
         self.audioDeviceSpeedSlider.setRange(5, 500)
         self.audioDeviceSpeedSlider.setValue(100)
         self.audioDeviceSpeedSlider.valueChanged.connect(_changeSpeed)
@@ -310,9 +310,9 @@ class MainWindow(QMainWindow):
         def _toggleMultiMode():
             SoundBackend.ToggleSpamming()
             self.audioDeviceMultiButton.setText(SoundBackend.SpammingTextState)
-        self.audioDeviceLoopButton = FuncButton(SoundBackend.LoopTextState, _toggleGlobalLoopMode, w=self.buttonSize[0])
+        self.audioDeviceLoopButton = FuncButton(SoundBackend.LoopTextState, _toggleGlobalLoopMode, self.buttonSize[0], 30)
         self.audioDeviceLoopButton.setCheckable(True)
-        self.audioDeviceMultiButton = FuncButton(SoundBackend.SpammingTextState, _toggleMultiMode)
+        self.audioDeviceMultiButton = FuncButton(SoundBackend.SpammingTextState, _toggleMultiMode, h=29)
         self.audioDeviceMultiButton.setCheckable(True)
         audioDeviceToggles.addWidget(self.audioDeviceLoopButton)
         audioDeviceToggles.addWidget(self.audioDeviceMultiButton)
@@ -367,7 +367,7 @@ class MainWindow(QMainWindow):
         # Media position END
         # Elapsed time START
         self.mediaElapsedTimeLabel = QLabel('---')
-        self.mediaElapsedTimeLabel.setFixedWidth(125)
+        self.mediaElapsedTimeLabel.setFixedWidth(100)
         def _updateElapsedTimeDisplay():
             self.mediaElapsedTimeLabel.setText(AudioSystem.audioMediaPos('audio', SoundBackend.SelectedSlot, True)) if not self._pauseMediaPosUpdate else ''
         self.updaterLoop.appendToQueue(_updateElapsedTimeDisplay)
