@@ -10,7 +10,6 @@ LoopTextState, GlobalLoopState,  = "Looping ALL OFF", 0
 SpammingState, SpammingTextState = 0, 'Multi-Mode OFF'
 AudioFolder = xpfpath.xpfp(".\\SoundFiles")
 Title = ''
-SyncSpeedState:bool = True
 SelectedSlot:int = 0
 
 def InitializeSettings():

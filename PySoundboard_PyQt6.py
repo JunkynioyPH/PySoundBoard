@@ -85,6 +85,44 @@ class sections:
     class SoundButtons(QGroupBox):
         def __init__(self, title, parent=None):
             super().__init__(title, parent)
+            soundButtonsCanvas = QVBoxLayout()
+            self.buttonTabsCanvas = QTabWidget()
+            self.setLayout(soundButtonsCanvas)
+            soundButtonsCanvas.addWidget(self.buttonTabsCanvas)
+            self.bakeButtons()
+            
+        def generateButtonIndex(self):
+            return SoundBackend.GenerateSoundIndex(AudioSystem, SoundBackend.AudioFolder)
+        def bakeButtons(self):
+            # buttonColumnCount = 0
+            self.buttonsIndex = self.generateButtonIndex()
+            for _tabItem in self.buttonsIndex:
+                tabCanvas = QWidget()
+                tabContents = QHBoxLayout()
+                buttonColumnCanvas = QVBoxLayout()
+                buttonColumnCounter = 0
+                # tabCanvas.setLayout(tabContents)
+                for _buttonItem in self.buttonsIndex[_tabItem]:
+                    if buttonColumnCounter < Settings['MaxRows']:
+                        print(_buttonItem)
+                        buttonColumnCanvas.addWidget(FuncButton(_buttonItem[0], _buttonItem[1], 120, styleSheet='text-align: left'))
+                        buttonColumnCounter += 1
+                    else:
+                        buttonColumnCanvas.addStretch(0)
+                        tabContents.addLayout(buttonColumnCanvas)
+                        buttonColumnCanvas = QVBoxLayout()
+                        buttonColumnCounter = 0
+                else:
+                    tabContents.addLayout(buttonColumnCanvas) if buttonColumnCounter != 0 else rich.print(f'[GUI] [green]Adding: Completed MaxRow[/green] [magenta b]<{_tabItem}>[/magenta b]')
+                    tabContents.addStretch(0)
+                    tabCanvas.setLayout(tabContents)
+                    buttonColumnCanvas.addStretch(0) if buttonColumnCounter > 0 else ''
+                    rich.print(f"[GUI] [yellow]Adding: Incomplete MaxRow[/yellow] [magenta b]<{_tabItem}>[/magenta b]") if buttonColumnCounter > 0 else rich.print('[GUI] [b]Perfect.[/b]')
+                    self.buttonTabsCanvas.addTab(tabCanvas, _tabItem)
+                    
+        def refreshButtons(self):
+            ...
+            
     class SlotStatusMonitor(QGroupBox):
         def __init__(self, title, parent=None):
             super().__init__(title, parent)
@@ -115,6 +153,7 @@ class ArrowKeysFilter_Callback(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.buttonSize = [120, 30]
         self.updaterLoop = updateTimerQueue(self, 125)
         self.updaterLoop.appendToQueue(self._updateTopBarTitle)
         self.setWindowTitle('PySoundboard PyQt6 GUI')
@@ -141,6 +180,9 @@ class MainWindow(QMainWindow):
         topBarCanvas.addWidget(QLabel("PySoundboard PyQt6 - @junkynioy"))
         topBarCanvas.addWidget(self.topBarStatus)
         self.topBarStatus.setAlignment(AlignFlag.AlignHCenter)
+        self.topBarStatus.setWordWrap(True)
+        self.topBarStatus.setMinimumSize(600,38)
+        self.topBarStatus.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
         self.audioDeviceControlsGroup = QGroupBox('')
         self.mediaControlsGroup = QGroupBox('')
@@ -231,15 +273,13 @@ class MainWindow(QMainWindow):
         audioDevicePlaySpeedCanvas = audioDeviceVolumeControlCanvas
         def _changeSpeed():
             self.audioDeviceSpeedLabel.setText(f"Playback Speed: {self.audioDeviceSpeedSlider.value()/100}x")
-            # if not SoundBackend.SyncSpeedState: return
             for slot in range(0, AudioSystem.audioPoolSize):
                 AudioSystem.setPlaybackSpeed('audio', slot, self.audioDeviceSpeedSlider.value()/100)
         def _speedSpeedToggle():
             self.audioDeviceSpeedSlider.setDisabled(False) if self.audioDeviceSpeedSyncToggle.isChecked() else self.audioDeviceSpeedSlider.setDisabled(True)
-            SoundBackend.SyncSpeedState = False if SoundBackend.SyncSpeedState else True
-            rich.print("[PySoundboard] PlaybackSpeed Sync:", SoundBackend.SyncSpeedState)
+            rich.print("[PySoundboard] PlaybackSpeed Sync:", self.audioDeviceSpeedSyncToggle.isChecked())
             for slot in range(0, AudioSystem.audioPoolSize):
-                AudioSystem.setPlaybackSpeed('audio', slot, 1) if not SoundBackend.SyncSpeedState else AudioSystem.setPlaybackSpeed('audio', slot, self.audioDeviceSpeedSlider.value()/100)
+                AudioSystem.setPlaybackSpeed('audio', slot, 1) if not self.audioDeviceSpeedSyncToggle.isChecked() else AudioSystem.setPlaybackSpeed('audio', slot, self.audioDeviceSpeedSlider.value()/100)
         self.audioDeviceSpeedSlider = QSlider(Qt.Orientation.Horizontal)
         audioDeviceSpeedLabelCanvas = QHBoxLayout() # main canvas
         audioDeviceSpeedSyncToggleCanvas = QHBoxLayout() # canvas for speed display + sync toggle
@@ -262,16 +302,15 @@ class MainWindow(QMainWindow):
         # Audio Device Global PlaybackSpeed END
         # Audio Device Global Toggles START
         audioDeviceToggles = QVBoxLayout()
-        def _toggleGlobalLoopMod():
+        def _toggleGlobalLoopMode():
             SoundBackend.ToggleLoopSync(AudioSystem) # Need to detatch AudioSystem sometime later
             self.audioDeviceLoopButton.setText(SoundBackend.LoopTextState)
+            self.mediaLoopSlot.setDisabled(True) if self.audioDeviceLoopButton.isChecked() else self.mediaLoopSlot.setDisabled(False)
+            self.mediaLoopSlot.setToolTip('Disabled as "Loop ALL" Enables loops to ALL slots.') if self.audioDeviceLoopButton.isChecked() else self.mediaLoopSlot.setToolTip('')
         def _toggleMultiMode():
             SoundBackend.ToggleSpamming()
-            self.mediaSlotSelector.setDisabled(True) if SoundBackend.SpammingState == 1 else self.mediaSlotSelector.setDisabled(False)
-            self.mediaCurrentPositionSlider.setDisabled(True) if SoundBackend.SpammingState == 1 else self.mediaCurrentPositionSlider.setDisabled(False)
-            self.mediaSlotSelector.setToolTip('This is disabled as Multi-Mode Automagically manages slot selection.') if SoundBackend.SpammingState == 1 else self.mediaSlotSelector.setToolTip('')
             self.audioDeviceMultiButton.setText(SoundBackend.SpammingTextState)
-        self.audioDeviceLoopButton = FuncButton(SoundBackend.LoopTextState, _toggleGlobalLoopMod, w=120)
+        self.audioDeviceLoopButton = FuncButton(SoundBackend.LoopTextState, _toggleGlobalLoopMode, w=self.buttonSize[0])
         self.audioDeviceLoopButton.setCheckable(True)
         self.audioDeviceMultiButton = FuncButton(SoundBackend.SpammingTextState, _toggleMultiMode)
         self.audioDeviceMultiButton.setCheckable(True)
@@ -300,13 +339,13 @@ class MainWindow(QMainWindow):
         def _stopAllPlayback():
             AudioSystem.unloadAllAudioMedia()
         self.mediaResumePauseButton = FuncButton('Resume / Pause', _toggleAllPlayPauseState, w=120, h=30)
-        self.mediaStopButton = FuncButton('Stop', _stopAllPlayback, w=120, h=30)
+        self.mediaStopButton = FuncButton('Stop', _stopAllPlayback, int(self.buttonSize[0]/2),self.buttonSize[1])
         mediaControlsCanvas.addWidget(self.mediaResumePauseButton)
         mediaControlsCanvas.addWidget(self.mediaStopButton)
         # Play Resume Stop Button END
         # Media position START
         def _updateMediaPositionSlider():
-            index, dur, pos = AudioSystem.audioMediaPos('audio',SoundBackend.SelectedSlot)
+            _, dur, pos = AudioSystem.audioMediaPos('audio',SoundBackend.SelectedSlot)
             self.mediaCurrentPositionSlider.setRange(0, int(dur))
             self.mediaCurrentPositionSlider.setValue(int(pos)) if not self._pauseMediaPosUpdate else ''
         def _seekMedia():
@@ -334,15 +373,21 @@ class MainWindow(QMainWindow):
         self.updaterLoop.appendToQueue(_updateElapsedTimeDisplay)
         mediaControlsCanvas.addWidget(self.mediaElapsedTimeLabel)
         # Elapsed time END
+        # Slot Loop START
+        def _loopSlot():
+            AudioSystem.toggleLoopAudioMediaSlot('audio', SoundBackend.SelectedSlot)
+        self.mediaLoopSlot = FuncButton("Loop", _loopSlot, int(self.buttonSize[0]/2), self.buttonSize[1])
+        mediaControlsCanvas.addWidget(self.mediaLoopSlot)
+        # Slot Loop END
         mediaControlsCanvas.addStretch(1)
         
         
     def _soundboardTabsContent(self):
         # might not need a self var some of these
-        self.soundboardTab = sections.SoundButtons('')
-        self.slotsMonitorTab = sections.SlotStatusMonitor('')
-        self.appSettingsTab = sections.PySoundboardSettings('')
-        self.audioIndexMonitorTab = sections.AudioIndexMonitor('')
+        self.soundboardTab = sections.SoundButtons('', self)
+        self.slotsMonitorTab = sections.SlotStatusMonitor('', self)
+        self.appSettingsTab = sections.PySoundboardSettings('', self)
+        self.audioIndexMonitorTab = sections.AudioIndexMonitor('', self)
         
         self.soundboardTabsGroup.addTab(self.soundboardTab, 'Soundboard')
         self.soundboardTabsGroup.addTab(self.slotsMonitorTab, 'Slots')
@@ -353,15 +398,15 @@ class MainWindow(QMainWindow):
 # Text and .clicked.connect() declaration
 # on the same line
 class FuncButton(QPushButton):
-    def __init__(self, Name:str, callback, w:int|None=None, h:int|None=None):
+    def __init__(self, Name:str, callback, w:int|None=None, h:int|None=None, styleSheet:str|None=None):
         super().__init__()
         # self.Method = Method
         self.setText(Name)
-        self.setStyleSheet("text-align: left; padding: 5%;") #  margin: 0%;
+        self.setStyleSheet(f"padding: 5%;{f' {styleSheet}' if styleSheet else ''}") #  margin: 0%; ; 
         self.setFixedWidth(w) if w else ''
         self.setFixedHeight(h) if h else ''
-        if not callable(callback):
-            raise TypeError(f'{callback} Not Callable Method')
+        # if not callable(callback):
+        #     raise TypeError(f'{callback} Not Callable Method')
         self.clicked.connect(callback)
 
 # Initialize Backend
@@ -375,15 +420,13 @@ Main.show()
 splash()
 ShowSettings()
 # AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./boop.wav')
-# AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./startup.wav')
-AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./SoundFiles/Hexyz/A Maiden Fights.mp3')
+AudioSystem.addIndex(SoundBackend.SoundType.AUDIO_MEDIA,'./startup.wav')
 
 # try to look for a way to make this not be bound to only .wav files for startup sound!
 # ^^^ In a way, this is already done.
 # ^^^ Because  im using keyNames in Dicts now, which doesnt have file extensions.
 # AudioSystem.toggleLooping('audio')
-# AudioSystem.loadAudioMedia('audio','startup',0)
-AudioSystem.loadAudioMedia('audio','A Maiden Fights',0)
+AudioSystem.loadAudioMedia('audio','startup',0)
 AudioSystem.playSlot('audio',0)
 
 sys.exit(APP.exec())
