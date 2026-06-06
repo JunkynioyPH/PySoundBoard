@@ -393,6 +393,13 @@ class MainWindow(QMainWindow):
         self.soundboardTabsGroup.addTab(self.slotsMonitorTab, 'Slots')
         self.soundboardTabsGroup.addTab(self.appSettingsTab, 'Settings')
         self.soundboardTabsGroup.addTab(self.audioIndexMonitorTab, 'AudioIndex')
+    ## Ai Assisted Window centering
+    ## Unknown if Cross Platform
+    def center_window(self):
+        screen = self.screen().availableGeometry()
+        frame = self.frameGeometry()
+        frame.moveCenter(screen.center())
+        self.move(frame.topLeft())
         
 # Generic Button which allows for 
 # Text and .clicked.connect() declaration
@@ -416,6 +423,7 @@ AudioSystem.togglePoolRollOver('audio')
 # Start Window
 Main = MainWindow()
 Main.show()
+Main.center_window()
 # SoundBackend.AudioSystem.status()
 splash()
 ShowSettings()
