@@ -10,14 +10,14 @@ PySoundboard_Legacy holds the old versions of the soundboard. Written with TkInt
 
 PySoundboard_PyQt6 is my latest iteration of this soundboard. Written soley with PyQt6.
 
-# Pre-Requisites (PySoundboard_PyQt6 & [PySoundboard_PyQt6_old](PySoundboard_PyQt6_old))
+# (PySoundboard_PyQt6 & [PySoundboard_PyQt6_old](PySoundboard_PyQt6_old))
 **(Python 3.10+)**
 Requires **python** to be installed.
 
 **(pip install pyqt6)**
 Requires **PyQt6** to be installed.
 
-# Pre-Requisites ([PySoundboard_Legacy](PySoundboard_Legacy))
+# ([PySoundboard_Legacy](PySoundboard_Legacy))
 **(Python 3.10+** with **Ttk/TKinter**)
 Requires **python** to be installed. **Ttk/TKinter** for **TkInter GUI**
 
