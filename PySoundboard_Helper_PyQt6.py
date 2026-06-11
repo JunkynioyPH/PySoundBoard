@@ -4,7 +4,7 @@ from AudioSystem_PyQt6 import *
 def InitializeSettings():
     Settings:dict = {}
     # add parameters for button sizes and stuff
-    Defaults = {"AudioDevice":None,"Volume":8,"UseSystemTheme":True,"MaxRows":8,"Splash":True, "SteamDeck":False}
+    Defaults = {"AudioDevice":None,"Volume":8,"UseSystemTheme":True,"MaxRows":8,"Splash":True, "HandHeld":False}
     def writeNewJSONValues(update=False):
         if update:
             with open("Settings.json","r") as Dump:

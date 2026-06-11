@@ -357,7 +357,7 @@ class MainWindow(QMainWindow):
         self.soundboardTabsGroup.addTab(self.slotsMonitorTab, 'Slots')
         self.soundboardTabsGroup.addTab(self.appSettingsTab, 'Settings')
         self.soundboardTabsGroup.addTab(self.audioIndexMonitorTab, 'AudioIndex')
-    def steamDeckMode(self, bool):
+    def handHeldMode(self, bool):
         if bool:
             print('deckMode_enabled')
     ## Ai Assisted Window centering
@@ -399,7 +399,7 @@ splashInfo(Settings.get('Splash'))
 AudioSystem = PSbHelper.InitializeAudioSystem(Settings); AudioSystem.togglePoolRollOver('audio')
 # Start Window
 Main = MainWindow(); Main.show(); Main.center_window() if os.name=='nt' else ''
-Main.steamDeckMode(Settings['SteamDeck'])
+Main.handHeldMode(Settings['HandHeld'])
 splashCli(); ShowSettings()
 AudioSystem.addIndex(PSbHelper.SoundType.AUDIO_MEDIA,'./startup.wav')
 AudioSystem.loadAudioMedia('audio','startup',0)
