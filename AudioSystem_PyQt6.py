@@ -34,14 +34,19 @@ class MediaLoaded(enum.Enum):
     LOADED = QMediaPlayer.MediaStatus.LoadedMedia
     BUFFERING = QMediaPlayer.MediaStatus.BufferingMedia
     BUFFERED = QMediaPlayer.MediaStatus.BufferedMedia
-    
+    @classmethod
+    def contains(cls, status):
+        try:
+            cls(status)
+            return True
+        except ValueError:
+            return False
 class PlaybackStatus(enum.Enum):
     """Use PlaybackStatus.Playing.value to compare .playbackstate():QMediaPlayer.PlaybackState and this class' Values."""
     PLAYING = QMediaPlayer.PlaybackState.PlayingState
     PAUSED = QMediaPlayer.PlaybackState.PausedState
     STOPPED = QMediaPlayer.PlaybackState.StoppedState
 
-# Main Heart
 class AudioManager():
     def __init__(self, device:QAudioDevice, audioGroups:dict[str, SoundType], masterVolume:int=100, initVolume=14, audioPoolSize:int=8):
         """The Main Class which holds everything about the Audio System"""
@@ -93,10 +98,10 @@ class AudioManager():
         [Index] [SoundEffect] :
         {self.audioIndex[SoundType.SOUND_EFFECT]}"""
         statusAudioMediaPool = []
-        for group in self.audioGroups:
-            if SoundType.isMasterVolume(self.audioGroups, group): continue
-            statusAudioMediaPool.append(f"        <{group}> {self.audioGroups.get(group)} :\n\n")
-            for item in self.audioPool.get(group):
+        for pool in self.audioGroups:
+            if SoundType.isMasterVolume(self.audioGroups, pool): continue
+            statusAudioMediaPool.append(f"        <{pool}> {self.audioGroups.get(pool)} :\n\n")
+            for item in self.audioPool.get(pool):
                 statusAudioMediaPool.append(f"{"        "*2}{item}\n")
             statusAudioMediaPool.append('\n')
                 
@@ -126,22 +131,22 @@ class AudioManager():
             self.rollOverEnabled[pool] = False if self.rollOverEnabled[pool] else True
         rich.print(f"[b]Toggle Pools {self.rollOverEnabled}")
         
-    def setVolume(self, group:str, vol:int):
-        """Set volume of specified group/pool"""
-        # check if valid group
-        if not self._isValidPool(group): 
-            return rich.print(f'[AudioManager] Invalid Group <{group}>')
+    def setVolume(self, pool:str, vol:int):
+        """Set volume of specified pool/pool"""
+        # check if valid pool
+        if not self._isValidPool(pool): 
+            return rich.print(f'[AudioManager] Invalid pool <{pool}>')
         # update stored setting
-        rich.print(f'[AudioManager] [b]Set Volume: <{group}> {vol} ', end='')
-        self.settings.get('volume')[group] = vol
+        rich.print(f'[AudioManager] [b]Set Volume: <{pool}> {vol} ', end='')
+        self.settings.get('volume')[pool] = vol
         # updating AudioMedia/SoundEffect
-        if not SoundType.isMasterVolume(self.audioGroups, group):
-            if SoundType.isSoundEffect(self.audioGroups, group):
-                if len(self.audioPool.get(group)) < 1: return rich.print(f"[red b]Empty Pool[/red b]")
-                for sound in self.audioPool.get(group):
+        if not SoundType.isMasterVolume(self.audioGroups, pool):
+            if SoundType.isSoundEffect(self.audioGroups, pool):
+                if len(self.audioPool.get(pool)) < 1: return rich.print(f"[red b]Empty Pool[/red b]")
+                for sound in self.audioPool.get(pool):
                     sound.setVolume(vol/100)
             else:
-                for audio in self.audioPool.get(group):
+                for audio in self.audioPool.get(pool):
                     audio.device.setVolume(vol/100)
         rich.print(f"[green b]OK[/green b]")
             
@@ -248,7 +253,7 @@ class AudioManager():
             # load to next available pool slot
             rich.print(f'[yellow b]Using[/yellow b] ', end='')
             for slot in self.audioPool.get(pool):
-                if slot.mediaStatus() in [status.value for status in MediaLoaded]: 
+                if MediaLoaded.contains(slot.mediaStatus()): 
                     # rich.print(f'[cyan b][{slot.name}][/cyan b][red b]X[/red b] ', end='')
                     continue
                 _setAudioMediaParams(slot, audioPathQUrl)
@@ -279,8 +284,7 @@ class AudioManager():
             rich.print(f"[AudioManager] [red b]Unload All AudioMedia:[/red b] ({pool}) [blue]Slots[/blue] ",end='')
             for slot in self.audioPool.get(pool):
                 if not self.audioGroups.get(pool) is SoundType.SOUND_EFFECT:
-                    if not slot.mediaStatus() in [status.value for status in MediaLoaded]: continue
-                    
+                    if not MediaLoaded.contains(slot.mediaStatus()): continue
                 slot.setSource(QUrl.fromLocalFile(None))
                 rich.print(f"[yellow b]{slot.name}", end=' ')
             else:
@@ -297,7 +301,7 @@ class AudioManager():
         slot:AudioMedia = self.audioPool.get(pool)[poolIndex]
         slot.setSource(QUrl.fromLocalFile(None))
     
-    def setPlaybackSpeed(self, pool:str, slot:int, rate:float):
+    def setSlotPlaybackSpeed(self, pool:str, slot:int, rate:float):
             slot:AudioMedia = self.audioPool.get(pool)[slot]
             rich.print(f"[AudioManager] [blue b]Playback Rate:[/blue b] ({pool}) ", end='')
             slot.setPlaybackRate(rate)
@@ -323,7 +327,7 @@ class AudioManager():
     
     def playSoundEffect(self, poolName:str, sound:str):
         rich.print(f"[AudioManager] [blue b]Play SoundEffect:[/blue b] ({poolName}) [magenta b]<{sound}>[/magenta b] ", end='')
-        # if exists in group
+        # if exists in pool
         if not self._isValidPool(poolName): 
             return rich.print(f'[red b]Invalid Pool')
         # if it's SoundEffect pool
@@ -391,7 +395,7 @@ class AudioManager():
             stateColor = 'b'
             for audio in audioMediaPool:
                 #if it's not even loaded with audio, skip
-                if not audio.mediaStatus() in [status.value for status in MediaLoaded]: continue
+                if not MediaLoaded.contains(audio.mediaStatus()): continue
                 match state:
                     case AudioPlaybackAction.PLAY:
                         stateColor = 'cyan b'
