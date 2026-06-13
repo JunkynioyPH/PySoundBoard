@@ -2,10 +2,11 @@ from rich import pretty
 pretty.install()
 import json, os, sys, rich
 # QSize, QUrl
-from PyQt6.QtCore import Qt, QTimer, QObject, QEvent
 # from PyQt6.QtGui import QPixmap, QRegion # MAYBE ill get to work this at some point lmao
+from PyQt6.QtCore import Qt, QTimer, QObject, QEvent
 from PyQt6.QtMultimedia import QMediaDevices
 from PyQt6.QtWidgets import *
+from difflib import get_close_matches
 import PySoundboard_Helper_PyQt6 as PSbHelper
 APP = QApplication([])
 # Initialise Instance of QApp
@@ -37,6 +38,13 @@ def UpdateSettings(Variable,Value):
         UpdateSettings.write(json.dumps(Settings))
     PSbHelper.InitializeSettings() # Reload Settings
     ShowSettings()
+def setAppTheme(bool:bool):
+    if not bool:
+        import darkmode
+        APP.setStyle('Fusion'); APP.setPalette(darkmode.get_slate_blue_dark_palette())
+        rich.print('[PySoundboard] Using Built-in Dark Theme')
+    else:
+        rich.print('[PySoundboard] Using System Theme')
 # Show First-Time Execution then turn off pop up
 # need to replace
 def splashInfo(unseen:bool):
@@ -65,14 +73,22 @@ class sections:
         def __init__(self, title, parent=None):
             super().__init__(title, parent)
             self.progenitor = parent
-            soundButtonsCanvas = QVBoxLayout()
-            self.buttonTabsCanvas = QTabWidget()
-            self.setLayout(soundButtonsCanvas)
-            soundButtonsCanvas.addWidget(self.buttonTabsCanvas)
+            self.soundButtonsCanvas = QVBoxLayout()
+            # SoundButtonsFilterBar = QHBoxLayout()
+            # self.soundButtonsFilterTextBox = QLineEdit()
+            # self.soundButtonsFilterTextBox.setPlaceholderText('Filter Search...')
+            self.soundButtonsRefreshListButton = FuncButton('Refresh', self.refreshButtons)
+            # SoundButtonsFilterBar.addWidget(self.soundButtonsFilterTextBox)
+            # SoundButtonsFilterBar.addWidget(self.soundButtonsRefreshListButton)
+            # self.soundButtonsCanvas.addLayout(SoundButtonsFilterBar)
+            self.soundButtonsCanvas.addWidget(self.soundButtonsRefreshListButton)
             self.bakeButtons()
         def _generateButtonIndex(self):
-            return PSbHelper.GenerateSoundIndex(AudioSystem, os.path.join('./SoundFiles'))
+            return PSbHelper.GenerateSoundIndex(AudioSystem, os.path.join('./SoundFiles'))        
         def bakeButtons(self):
+            self.buttonTabsCanvas = QTabWidget()
+            self.setLayout(self.soundButtonsCanvas)
+            self.soundButtonsCanvas.addWidget(self.buttonTabsCanvas)
             self.buttonsIndex = self._generateButtonIndex()
             for _tabItem in self.buttonsIndex:
                 tabCanvas = QWidget()
@@ -99,9 +115,15 @@ class sections:
                     tabCanvas.setLayout(tabContents)
                     buttonColumnCanvas.addStretch(0) if buttonColumnCounter > 0 else ''
                     rich.print(f"[PySoundboard] [green]Adding Column:[/green] Incomplete [magenta b]<{_tabItem}>[/magenta b]") if buttonColumnCounter > 0 else rich.print('[GUI] [b]Perfect.[/b]')
-                    self.buttonTabsCanvas.addTab(tabCanvas, _tabItem) 
+                    self.buttonTabsCanvas.addTab(tabCanvas, _tabItem)
+            # print(self.overlap_score(Query, _buttonName))
         def refreshButtons(self):
-            ...
+            AudioMediaIndex = list(AudioSystem.audioIndex.get(PSbHelper.SoundType.AUDIO_MEDIA))
+            for indexItem in AudioMediaIndex:
+                AudioSystem.removeIndex(PSbHelper.SoundType.AUDIO_MEDIA, indexItem)
+            self.soundButtonsCanvas.removeWidget(self.buttonTabsCanvas)
+            self.buttonTabsCanvas.deleteLater()
+            self.bakeButtons()
     class SlotStatusMonitor(QGroupBox):
         def __init__(self, title, parent=None):
             super().__init__(title, parent)
@@ -210,7 +232,7 @@ class MainWindow(QMainWindow):
                 AudioSystem.loadAudioMedia('audio','startup',0)
                 AudioSystem.playSlot('audio',0)
                 rich.print(f"[PySoundboard] [{self.audioDeviceSelectComboBox.currentText()}] : {repr(ERR)}\n[PySoundboard] Restart Soundboard to refresh Dropdown List ") if self.audioDeviceSelectComboBox.currentIndex() != 0 else ''      
-        self.audioDeviceSelectComboBox.setFixedSize(430, 42)
+        self.audioDeviceSelectComboBox.setFixedSize(435, 42)
         self.audioDeviceSelectComboBox.setPlaceholderText('Defaulting, Select an Output Device...')
         self.audioDeviceSelectComboBox.addItems([device.description() for device in QMediaDevices.audioOutputs()])
         self.audioDeviceSelectComboBox.setCurrentIndex(self.audioDeviceSelectComboBox.findText(Settings["AudioDevice"]))
@@ -281,10 +303,12 @@ class MainWindow(QMainWindow):
             # PSbHelper.ToggleLoopSync(AudioSystem) # Need to detatch AudioSystem sometime later
             self.audioDeviceLoopButton.setText(f'Looping ALL {'ON' if self.audioDeviceLoopButton.isChecked() else 'OFF'}')
             for slot in range(0, AudioSystem.audioPoolSize):
-                AudioSystem.toggleLoopAudioMediaSlot('audio', slot)
+                slotLoopingState = AudioSystem.audioPool['audio'][slot].loops() > 1
+                if not slotLoopingState is self.audioDeviceLoopButton.isChecked():
+                    AudioSystem.toggleLoopAudioMediaSlot('audio', slot)
         def _toggleMultiMode():
             self.audioDeviceMultiButton.setText(f"Multi-Mode {'ON' if self.audioDeviceMultiButton.isChecked() else 'OFF'}")
-        self.audioDeviceLoopButton = FuncButton(f'Looping ALL OFF', _toggleGlobalLoopMode, self.buttonSize[0], 30)
+        self.audioDeviceLoopButton = FuncButton(f'Looping ALL OFF', _toggleGlobalLoopMode, self.buttonSize[0], self.buttonSize[1])
         self.audioDeviceLoopButton.setCheckable(True)
         self.audioDeviceMultiButton = FuncButton('Multi-Mode OFF', _toggleMultiMode, h=29)
         self.audioDeviceMultiButton.setCheckable(True)
@@ -374,7 +398,7 @@ class MainWindow(QMainWindow):
         self.soundboardTabsGroup.addTab(self.slotsMonitorTab, 'Slots')
         self.soundboardTabsGroup.addTab(self.appSettingsTab, 'Settings')
         self.soundboardTabsGroup.addTab(self.audioIndexMonitorTab, 'AudioIndex')
-    def handHeldMode(self, bool):
+    def handHeldMode(self, bool:bool):
         if bool:
             print('deckMode_enabled')
     ## Ai Assisted Window centering
@@ -408,12 +432,7 @@ class AudioButton(FuncButton):
         AudioSystem.playAll() if multiMode else AudioSystem.playSlot('audio', 0)
 # Load Settings
 Settings:dict = PSbHelper.InitializeSettings()
-if not Settings['UseSystemTheme']:
-    import darkmode
-    APP.setStyle('Fusion'); APP.setPalette(darkmode.get_slate_blue_dark_palette())
-    rich.print('[PySoundboard] Using Built-in Dark Theme')
-else:
-    rich.print('[PySoundboard] Using System Theme')
+setAppTheme(Settings['UseSystemTheme'])
 splashInfo(Settings.get('Splash'))
 # Initialize System
 AudioSystem = PSbHelper.InitializeAudioSystem(Settings); AudioSystem.togglePoolRollOver('audio')

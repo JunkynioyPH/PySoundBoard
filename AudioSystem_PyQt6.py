@@ -206,11 +206,6 @@ class AudioManager():
         self.audioIndex[type].pop(item)
         rich.print(f"[green b]OK[/green b]")
     
-    # will need to add individual adressing of each slots
-    # will need to re-write some parts of loadAudioMedia() related to LOOPING
-    #   > set looping True/False or use the PyQt6 INFINITE thing
-    # will need to built-in LOOPING check or something to AudioMedia/SoundEffect
-    
     def toggleLoopAudioMediaSlot(self, pool:str, slot:int):
         rich.print(f"[AudioManager] Toggle Looping: ({pool}) ", end='')
         if not self._isValidPool(pool): 
