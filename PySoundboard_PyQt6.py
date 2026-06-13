@@ -96,14 +96,12 @@ class sections:
                 tabContents.addStretch(0)
                 buttonColumnCanvas = QVBoxLayout()
                 buttonColumnCounter = 0
-                # tabCanvas.setLayout(tabContents)
                 for _buttonName in self.buttonsIndex[_tabItem]:
                     button = AudioButton(self.progenitor, _buttonName)
                     if buttonColumnCounter < Settings['MaxRows']:
                         buttonColumnCanvas.addWidget(button)
                         buttonColumnCounter += 1
                     else:
-                        # rich.print(f"[yellow b]Overflow[/yellow b] [red]{buttonColumnCounter, _tabItem, _buttonItem}")
                         buttonColumnCanvas.addStretch(0)
                         tabContents.addLayout(buttonColumnCanvas)
                         buttonColumnCanvas = QVBoxLayout()
@@ -116,7 +114,6 @@ class sections:
                     buttonColumnCanvas.addStretch(0) if buttonColumnCounter > 0 else ''
                     rich.print(f"[PySoundboard] [green]Adding Column:[/green] Incomplete [magenta b]<{_tabItem}>[/magenta b]") if buttonColumnCounter > 0 else rich.print('[GUI] [b]Perfect.[/b]')
                     self.buttonTabsCanvas.addTab(tabCanvas, _tabItem)
-            # print(self.overlap_score(Query, _buttonName))
         def refreshButtons(self):
             AudioMediaIndex = list(AudioSystem.audioIndex.get(PSbHelper.SoundType.AUDIO_MEDIA))
             for indexItem in AudioMediaIndex:
@@ -215,7 +212,6 @@ class MainWindow(QMainWindow):
                 devices = QMediaDevices.audioOutputs()
                 for device in devices:
                     if device.description() == self.audioDeviceSelectComboBox.currentText():
-                        # rich.print(device, device.description(), self.audioDeviceSelectComboBox.currentText())
                         return device
             try:
                 UpdateSettings("AudioDevice",self.audioDeviceSelectComboBox.currentText())
@@ -268,7 +264,7 @@ class MainWindow(QMainWindow):
         def _changeSpeed():
             ###
             # ADD CHECK TO SEE IF SLOT IS PLAYING, IF IT ISNT, IGNORE SLOT
-            ##
+            ###
             self.audioDeviceSpeedLabel.setText(f"Playback Speed: {self.audioDeviceSpeedSlider.value()/100}x")
             for slot in range(0, AudioSystem.audioPoolSize):
                 AudioSystem.setSlotPlaybackSpeed('audio', slot, self.audioDeviceSpeedSlider.value()/100)
@@ -300,7 +296,6 @@ class MainWindow(QMainWindow):
         # Audio Device Global Toggles START
         audioDeviceToggles = QVBoxLayout()
         def _toggleGlobalLoopMode():
-            # PSbHelper.ToggleLoopSync(AudioSystem) # Need to detatch AudioSystem sometime later
             self.audioDeviceLoopButton.setText(f'Looping ALL {'ON' if self.audioDeviceLoopButton.isChecked() else 'OFF'}')
             for slot in range(0, AudioSystem.audioPoolSize):
                 slotLoopingState = AudioSystem.audioPool['audio'][slot].loops() > 1
