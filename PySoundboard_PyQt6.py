@@ -77,7 +77,7 @@ class sections:
             # SoundButtonsFilterBar = QHBoxLayout()
             # self.soundButtonsFilterTextBox = QLineEdit()
             # self.soundButtonsFilterTextBox.setPlaceholderText('Filter Search...')
-            self.soundButtonsRefreshListButton = FuncButton('Refresh', self.refreshButtons)
+            self.soundButtonsRefreshListButton = FuncButton('Refresh Tab Lists', self.refreshButtons)
             # SoundButtonsFilterBar.addWidget(self.soundButtonsFilterTextBox)
             # SoundButtonsFilterBar.addWidget(self.soundButtonsRefreshListButton)
             # self.soundButtonsCanvas.addLayout(SoundButtonsFilterBar)
