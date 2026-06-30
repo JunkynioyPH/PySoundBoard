@@ -124,7 +124,49 @@ class sections:
     class SlotStatusMonitor(QGroupBox):
         def __init__(self, title, parent=None):
             super().__init__(title, parent)
-    class AudioIndexMonitor(QGroupBox):
+            self.slotStatusMonitorCanvas = QVBoxLayout()
+            self.progenitor = parent
+            self.setLayout(self.slotStatusMonitorCanvas)
+            for slot in range(0, AudioSystem.audioPoolSize):
+                self.slotStatusMonitorCanvas.addLayout(self._SlotDisplay(slot, self.progenitor))
+        class _SlotDisplay(QVBoxLayout):
+            def __init__(self, slotNumber, parent:"MainWindow"):
+                super().__init__(parent)
+                self.slot = slotNumber
+                
+                self.slotInformationText = QLabel()
+                self.slotControlButtons = QHBoxLayout()
+                self.slotInformationText.setWordWrap(True)
+                self.slotInformationText.setMinimumSize(600,38)
+                self.addWidget(self.slotInformationText)
+                self.addLayout(self.slotControlButtons)
+                parent.updaterLoop.appendToQueue(self.slotStatusUpdater)
+                
+                self.slotControlButtons.addWidget(FuncButton('Looping', self.toggleLoop, parent.buttonSize[0]))
+                self.slotControlButtons.addWidget(FuncButton('Resume', self.resume, parent.buttonSize[0]))
+                self.slotControlButtons.addWidget(FuncButton('Pause', self.pause, parent.buttonSize[0]))
+                self.slotControlButtons.addWidget(FuncButton('Stop', self.stop, parent.buttonSize[0]))
+                self.slotControlButtons.addWidget(FuncButton('Unload', self.unload, parent.buttonSize[0]))
+                self.slotControlButtons.addStretch(0)
+                
+                
+            def slotStatusUpdater(self):
+                slot:PSbHelper.AudioMedia = AudioSystem.audioPool['audio'][self.slot]
+                name, src, mediastat, loopstat, playstat, playrate = slot.getStatus()
+                _text = f'[Slot {name}] - {mediastat if src == '' else src}{f"\n : {loopstat}" if loopstat != '' else '\n'}{f" : {mediastat}" if src != '' else ''} : {playstat} [@ {playrate}x]'
+                self.slotInformationText.setText(_text)
+            def toggleLoop(self):
+                AudioSystem.toggleLoopAudioMediaSlot('audio', self.slot)
+            def resume(self):
+                AudioSystem.playSlot('audio', self.slot)
+            def pause(self):
+                AudioSystem.pauseSlot('audio', self.slot)
+            def stop(self):
+                AudioSystem.stopSlot('audio', self.slot)
+            def unload(self):
+                AudioSystem.unloadAudioMediaSlot('audio', self.slot)
+                
+    class DebugMonitor(QGroupBox):
         def __init__(self, title, parent=None):
             super().__init__(title, parent)
     class PySoundboardSettings(QGroupBox):
@@ -318,7 +360,7 @@ class MainWindow(QMainWindow):
         self.mediaControlsGroup.setLayout(mediaControlsCanvas)
         # Control ALL slots START
         def _controlAllSlots():
-            toolTip = '"All Slots" is Enabled, which controls all slots.' if self.mediaControlAllSlots.isChecked() else ''
+            toolTip = '"All Slots" is Enabled.' if self.mediaControlAllSlots.isChecked() else ''
             self.mediaLoopSlot.setToolTip(toolTip)
             self.mediaLoopSlot.setDisabled(self.mediaControlAllSlots.isChecked())
             self.mediaSlotSelector.setToolTip(toolTip)
@@ -331,11 +373,11 @@ class MainWindow(QMainWindow):
         # Select Slot START
         self.mediaSlotSelector = QComboBox()
         self.mediaSlotSelector.addItems([f"Slot {slot.name}" for slot in AudioSystem.audioPool['audio']])
-        self.mediaSlotSelector.addItem('All')
         self.mediaSlotSelector.setFixedHeight(30)
         mediaControlsCanvas.addWidget(self.mediaSlotSelector)
         # Select Slot END
         # Play Resume Stop Button START
+        ######## DESYNC BUG OF SLOTS WHEN "ALL SLOTS" IS SELECTED, AFTER PAUSING/RESUMING ONLY 1 SLOT TODO
         def _toggleAllPlayPauseState():
             PSbHelper.togglePlaybackStateAll(AudioSystem) if self.mediaControlAllSlots.isChecked() else PSbHelper.togglePlaybackStateSlot(AudioSystem, self.mediaSlotSelector.currentIndex())
         def _stopAllPlayback():
@@ -387,12 +429,12 @@ class MainWindow(QMainWindow):
         self.soundboardTab = sections.SoundButtons('', self)
         self.slotsMonitorTab = sections.SlotStatusMonitor('', self)
         self.appSettingsTab = sections.PySoundboardSettings('', self)
-        self.audioIndexMonitorTab = sections.AudioIndexMonitor('', self)
+        self.debugMonitor = sections.DebugMonitor('', self) if Settings.get('DebugInfo') else ''
         
         self.soundboardTabsGroup.addTab(self.soundboardTab, 'Soundboard')
         self.soundboardTabsGroup.addTab(self.slotsMonitorTab, 'Slots')
         self.soundboardTabsGroup.addTab(self.appSettingsTab, 'Settings')
-        self.soundboardTabsGroup.addTab(self.audioIndexMonitorTab, 'AudioIndex')
+        self.soundboardTabsGroup.addTab(self.debugMonitor, 'debugMonitor') if Settings.get('DebugInfo') else ''
     def handHeldMode(self, bool:bool):
         if bool:
             print('deckMode_enabled')
@@ -423,8 +465,8 @@ class AudioButton(FuncButton):
         self.setToolTip(name)
     def play(self):
         multiMode = self.progenitor.audioDeviceMultiButton.isChecked()
-        AudioSystem.loadAudioMedia('audio', self.name, None if multiMode else 0)
-        AudioSystem.playAll() if multiMode else AudioSystem.playSlot('audio', 0)
+        AudioSystem.loadAudioMedia('audio', self.name, None if multiMode else self.progenitor.mediaSlotSelector.currentIndex())
+        AudioSystem.playAll() if multiMode else AudioSystem.playSlot('audio', self.progenitor.mediaSlotSelector.currentIndex())
 # Load Settings
 Settings:dict = PSbHelper.InitializeSettings()
 setAppTheme(Settings['UseSystemTheme'])
