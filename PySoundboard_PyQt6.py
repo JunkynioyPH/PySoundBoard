@@ -112,19 +112,9 @@ class sections:
             self.soundIndexGenerator.soundIndexReady.connect(self.bakeButtons)
             self.soundIndexGenerator.soundIndexReady.connect(self.threadingObj.quit)
             self.soundIndexGenerator.soundIndexReady.connect(self.soundIndexGenerator.deleteLater)
-            self.threadingObj.finished.connect(self.soundIndexGenerator.deleteLater)
+            self.threadingObj.finished.connect(self.threadingObj.deleteLater)
             self.threadingObj.finished.connect(splashCli)
             self.threadingObj.finished.connect(ShowSettings)
-            self.threadingObj.start(QThread.Priority.TimeCriticalPriority)
-        def _RebakeButtonsThreadingWrapper(self):
-            self.threadingObj = QThread(self)
-            self.soundIndexClearing = self.threadedSoundButtonRemover()
-            self.soundIndexClearing.moveToThread(self.threadingObj)
-            self.threadingObj.started.connect(self.soundIndexClearing._clearIndex)
-            self.soundIndexClearing.soundButtonsCleared.connect(self.threadingObj.quit)
-            self.soundIndexClearing.soundButtonsCleared.connect(self.soundIndexClearing.deleteLater)
-            self.soundIndexClearing.soundButtonsCleared.connect(self._bakeButtonThreadingWrapper)
-            self.threadingObj.finished.connect(self.soundIndexClearing.deleteLater)
             self.threadingObj.start(QThread.Priority.TimeCriticalPriority)
         def bakeButtons(self, buttonIndex:dict):
             self.buttonTabsCanvas = QTabWidget()
@@ -163,7 +153,8 @@ class sections:
         def refreshButtons(self):
             self.progenitor.soundboardTab.soundButtonsRefreshListButton.setDisabled(True)
             self.refreshButtonDisplayLabel.setHidden(False)
-            self._RebakeButtonsThreadingWrapper()
+            AudioSystem.audioIndex[PSbHelper.SoundType.AUDIO_MEDIA] = {} # CLEAR INDEX
+            self._bakeButtonThreadingWrapper()
             self.buttonTabsCanvas.deleteLater()
     class SlotStatusMonitor(QGroupBox):
         def __init__(self, title, parent:"MainWindow"=None):
@@ -228,7 +219,7 @@ class sections:
             for pool in mediaPool:
                 debugText += pool
             debugText += index
-            self.debugInfoLabel.setText(f"AudioSystem.audioIndex[AUDIO_MEDIA] Size: {len(AudioSystem.audioIndex[PSbHelper.SoundType.AUDIO_MEDIA])} Sounds\n{debugText}")
+            self.debugInfoLabel.setText(f"AudioSystem.audioIndex[AUDIO_MEDIA]: {len(AudioSystem.audioIndex[PSbHelper.SoundType.AUDIO_MEDIA])} Sounds\n\n{debugText}")
     class PySoundboardSettings(QGroupBox):
         def __init__(self, title, parent=None):
             super().__init__(title, parent)
