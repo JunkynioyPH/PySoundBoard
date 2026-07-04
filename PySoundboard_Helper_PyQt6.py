@@ -50,33 +50,27 @@ def InitializeAudioSystem(Settings:dict):
         for device in QMediaDevices.audioOutputs():
             if device.description() == Settings['AudioDevice']:
                 return device
-    return AudioManager(_getDevice(),{'audio':SoundType.AUDIO_MEDIA}, initVolume=Settings['Volume'])
+    return AudioManager(_getDevice(),{'audio':SoundType.AUDIO_MEDIA,'sound':SoundType.SOUND_EFFECT}, initVolume=Settings['Volume'])
 def togglePlaybackStateAll(AudioSystem:AudioManager):
     pool = AudioSystem.audioPool['audio']
     for slot in pool:
         if not MediaLoaded.contains(slot.mediaStatus()): continue
-        rich.print(f"[PySoundboard] [yellow]TogglePlayback Status[/yellow]: Set {slot} to ",end='')
         if slot.playbackState() == PlaybackStatus.PLAYING.value:
-            rich.print(f"[b]{PlaybackStatus.PAUSED}[/b]")
             AudioSystem.pauseSlot('audio',pool.index(slot))
         else:
-            rich.print(f"[b]{PlaybackStatus.PLAYING}[/b]")
             AudioSystem.playSlot('audio',pool.index(slot))
 def togglePlaybackStateSlot(AudioSystem:AudioManager, slot):
     pool = AudioSystem.audioPool['audio']
     slotItem:AudioMedia = pool[slot]
-    rich.print(f"[PySoundboard] [yellow]TogglePlayback Status[/yellow]: Set {slotItem} to ",end='')
     if slotItem.playbackState() == PlaybackStatus.PLAYING.value:
-        rich.print(f"[b]{PlaybackStatus.PAUSED}[/b]")
         AudioSystem.pauseSlot('audio',pool.index(slotItem))
     else:
-        rich.print(f"[b]{PlaybackStatus.PLAYING}[/b]")
         AudioSystem.playSlot('audio',pool.index(slotItem))
 def GenerateSoundIndex(AudioSystem:AudioManager, path) -> dict:
     if not os.path.exists(path):
-        rich.print(f'[yellow][PySoundboard] Checking: <{path}>[/yellow][red] Not Found[/red]')
+        rich.print(f'[yellow][PySoundboard] Checking Path: <{path}>[/yellow][red] Not Found[/red]')
         os.mkdir(path)
-        rich.print(f'[yellow][PySoundboard] Checking: <{path}>[/yellow][green] Created[/green]')
+        rich.print(f'[yellow][PySoundboard] Creating Path: <{path}>[/yellow][green] Created[/green]')
     # Scan Root ./SoundFiles
     rich.print(f'[yellow][PySoundboard] Scanning [{path}][/yellow]')
     RootFolderContents = os.scandir(path)

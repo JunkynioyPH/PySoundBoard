@@ -70,7 +70,7 @@ class updateTimerQueue(QTimer):
         self.updateList.pop(index)
 class sections:
     class SoundButtons(QGroupBox):
-        def __init__(self, title, parent=None):
+        def __init__(self, title, parent:"MainWindow"=None):
             super().__init__(title, parent)
             self.progenitor = parent
             self.soundButtonsCanvas = QVBoxLayout()
@@ -91,6 +91,8 @@ class sections:
             self.soundButtonsCanvas.addWidget(self.buttonTabsCanvas)
             self.buttonsIndex = self._generateButtonIndex()
             for _tabItem in self.buttonsIndex:
+                tabScrollableArea = QScrollArea()
+                tabScrollableArea.setWidgetResizable(True)
                 tabCanvas = QWidget()
                 tabContents = QHBoxLayout()
                 tabContents.addStretch(0)
@@ -102,18 +104,19 @@ class sections:
                         buttonColumnCanvas.addWidget(button)
                         buttonColumnCounter += 1
                     else:
-                        buttonColumnCanvas.addStretch(0)
+                        # buttonColumnCanvas.addStretch(0) # commented out for dynamic sized audio buttons.
                         tabContents.addLayout(buttonColumnCanvas)
                         buttonColumnCanvas = QVBoxLayout()
                         buttonColumnCanvas.addWidget(button)
                         buttonColumnCounter = 1 ## 1 since i added a button from overflow of prev column
                 else:
-                    tabContents.addLayout(buttonColumnCanvas) if buttonColumnCounter != 0 else rich.print(f'[GUI] [green]Adding: Completed MaxRow[/green] [magenta b]<{_tabItem}>[/magenta b]')
+                    # buttonColumnCanvas.addStretch(0) # commented out for dynamic sized audio buttons.
+                    tabContents.addLayout(buttonColumnCanvas)
                     tabContents.addStretch(0)
                     tabCanvas.setLayout(tabContents)
-                    buttonColumnCanvas.addStretch(0) if buttonColumnCounter > 0 else ''
-                    rich.print(f"[PySoundboard] [green]Adding Column:[/green] Incomplete [magenta b]<{_tabItem}>[/magenta b]") if buttonColumnCounter > 0 else rich.print('[GUI] [b]Perfect.[/b]')
-                    self.buttonTabsCanvas.addTab(tabCanvas, _tabItem)
+                    rich.print(f"[PySoundboard] [green]Adding Column:[/green] Incomplete {str(buttonColumnCounter).rjust(2,"0")}/{Settings['MaxRows']} [magenta b]<{_tabItem}>[/magenta b]") if buttonColumnCounter < Settings['MaxRows'] else rich.print(f'[PySoundboard] [green]Adding Column: Completed MaxRow[/green] [magenta b]<{_tabItem}>[/magenta b]')
+                    tabScrollableArea.setWidget(tabCanvas)
+                    self.buttonTabsCanvas.addTab(tabScrollableArea, _tabItem)
         def refreshButtons(self):
             AudioMediaIndex = list(AudioSystem.audioIndex.get(PSbHelper.SoundType.AUDIO_MEDIA))
             for indexItem in AudioMediaIndex:
@@ -122,34 +125,33 @@ class sections:
             self.buttonTabsCanvas.deleteLater()
             self.bakeButtons()
     class SlotStatusMonitor(QGroupBox):
-        def __init__(self, title, parent=None):
+        def __init__(self, title, parent:"MainWindow"=None):
             super().__init__(title, parent)
             self.slotStatusMonitorCanvas = QVBoxLayout()
             self.progenitor = parent
             self.setLayout(self.slotStatusMonitorCanvas)
             for slot in range(0, AudioSystem.audioPoolSize):
-                self.slotStatusMonitorCanvas.addLayout(self._SlotDisplay(slot, self.progenitor))
-        class _SlotDisplay(QVBoxLayout):
+                self.slotStatusMonitorCanvas.addWidget(self._SlotDisplay(slot, self.progenitor))
+        class _SlotDisplay(QWidget):
             def __init__(self, slotNumber, parent:"MainWindow"):
                 super().__init__(parent)
                 self.slot = slotNumber
-                
+                self.slotVCanvas = QVBoxLayout()
+                self.setLayout(self.slotVCanvas)
                 self.slotInformationText = QLabel()
+                self.setFixedHeight(80)
                 self.slotControlButtons = QHBoxLayout()
                 self.slotInformationText.setWordWrap(True)
                 self.slotInformationText.setMinimumSize(600,38)
-                self.addWidget(self.slotInformationText)
-                self.addLayout(self.slotControlButtons)
+                self.slotVCanvas.addWidget(self.slotInformationText)
+                self.slotVCanvas.addLayout(self.slotControlButtons)
                 parent.updaterLoop.appendToQueue(self.slotStatusUpdater)
-                
                 self.slotControlButtons.addWidget(FuncButton('Looping', self.toggleLoop, parent.buttonSize[0]))
                 self.slotControlButtons.addWidget(FuncButton('Resume', self.resume, parent.buttonSize[0]))
                 self.slotControlButtons.addWidget(FuncButton('Pause', self.pause, parent.buttonSize[0]))
                 self.slotControlButtons.addWidget(FuncButton('Stop', self.stop, parent.buttonSize[0]))
                 self.slotControlButtons.addWidget(FuncButton('Unload', self.unload, parent.buttonSize[0]))
                 self.slotControlButtons.addStretch(0)
-                
-                
             def slotStatusUpdater(self):
                 slot:PSbHelper.AudioMedia = AudioSystem.audioPool['audio'][self.slot]
                 name, src, mediastat, loopstat, playstat, playrate = slot.getStatus()
@@ -164,11 +166,27 @@ class sections:
             def stop(self):
                 AudioSystem.stopSlot('audio', self.slot)
             def unload(self):
-                AudioSystem.unloadAudioMediaSlot('audio', self.slot)
-                
+                AudioSystem.unloadAudioMediaSlot('audio', self.slot)                
     class DebugMonitor(QGroupBox):
-        def __init__(self, title, parent=None):
+        def __init__(self, title, parent:"MainWindow"=None):
             super().__init__(title, parent)
+            self.progenitor = parent
+            self.debugCanvas = QVBoxLayout()
+            self.debugScrollableCanvas = QScrollArea()
+            self.debugScrollableCanvas.setWidgetResizable(True)
+            self.debugCanvas.addWidget(self.debugScrollableCanvas)
+            self.setLayout(self.debugCanvas)
+            self.debugInfoLabel = QLabel()
+            self.debugScrollableCanvas.setWidget(self.debugInfoLabel)
+            self.debugInfoLabel.setWordWrap(True)
+            self.progenitor.updaterLoop.appendToQueue(self.updateDebugLabel)
+        def updateDebugLabel(self):
+            debugText:str = ''
+            mediaPool, index = AudioSystem.status(False)
+            for pool in mediaPool:
+                debugText += pool
+            debugText += index
+            self.debugInfoLabel.setText(debugText)
     class PySoundboardSettings(QGroupBox):
         def __init__(self, title, parent=None):
             super().__init__(title, parent)
@@ -223,12 +241,13 @@ class MainWindow(QMainWindow):
         self.mediaControlsGroup = QGroupBox('')
         self.soundboardTabsGroup = QTabWidget()
         VerticalCanvas.addLayout(topBarCanvas)
-        widgets = [self.audioDeviceControlsGroup, self.mediaControlsGroup, self.soundboardTabsGroup]
+        # such big brain use of dictionary
+        widgets = {self.audioDeviceControlsGroup:0, self.mediaControlsGroup:0, self.soundboardTabsGroup:1}
         for widget in widgets:
-            VerticalCanvas.addWidget(widget)
+            VerticalCanvas.addWidget(widget, widgets.get(widget))
         else:
             self.bakeGroupContents()
-        VerticalCanvas.addStretch(1)
+        # VerticalCanvas.addStretch(1)
     def bakeGroupContents(self):
         self._audioDeviceControlsContent()
         self._mediaControlsContent()
@@ -344,6 +363,10 @@ class MainWindow(QMainWindow):
                 if not slotLoopingState is self.audioDeviceLoopButton.isChecked():
                     AudioSystem.toggleLoopAudioMediaSlot('audio', slot)
         def _toggleMultiMode():
+            self.mediaControlAllSlots.setChecked(self.audioDeviceMultiButton.isChecked())
+            self.mediaControlAllSlots.clicked.emit()
+            self.mediaControlAllSlots.setDisabled(self.audioDeviceMultiButton.isChecked())
+            self.mediaControlAllSlots.setToolTip('MultiMode is Enabled!' if self.audioDeviceMultiButton.isChecked() else '')
             self.audioDeviceMultiButton.setText(f"Multi-Mode {'ON' if self.audioDeviceMultiButton.isChecked() else 'OFF'}")
         self.audioDeviceLoopButton = FuncButton(f'Looping ALL OFF', _toggleGlobalLoopMode, self.buttonSize[0], self.buttonSize[1])
         self.audioDeviceLoopButton.setCheckable(True)
@@ -361,7 +384,7 @@ class MainWindow(QMainWindow):
         # Control ALL slots START
         def _controlAllSlots():
             toolTip = '"All Slots" is Enabled.' if self.mediaControlAllSlots.isChecked() else ''
-            self.mediaLoopSlot.setToolTip(toolTip)
+            self.mediaLoopSlot.setToolTip(f"{toolTip} Use \"Looping ALL\"")
             self.mediaLoopSlot.setDisabled(self.mediaControlAllSlots.isChecked())
             self.mediaSlotSelector.setToolTip(toolTip)
             self.mediaSlotSelector.setDisabled(self.mediaControlAllSlots.isChecked())
