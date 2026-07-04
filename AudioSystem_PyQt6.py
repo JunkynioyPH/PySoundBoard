@@ -34,6 +34,7 @@ class MediaLoaded(enum.Enum):
     LOADED = QMediaPlayer.MediaStatus.LoadedMedia
     BUFFERING = QMediaPlayer.MediaStatus.BufferingMedia
     BUFFERED = QMediaPlayer.MediaStatus.BufferedMedia
+    ENDOFMEDIA = QMediaPlayer.MediaStatus.EndOfMedia
     @classmethod
     def contains(cls, status):
         try:
@@ -272,10 +273,8 @@ class AudioManager():
             rich.print(f'[b]Set [cyan b][Slot {poolIndex}]','[green b]OK[/green b]')
     
     def unloadAllAudioMedia(self, type:SoundType|None=None):
-        if not type in (SoundType.SOUND_EFFECT, SoundType.AUDIO_MEDIA, None): return rich.print(f"[AudioManager] [red b]Unload All AudioMedia:[/red b] [b]({type})[/b] [yellow]Invalid Type.[/yellow] [red b]NOT[/red b] [magenta]{(SoundType.SOUND_EFFECT, SoundType.AUDIO_MEDIA)}")
         for pool in self.audioPool:
-            if type is None: pass
-            elif not self.audioGroups.get(pool) is type: continue
+            if self.audioGroups.get(pool) is SoundType.SOUND_EFFECT: continue
             rich.print(f"[AudioManager] [red b]Unload All AudioMedia:[/red b] ({pool}) [blue]Slots[/blue] ",end='')
             for slot in self.audioPool.get(pool):
                 if not self.audioGroups.get(pool) is SoundType.SOUND_EFFECT:
