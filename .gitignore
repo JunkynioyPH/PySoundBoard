@@ -9,7 +9,7 @@ venv/*
 *__pycache__*
 *Backup_.py*
 *SoundFiles*
-Settings.json
+Settings*
 .venv
 test.png
 .vscode

@@ -2,7 +2,7 @@ import os, json, rich, re
 from PyQt6.QtMultimedia import QMediaDevices
 from AudioSystem_PyQt6 import *
 def InitializeSettings():
-    Settings:dict = {}
+    Values:dict = {}
     # add parameters for button sizes and stuff
     Defaults = {"AudioDevice":None, "Volume":8, "UseSystemTheme":True, "MaxRows":8, "Splash":True, "HandHeld":False, "DebugInfo":False}
     def writeNewJSONValues(update=False):
@@ -11,7 +11,15 @@ def InitializeSettings():
                 data = Dump.read()
         with open("Settings.json","w") as Dump:
             Dump.write(json.dumps(Defaults)) if not update else Dump.write(json.dumps(Defaults | json.loads(data)))
-    
+    def cleanJSONConfig():
+        with open("Settings.json","r") as Dump:
+            data:dict = json.loads(Dump.read())
+        with open("Settings.json","w") as Dump:
+            commonKeys = set(data) & set(Defaults)
+            cleaned = {}
+            for key in commonKeys:
+                cleaned[key] = data.get(key)
+            Dump.write(json.dumps(cleaned))
     # add checks for deprecated keys and remove them.
     # not really necessary, but i think it'd help make sure
     # that the json is clean from all changes ill make in the future.
@@ -19,28 +27,34 @@ def InitializeSettings():
         # Check for missing Keys
         try:
             with open('Settings.json','r') as SettingsValue:
-                Settings = json.loads(SettingsValue.read())
+                Values = json.loads(SettingsValue.read())
                 # Validate
-                check_conf = list(Defaults.keys() - Settings.keys())
+                check_conf = list(Defaults.keys() - Values.keys())
                 if len(check_conf) == 0:
-                    rich.print('[PySoundboard] [b]Settings OK !')
+                    rich.print('[PySoundboard] Validation: [b]Settings OK !')
                 else:
                     raise KeyError(f"Missing Key/s: {check_conf}")
         except (json.decoder.JSONDecodeError, KeyError) as err:
             rich.print(f"\n[PySoundboard] Settings: {repr(err)}")
             writeNewJSONValues(update=True)
-            InitializeSettings()
+            return InitializeSettings()
         # Check for Deprecated keys
         try:
-            ...
+            with open('Settings.json','r') as SettingsValue:
+                Values = json.loads(SettingsValue.read())
+                check_conf = list(Values.keys() - Defaults.keys())
+                if len(check_conf) == 0:
+                    rich.print('[PySoundboard] Settings Cleaner: [b]Settings OK !')
+                else:
+                    raise KeyError(f"Unused Key/s: {check_conf}")
         except (json.decoder.JSONDecodeError, KeyError) as err:
             rich.print(f"\n[PySoundboard] Settings: {repr(err)}")
-            print('OMIT OLD KEYS') # STUB
-            InitializeSettings()
+            cleanJSONConfig()
+            return InitializeSettings()
     else:
         writeNewJSONValues()
-        InitializeSettings()
-    return Settings
+        return InitializeSettings()
+    return Values
         
 def InitializeAudioSystem(Settings:dict):
     if Settings['AudioDevice'] is None:
@@ -99,6 +113,7 @@ def GenerateSoundIndex(AudioSystem:AudioManager, path) -> dict:
     # need to implement better sorting.
     for each in Index:
         rich.print(f"[PySoundboard] [cyan]Button Sorting:[/cyan] <Tab_[yellow bold]{each}[/yellow bold]>")
+        # AI Generated key= arg
         Index[each] = sorted(Index[each], key=lambda s: [int(t) if t.isdigit() else t.lower() for t in re.split(r'(\d+)', s)])
     # Return dict {tabName:[buttonName, playFunc]}
     return Index
