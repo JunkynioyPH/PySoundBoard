@@ -1,4 +1,4 @@
-import os, json, rich
+import os, json, rich, re
 from PyQt6.QtMultimedia import QMediaDevices
 from AudioSystem_PyQt6 import *
 def InitializeSettings():
@@ -99,6 +99,6 @@ def GenerateSoundIndex(AudioSystem:AudioManager, path) -> dict:
     # need to implement better sorting.
     for each in Index:
         rich.print(f"[PySoundboard] [cyan]Button Sorting:[/cyan] <Tab_[yellow bold]{each}[/yellow bold]>")
-        Index[each] = sorted(Index[each])
+        Index[each] = sorted(Index[each], key=lambda s: [int(t) if t.isdigit() else t.lower() for t in re.split(r'(\d+)', s)])
     # Return dict {tabName:[buttonName, playFunc]}
     return Index
