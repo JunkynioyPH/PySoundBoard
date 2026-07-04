@@ -3,10 +3,10 @@ pretty.install()
 import json, os, sys, rich
 # QSize, QUrl
 # from PyQt6.QtGui import QPixmap, QRegion # MAYBE ill get to work this at some point lmao
-from PyQt6.QtCore import Qt, QTimer, QObject, QEvent
+from PyQt6.QtCore import Qt, QTimer, QObject, QEvent, QThread, pyqtSlot, pyqtSignal
 from PyQt6.QtMultimedia import QMediaDevices
 from PyQt6.QtWidgets import *
-from difflib import get_close_matches
+# from difflib import get_close_matches
 import PySoundboard_Helper_PyQt6 as PSbHelper
 APP = QApplication([])
 # Initialise Instance of QApp
@@ -59,12 +59,12 @@ class updateTimerQueue(QTimer):
         self.start(ticks) if ticks else self.start(250)
     def update(self):
         for item in self.updateList:
-            item() 
+            item()
     def appendToQueue(self, _callable):
         rich.print('[PySoundboard] UpdateTimerQueue: ', end='')
         if not callable(_callable):
             return rich.print(f'[red]Not Callable [/red]{_callable}')
-        rich.print(f'[green]Appended [/green] {_callable}')
+        rich.print(f'[green]Appended [/green]{_callable}')
         self.updateList.append(_callable)
     def popQueueItem(self, index:int):
         self.updateList.pop(index)
@@ -74,22 +74,63 @@ class sections:
             super().__init__(title, parent)
             self.progenitor = parent
             self.soundButtonsCanvas = QVBoxLayout()
+            self.soundButtonsRefreshListButton = FuncButton('Refresh Tab Lists', self.refreshButtons)
+            self.refreshButtonDisplayLabel = QLabel('Refreshing Buttons...')
+            self.refreshButtonDisplayLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.refreshButtonDisplayLabel.setStyleSheet('font-size: 70px;')
+            self.soundButtonsCanvas.addWidget(self.soundButtonsRefreshListButton)
+            self.soundButtonsCanvas.addWidget(self.refreshButtonDisplayLabel)
+            self.refreshButtonDisplayLabel.setHidden(True)
             # SoundButtonsFilterBar = QHBoxLayout()
             # self.soundButtonsFilterTextBox = QLineEdit()
             # self.soundButtonsFilterTextBox.setPlaceholderText('Filter Search...')
-            self.soundButtonsRefreshListButton = FuncButton('Refresh Tab Lists', self.refreshButtons)
             # SoundButtonsFilterBar.addWidget(self.soundButtonsFilterTextBox)
             # SoundButtonsFilterBar.addWidget(self.soundButtonsRefreshListButton)
             # self.soundButtonsCanvas.addLayout(SoundButtonsFilterBar)
-            self.soundButtonsCanvas.addWidget(self.soundButtonsRefreshListButton)
-            self.bakeButtons()
-        def _generateButtonIndex(self):
-            return PSbHelper.GenerateSoundIndex(AudioSystem, os.path.join('./SoundFiles'))        
-        def bakeButtons(self):
+            self._bakeButtonThreadingWrapper()
+        class threadedSoundIndexer(QObject):
+            soundIndexReady = pyqtSignal(dict)
+            @pyqtSlot()
+            def _generateSoundIndex(self):
+                returnValue = PSbHelper.GenerateSoundIndex(AudioSystem, os.path.join('./SoundFiles'))
+                self.soundIndexReady.emit(returnValue)
+        class threadedSoundButtonRemover(QObject):
+            soundButtonsCleared = pyqtSignal()
+            @pyqtSlot()
+            def _clearIndex(self):
+                AudioMediaIndex = list(AudioSystem.audioIndex.get(PSbHelper.SoundType.AUDIO_MEDIA))
+                for indexItem in AudioMediaIndex:
+                    AudioSystem.removeIndex(PSbHelper.SoundType.AUDIO_MEDIA, indexItem)
+                else:
+                    self.soundButtonsCleared.emit()
+        def _bakeButtonThreadingWrapper(self):
+            ## AI ASSISTED, QTHREAD, IMPLEMENTATION. NOW I KNOW HOW TO THREAD-ish :)
+            self.threadingObj = QThread(self)
+            self.soundIndexGenerator = self.threadedSoundIndexer()
+            self.soundIndexGenerator.moveToThread(self.threadingObj)
+            self.threadingObj.started.connect(self.soundIndexGenerator._generateSoundIndex)
+            self.soundIndexGenerator.soundIndexReady.connect(self.bakeButtons)
+            self.soundIndexGenerator.soundIndexReady.connect(self.threadingObj.quit)
+            self.soundIndexGenerator.soundIndexReady.connect(self.soundIndexGenerator.deleteLater)
+            self.threadingObj.finished.connect(self.soundIndexGenerator.deleteLater)
+            self.threadingObj.finished.connect(splashCli)
+            self.threadingObj.finished.connect(ShowSettings)
+            self.threadingObj.start(QThread.Priority.TimeCriticalPriority)
+        def _RebakeButtonsThreadingWrapper(self):
+            self.threadingObj = QThread(self)
+            self.soundIndexClearing = self.threadedSoundButtonRemover()
+            self.soundIndexClearing.moveToThread(self.threadingObj)
+            self.threadingObj.started.connect(self.soundIndexClearing._clearIndex)
+            self.soundIndexClearing.soundButtonsCleared.connect(self.threadingObj.quit)
+            self.soundIndexClearing.soundButtonsCleared.connect(self.soundIndexClearing.deleteLater)
+            self.soundIndexClearing.soundButtonsCleared.connect(self._bakeButtonThreadingWrapper)
+            self.threadingObj.finished.connect(self.soundIndexClearing.deleteLater)
+            self.threadingObj.start(QThread.Priority.TimeCriticalPriority)
+        def bakeButtons(self, buttonIndex:dict):
             self.buttonTabsCanvas = QTabWidget()
             self.setLayout(self.soundButtonsCanvas)
             self.soundButtonsCanvas.addWidget(self.buttonTabsCanvas)
-            self.buttonsIndex = self._generateButtonIndex()
+            self.buttonsIndex = buttonIndex
             for _tabItem in self.buttonsIndex:
                 tabScrollableArea = QScrollArea()
                 tabScrollableArea.setWidgetResizable(True)
@@ -117,13 +158,13 @@ class sections:
                     rich.print(f"[PySoundboard] [green]Adding Column:[/green] Incomplete {str(buttonColumnCounter).rjust(2,"0")}/{Settings['MaxRows']} [magenta b]<{_tabItem}>[/magenta b]") if buttonColumnCounter < Settings['MaxRows'] else rich.print(f'[PySoundboard] [green]Adding Column: Completed MaxRow[/green] [magenta b]<{_tabItem}>[/magenta b]')
                     tabScrollableArea.setWidget(tabCanvas)
                     self.buttonTabsCanvas.addTab(tabScrollableArea, _tabItem)
+            self.progenitor.soundboardTab.soundButtonsRefreshListButton.setDisabled(False)
+            self.refreshButtonDisplayLabel.setHidden(True)
         def refreshButtons(self):
-            AudioMediaIndex = list(AudioSystem.audioIndex.get(PSbHelper.SoundType.AUDIO_MEDIA))
-            for indexItem in AudioMediaIndex:
-                AudioSystem.removeIndex(PSbHelper.SoundType.AUDIO_MEDIA, indexItem)
-            self.soundButtonsCanvas.removeWidget(self.buttonTabsCanvas)
+            self.progenitor.soundboardTab.soundButtonsRefreshListButton.setDisabled(True)
+            self.refreshButtonDisplayLabel.setHidden(False)
+            self._RebakeButtonsThreadingWrapper()
             self.buttonTabsCanvas.deleteLater()
-            self.bakeButtons()
     class SlotStatusMonitor(QGroupBox):
         def __init__(self, title, parent:"MainWindow"=None):
             super().__init__(title, parent)
@@ -166,14 +207,15 @@ class sections:
             def stop(self):
                 AudioSystem.stopSlot('audio', self.slot)
             def unload(self):
-                AudioSystem.unloadAudioMediaSlot('audio', self.slot)                
+                AudioSystem.unloadAudioMediaSlot('audio', self.slot)
     class DebugMonitor(QGroupBox):
         def __init__(self, title, parent:"MainWindow"=None):
             super().__init__(title, parent)
             self.progenitor = parent
-            self.debugCanvas = QVBoxLayout()
             self.debugScrollableCanvas = QScrollArea()
+            self.debugCanvas = QVBoxLayout()
             self.debugScrollableCanvas.setWidgetResizable(True)
+            self.debugCanvas.addWidget(FuncButton('refreshButtons', self.progenitor.soundboardTab.soundButtonsRefreshListButton.clicked.emit))
             self.debugCanvas.addWidget(self.debugScrollableCanvas)
             self.setLayout(self.debugCanvas)
             self.debugInfoLabel = QLabel()
@@ -186,7 +228,7 @@ class sections:
             for pool in mediaPool:
                 debugText += pool
             debugText += index
-            self.debugInfoLabel.setText(debugText)
+            self.debugInfoLabel.setText(f"AudioSystem.audioIndex[AUDIO_MEDIA] Size: {len(AudioSystem.audioIndex[PSbHelper.SoundType.AUDIO_MEDIA])} Sounds\n{debugText}")
     class PySoundboardSettings(QGroupBox):
         def __init__(self, title, parent=None):
             super().__init__(title, parent)
@@ -499,7 +541,6 @@ AudioSystem = PSbHelper.InitializeAudioSystem(Settings); AudioSystem.togglePoolR
 # Start Window
 Main = MainWindow(); Main.show(); Main.center_window() if os.name=='nt' else ''
 Main.handHeldMode(Settings['HandHeld'])
-splashCli(); ShowSettings()
 AudioSystem.addIndex(PSbHelper.SoundType.AUDIO_MEDIA,'./startup.wav')
 AudioSystem.loadAudioMedia('audio','startup',0)
 AudioSystem.playSlot('audio',0)
