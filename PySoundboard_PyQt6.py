@@ -94,15 +94,6 @@ class sections:
             def _generateSoundIndex(self):
                 returnValue = PSbHelper.GenerateSoundIndex(AudioSystem, os.path.join('./SoundFiles'))
                 self.soundIndexReady.emit(returnValue)
-        class threadedSoundButtonRemover(QObject):
-            soundButtonsCleared = pyqtSignal()
-            @pyqtSlot()
-            def _clearIndex(self):
-                AudioMediaIndex = list(AudioSystem.audioIndex.get(PSbHelper.SoundType.AUDIO_MEDIA))
-                for indexItem in AudioMediaIndex:
-                    AudioSystem.removeIndex(PSbHelper.SoundType.AUDIO_MEDIA, indexItem)
-                else:
-                    self.soundButtonsCleared.emit()
         def _bakeButtonThreadingWrapper(self):
             ## AI ASSISTED, QTHREAD, IMPLEMENTATION. NOW I KNOW HOW TO THREAD-ish :)
             self.threadingObj = QThread(self)
