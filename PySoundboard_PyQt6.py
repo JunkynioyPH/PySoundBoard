@@ -193,6 +193,7 @@ class sections:
     class DebugMonitor(QGroupBox):
         def __init__(self, title, parent:"MainWindow"=None):
             super().__init__(title, parent)
+            self.debugText:str = ''
             self.progenitor = parent
             self.debugScrollableCanvas = QScrollArea()
             self.debugCanvas = QVBoxLayout()
@@ -205,12 +206,26 @@ class sections:
             self.debugInfoLabel.setWordWrap(True)
             self.progenitor.updaterLoop.appendToQueue(self.updateDebugLabel)
         def updateDebugLabel(self):
-            debugText:str = ''
-            mediaPool, index = AudioSystem.status(False)
-            for pool in mediaPool:
-                debugText += pool
-            debugText += index
-            self.debugInfoLabel.setText(f"AudioSystem.audioIndex[AUDIO_MEDIA]: {len(AudioSystem.audioIndex[PSbHelper.SoundType.AUDIO_MEDIA])} Sounds\n\n{debugText}")
+            def _textContent() -> str:
+                # construct
+                text:str = ''
+                mediaPool, index, rolloverstatus, rolloverindex = AudioSystem.status(False)
+                audioMediaIndexCount:str = f"AudioSystem.audioIndex[AUDIO_MEDIA]: {len(AudioSystem.audioIndex[PSbHelper.SoundType.AUDIO_MEDIA])} Sounds\n\n"
+                text += audioMediaIndexCount
+                for status in rolloverstatus:
+                    text += f"Roll-Over Status:\n        <{status}> {rolloverstatus.get(status)} <next target> {rolloverindex.get(status)}\n\n"
+                for pool in mediaPool:
+                    text += pool
+                # Completed Construction
+                text += index
+                return text
+            constructed_text = _textContent()
+            # compare changes
+            if self.debugText != constructed_text:
+                self.debugText = constructed_text
+                self.debugInfoLabel.setText(f"{self.debugText}")
+                del constructed_text
+
     class PySoundboardSettings(QGroupBox):
         def __init__(self, title, parent=None):
             super().__init__(title, parent)

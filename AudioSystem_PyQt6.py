@@ -57,6 +57,7 @@ class AudioManager():
         self.audioGroups:dict[str, SoundType] = audioGroups
         self.audioPool:dict[str, list[SoundEffect|AudioMedia]] = {}
         self.audioIndex:dict[SoundType, dict[str, str]] = {SoundType.AUDIO_MEDIA:{},SoundType.SOUND_EFFECT:{}}
+        self.isType = self.isTypeCheck(self)
         # init process
         for each in self.audioGroups:
             if not self.audioGroups.get(each) is SoundType.MASTER_VOLUME:
@@ -69,6 +70,16 @@ class AudioManager():
                 self.settings['volume'][each] = masterVolume
             if self.audioGroups.get(each) == SoundType.AUDIO_MEDIA:
                 self.audioPool[each] = (self._generateAudioMediaPool(self.audioPoolSize))
+    # YAAAY MORE BOILER PLATE!!!!!!!!
+    class isTypeCheck:
+        def __init__(self, progenitor:AudioManager):
+            self.groups = progenitor.audioGroups
+        def audioMedia(self, pool) -> bool:
+            return SoundType.isAudioMedia(self.groups, pool)
+        def soundEffect(self, pool) -> bool:
+            return SoundType.isSoundEffect(self.groups, pool)
+        def masterVolume(self, pool) -> bool:
+            return SoundType.isMasterVolume(self.groups, pool)
     def _generateAudioMediaPool(self, poolCount):
         pool = []
         for count in range(0,poolCount):
@@ -80,7 +91,7 @@ class AudioManager():
     # def _isValidPool(self, poolName:str):
     #     return poolName in self.audioPool
     # This checks groups with MASTER VOL types
-    def _isValidPool(self, poolName:str):
+    def _isValidGroup(self, poolName:str):
         return poolName in self.audioGroups
     def _rolloverIndex(self, pool:str):
         # cursed, it makes a copy instead of like "renaming it" and referring to it
@@ -116,11 +127,11 @@ class AudioManager():
             rich.print('Slots Roll-Over:',self.rollOverEnabled,self.rollingPoolIndex)
             rich.print('++ -------------- ++')
         else:
-            return statusAudioMediaPool, statusIndex
+            return statusAudioMediaPool, statusIndex, self.rollOverEnabled, self.rollingPoolIndex
             # return f'AudioPool.:\n   Audio:\n{self.audioPool['audio']}\n\n   Sound:\n{self.audioPool['sound']}'
     def togglePoolRollOver(self, poolName:str|None=None):
         rich.print(f'[AudioManager] [b][magenta]Index Roll-over:[/magenta] ', end='')
-        if not self._isValidPool(poolName) and poolName is not None or poolName not in self.rollOverEnabled and poolName is not None: 
+        if poolName not in self.rollOverEnabled and poolName is not None: 
             return rich.print(f'<{poolName}: {self.audioGroups.get(poolName)}> [red b]Invalid AudioMedia Pool[/red b] ')
         if poolName is not None:
             self.rollOverEnabled[poolName] = False if self.rollOverEnabled[poolName] else True
@@ -132,8 +143,8 @@ class AudioManager():
     def setVolume(self, pool:str, vol:int):
         """Set volume of specified pool/pool"""
         # check if valid pool
-        if not self._isValidPool(pool): 
-            return rich.print(f'[AudioManager] Invalid pool <{pool}>')
+        if not self._isValidGroup(pool): 
+            return rich.print(f'[AudioManager] Invalid Group <{pool}>')
         # update stored setting
         rich.print(f'[AudioManager] [b]Set Volume: <{pool}> {vol} ', end='')
         self.settings.get('volume')[pool] = vol
@@ -201,9 +212,11 @@ class AudioManager():
         self.audioIndex[type].pop(item)
         rich.print(f"[green b]OK[/green b]")
     def toggleLoopAudioMediaSlot(self, pool:str, slot:int):
-        rich.print(f"[AudioManager] Toggle Looping: ({pool}) ", end='')
-        if not self._isValidPool(pool): 
+        rich.print(f"[AudioManager] Toggle AudioMedia Loop: ({pool}) ", end='')
+        if not self._isValidGroup(pool):
             return rich.print(f'[red b]Invalid Pool')
+        if not self.isType.audioMedia(pool):
+            return rich.print(f'[red b]{pool} NOT Type {SoundType.AUDIO_MEDIA}')
         slotItem = self.audioPool.get(pool)[slot]
         originalPlayingState = slotItem.playbackState()
         slotItem_currentPos = slotItem.position()
@@ -217,9 +230,10 @@ class AudioManager():
         """Load the specified audioName into a specified or one of the available slots in a specified pool.
         It can also do slot roll-over if prefered, which only applies if self.rolloverEnabled == True and poolIndex == None"""
         rich.print(f"[AudioManager] [blue b]Load AudioMedia:[/blue b] ({pool}) [magenta b]<{audioName}>[/magenta b] ", end='')
-        if not self._isValidPool(pool): 
-            return rich.print(f'[red b]Invalid Pool')
-        if not SoundType.isAudioMedia(self.audioGroups, pool): return rich.print('[red b] NOT', SoundType.AUDIO_MEDIA)
+        if not self._isValidGroup(pool): 
+            return rich.print(f'[red b]Invalid Group')
+        if not self.isType.audioMedia(pool):
+            return rich.print('[red b] NOT', SoundType.AUDIO_MEDIA)
         # looping = int(((2**32) / 2) - 1) if self.loopMode[pool] else 1
         # Check if the audioName actually exist in audioIndex
         audioPath = self.audioIndex[SoundType.AUDIO_MEDIA].get(audioName)
@@ -271,9 +285,9 @@ class AudioManager():
             rich.print(f"[AudioManager] [red b]Unload AudioMedia:[/red b] ({type if type is not None else "ALL"}) Slots Unloaded!",)
     def unloadAudioMediaSlot(self, pool:str, poolIndex:None|int=None):
         rich.print(f"[AudioManager] [red b]Unload AudioMedia Slot:[/red b] ({pool}) ", end='')        
-        if not self._isValidPool(pool): 
-            return rich.print(f'[red b]Invalid Pool')
-        if not SoundType.isAudioMedia(self.audioGroups, pool): return rich.print('[red b]NOT', SoundType.AUDIO_MEDIA)
+        if not self._isValidGroup(pool): 
+            return rich.print(f'[red b]Invalid Group]')
+        if not self.isType.audioMedia(pool): return rich.print('[red b]NOT', SoundType.AUDIO_MEDIA)
         rich.print(f"[magenta b]{self.audioPool[pool][poolIndex]}[/magenta b]")
         slot:AudioMedia = self.audioPool.get(pool)[poolIndex]
         slot.setSource(QUrl.fromLocalFile(None))
@@ -295,14 +309,14 @@ class AudioManager():
         self._audioMediaControlState(pool, slot, AudioPlaybackAction.PAUSE)
     def stopSlot(self, pool:str, slot:int):
         self._audioMediaControlState(pool, slot, AudioPlaybackAction.STOP)
-    ## need rework and testing to best align with AudioMedia()
+    ## TODO need rework and testing to best align with AudioMedia()
     def loadSoundEffectObj(self, pool:str, sound:str):
         rich.print(f"[AudioManager] [blue b]Load SoundEffect:[/blue b] ({pool}) [magenta b]<{sound}>[/magenta b] ", end='')
         # if exists in pool
-        if not self._isValidPool(pool): 
-            return rich.print(f'[red b]Invalid Pool')
+        if not self._isValidGroup(pool): 
+            return rich.print(f'[red b]Invalid Group')
         # if it's SoundEffect pool
-        if not SoundType.isSoundEffect(self.audioGroups, pool):
+        if not self.isType.soundEffect(pool):
             return rich.print('[red b] NOT', SoundType.SOUND_EFFECT)
         # get path, and check if indexed
         sound = self.audioIndex[SoundType.SOUND_EFFECT].get(sound)
@@ -322,7 +336,7 @@ class AudioManager():
         self.audioPool[pool].pop(index)
         rich.print(f"[green b]OK")
     def _audioMediaControlState(self, pool:str, index:int, state:AudioPlaybackAction):
-        if not self._isValidPool(pool): 
+        if not self._isValidGroup(pool): 
             return rich.print(f'AudioManager] [b]AudioMedia Control: <{pool}> [red b]Invalid Pool')
         slot = self.audioPool.get(pool)[index]
         rich.print(f'[AudioManager] [b]AudioMedia Control: ', end='')
