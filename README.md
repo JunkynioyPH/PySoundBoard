@@ -11,14 +11,19 @@ PySoundboard_Legacy holds the old versions of the soundboard. Written with TkInt
 PySoundboard_PyQt6 is my latest iteration of this soundboard. Written soley with PyQt6.
 
 # (PySoundboard_PyQt6 & [PySoundboard_PyQt6_old](PySoundboard_PyQt6_old))
-**(Python 3.10+)**
+**(Python 3.12+)**
 Requires **python** to be installed.
+- (3.10-3.11) if complied to pre **3.12 PEP 701** (PEP 498)
 
 **(pip install pyqt6)**
 Requires **PyQt6** to be installed.
 
 # ([PySoundboard_Legacy](PySoundboard_Legacy))
-**(Python 3.10+** with **Ttk/TKinter**)
+(Note that i dont remember if it's 3.10/3.12+)
+
+(As I originally wrote this under 2.8 then overtime to 3.x)
+
+**(Python 3.10+** with **Ttk/TKinter**) 
 Requires **python** to be installed. **Ttk/TKinter** for **TkInter GUI**
 
 - _For TkInter DarkMode GUI_
@@ -37,10 +42,10 @@ When you run **PySoundBoard_\*.py**, it will give a **1-time pop** up and create
 In **Settings.json**, you can set **AudioDevice** to your preferred output device.
 
 # Setup Instructions for Windows, VoiceMeeter
-Instructions to be made available... at some point.. lmao
+...
 
 # Setup Instructions for Linux, PipeWire
-Instructions to be made available... at some point.. lmao
+...
 
 # Fingers Crossed
 Hope that everything works as it should!
