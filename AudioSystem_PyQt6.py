@@ -72,7 +72,7 @@ class AudioManager():
                 self.audioPool[each] = (self._generateAudioMediaPool(self.audioPoolSize))
     # YAAAY MORE BOILER PLATE!!!!!!!!
     class isTypeCheck:
-        def __init__(self, progenitor:AudioManager):
+        def __init__(self, progenitor:"AudioManager"):
             self.groups = progenitor.audioGroups
         def audioMedia(self, pool) -> bool:
             return SoundType.isAudioMedia(self.groups, pool)
@@ -274,26 +274,34 @@ class AudioManager():
             slot = self.audioPool.get(pool)[poolIndex]
             _setAudioMediaParams(slot, audioPathQUrl)
             rich.print(f'[b]Set [cyan b][Slot {poolIndex}]','[green b]OK[/green b]')
-    def unloadAllAudioMedia(self, type:SoundType|None=None):
-        for pool in self.audioPool:
-            if self.audioGroups.get(pool) is SoundType.SOUND_EFFECT: continue
-            rich.print(f"[AudioManager] [red b]Unload All AudioMedia:[/red b] ({pool}) [blue]Slots[/blue] ",end='')
-            for slot in self.audioPool.get(pool):
-                if not self.audioGroups.get(pool) is SoundType.SOUND_EFFECT:
-                    if not MediaLoaded.contains(slot.mediaStatus()): continue
-                slot.setSource(QUrl.fromLocalFile(None))
-                rich.print(f"[yellow b]{slot.name}", end=' ')
+    ## This block of code is fucking weird
+    def unloadAllMedia(self, type:SoundType|None=None):
+        def _audioMedia(pool):
+            # rich.print(f"[AudioManager] [red b]Unload All AudioMedia:[/red b] ({pool}) [blue]Slots[/blue] ",end='')
+            for slot in range(0,self.audioPoolSize):
+                self.unloadAudioMediaSlot(pool, slot)
+                # rich.print(f"[yellow b]{slot}", end=' ')
             else:
-                rich.print(f"[green]OK")
-        else:
-            rich.print(f"[AudioManager] [red b]Unload AudioMedia:[/red b] ({type if type is not None else "ALL"}) Slots Unloaded!",)
+                rich.print(f'[AudioManager] [red b]Unload AudioMedia: [/red b]({pool}) [green b]OK')
+        for pool in self.audioPool:
+            if type is SoundType.SOUND_EFFECT and self.isType.soundEffect(pool):
+                rich.print('is sfx')
+                return
+            
+            if type is SoundType.AUDIO_MEDIA and self.isType.audioMedia(pool):
+                _audioMedia(pool)
+                
+            if type not in (SoundType.SOUND_EFFECT, SoundType.AUDIO_MEDIA):
+                rich.print(f'type not provided [{type}]: Assume ALL')
+                return
     def unloadAudioMediaSlot(self, pool:str, poolIndex:None|int=None):
-        rich.print(f"[AudioManager] [red b]Unload AudioMedia Slot:[/red b] ({pool}) ", end='')        
         if not self._isValidGroup(pool): 
-            return rich.print(f'[red b]Invalid Group]')
+            return rich.print(f'[AudioManager] [red b]Unload AudioMedia Slot:[/red b] ({pool}) [red b]Invalid Group')
         if not self.isType.audioMedia(pool): return rich.print('[red b]NOT', SoundType.AUDIO_MEDIA)
-        rich.print(f"[magenta b]{self.audioPool[pool][poolIndex]}[/magenta b]")
         slot:AudioMedia = self.audioPool.get(pool)[poolIndex]
+        if not MediaLoaded.contains(slot.mediaStatus()): return
+        rich.print(f"[AudioManager] [red b]Unload AudioMedia Slot:[/red b] ({pool}) ", end='')        
+        rich.print(f"[magenta b]{self.audioPool[pool][poolIndex]}[/magenta b]")
         slot.setSource(QUrl.fromLocalFile(None))
     def setSlotPlaybackSpeed(self, pool:str, slot:int, rate:float):
             slot:AudioMedia = self.audioPool.get(pool)[slot]
@@ -368,7 +376,10 @@ class AudioManager():
             elif self.isType.soundEffect(pool) and stopSFXPool:
                 rich.print(f'[AudioManager] [green b]Playback All States: [/green b]<{pool}> [yellow b]Empty SoundEffect Pool[/yellow b]')
                 continue
+            ### TODO SoundEffects are not supported with this func... unless....
+            ### if the pool is a looped soundeffect pool... maybe like wind_rustling.wav ... ?
             elif self.isType.soundEffect(pool) and state in (AudioPlaybackAction.PAUSE, AudioPlaybackAction.PLAY):
+                ### TODO This section messes with SoundEffect Objects if ever.
                 continue
             # else if it's AudioMedia
             audioMediaPool:list[AudioMedia] = self.audioPool.get(pool)

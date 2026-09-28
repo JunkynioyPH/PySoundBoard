@@ -28,7 +28,9 @@ device = [QMediaDevices.audioOutputs()[2],QMediaDevices.defaultAudioOutput()]
 AudioSystem = AudioManager(device[1],
                             {'master':SoundType.MASTER_VOLUME,
                             'sfxMaster':SoundType.MASTER_VOLUME,
-                            'sfx.name':SoundType.SOUND_EFFECT})
+                            'sfx.name':SoundType.SOUND_EFFECT,
+                            'audio':SoundType.AUDIO_MEDIA,
+                            'audio1':SoundType.AUDIO_MEDIA})
 
 respondToMyShitty_CTRL_C_Please = updateTimerQueue()
 AudioSystem.addIndex(SoundType.SOUND_EFFECT,"./SoundFiles/funny sfx/Asterisk.wav")
@@ -41,4 +43,26 @@ AudioSystem.status()
 AudioSystem.loadSoundEffectObj("sfx.name",'Asterisk')
 AudioSystem.status()
 
+AudioSystem.toggleLoopAudioMediaSlot('mastesr',0)
+AudioSystem.toggleLoopAudioMediaSlot('sfx.name',0)
+AudioSystem.setSlotPlaybackSpeed
+
+AudioSystem.addIndex(SoundType.SOUND_EFFECT, "./startup.wav")
+AudioSystem.loadSoundEffectObj('sfx.name','startup')
+AudioSystem.addIndex(SoundType.AUDIO_MEDIA, './startup.wav')
+AudioSystem.loadAudioMedia('audio','startup')
+AudioSystem.loadAudioMedia('audio','startup')
+# AudioSystem.loadAudioMedia('audio','startup')
+# AudioSystem.loadAudioMedia('audio','startup')
+# AudioSystem.loadAudioMedia('audio','startup')
+AudioSystem.loadAudioMedia('audio','startup')
+AudioSystem.loadAudioMedia('audio','startup')
+AudioSystem.loadAudioMedia('audio','startup')
+AudioSystem.loadAudioMedia('audio1','startup')
+AudioSystem.loadAudioMedia('audio1','startup')
+AudioSystem.loadAudioMedia('audio1','startup')
+# AudioSystem.stopAll()
+AudioSystem.unloadAllMedia(SoundType.AUDIO_MEDIA)
+# AudioSystem.status()
+AudioSystem.unloadAudioMediaSlot('a',2)
 sys.exit(APP.exec())

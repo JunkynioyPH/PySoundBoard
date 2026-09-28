@@ -114,7 +114,7 @@ class sections:
             self.buttonsIndex = buttonIndex
             for _tabItem in self.buttonsIndex:
                 tabScrollableArea = QScrollArea()
-                tabScrollableArea.setWidgetResizable(True)
+                tabScrollableArea.setWidgetResizable(True) ###
                 tabCanvas = QWidget()
                 tabContents = QHBoxLayout()
                 tabContents.addStretch(0)
@@ -126,13 +126,13 @@ class sections:
                         buttonColumnCanvas.addWidget(button)
                         buttonColumnCounter += 1
                     else:
-                        # buttonColumnCanvas.addStretch(0) # commented out for dynamic sized audio buttons.
+                        buttonColumnCanvas.addStretch(0) # commented out for dynamic sized audio buttons.
                         tabContents.addLayout(buttonColumnCanvas)
                         buttonColumnCanvas = QVBoxLayout()
                         buttonColumnCanvas.addWidget(button)
                         buttonColumnCounter = 1 ## 1 since i added a button from overflow of prev column
                 else:
-                    # buttonColumnCanvas.addStretch(0) # commented out for dynamic sized audio buttons.
+                    buttonColumnCanvas.addStretch(0) # commented out for dynamic sized audio buttons.
                     tabContents.addLayout(buttonColumnCanvas)
                     tabContents.addStretch(0)
                     tabCanvas.setLayout(tabContents)
@@ -212,11 +212,14 @@ class sections:
                 mediaPool, index, rolloverstatus, rolloverindex = AudioSystem.status(False)
                 audioMediaIndexCount:str = f"AudioSystem.audioIndex[AUDIO_MEDIA]: {len(AudioSystem.audioIndex[PSbHelper.SoundType.AUDIO_MEDIA])} Sounds\n\n"
                 text += audioMediaIndexCount
+                text += "Roll-Over Status:\n"
                 for status in rolloverstatus:
-                    text += f"Roll-Over Status:\n        <{status}> {rolloverstatus.get(status)} <next target> {rolloverindex.get(status)}\n\n"
+                    text += f"        <{status}> {rolloverstatus.get(status)} <next target> {rolloverindex.get(status)}\n\n"
+                text += "Slots Status:\n"
                 for pool in mediaPool:
                     text += pool
                 # Completed Construction
+                text += "Audio Index List:"
                 text += index
                 return text
             constructed_text = _textContent()
@@ -225,11 +228,10 @@ class sections:
                 self.debugText = constructed_text
                 self.debugInfoLabel.setText(f"{self.debugText}")
                 del constructed_text
-
     class PySoundboardSettings(QGroupBox):
         def __init__(self, title, parent=None):
             super().__init__(title, parent)
-# Ai Assisted, Keyfilter code START
+# AI Assisted, Keyfilter code START
 class ArrowKeysFilter_Callback(QObject):
     def __init__(self, callback):
         super().__init__()
