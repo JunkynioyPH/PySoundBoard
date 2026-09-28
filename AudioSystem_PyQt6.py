@@ -274,26 +274,36 @@ class AudioManager():
             slot = self.audioPool.get(pool)[poolIndex]
             _setAudioMediaParams(slot, audioPathQUrl)
             rich.print(f'[b]Set [cyan b][Slot {poolIndex}]','[green b]OK[/green b]')
-    # TODO add handling for unloading sfx only and ALL
     def unloadAllMedia(self, type:SoundType|None=None):
         def _audioMedia(pool):
-            # rich.print(f"[AudioManager] [red b]Unload All AudioMedia:[/red b] ({pool}) [blue]Slots[/blue] ",end='')
             for slot in range(0,self.audioPoolSize):
                 self.unloadAudioMediaSlot(pool, slot)
-                # rich.print(f"[yellow b]{slot}", end=' ')
             else:
                 rich.print(f'[AudioManager] [red b]Unload AudioMedia: [/red b]({pool}) [green b]OK')
+        def _soundEffect(pool):
+            for _ in range(len(self.audioPool.get(pool))):
+                self.unloadSoundEffectObj(pool, 0)
+            else:
+                rich.print(f'[AudioManager] [red b]Unload SoundEffect: [/red b]({pool}) [green b]OK')
         for pool in self.audioPool:
+            # target only SoundEffect
             if type is SoundType.SOUND_EFFECT and self.isType.soundEffect(pool):
-                rich.print('is sfx')
-                return
-            
+                _soundEffect(pool)
+                continue
+            # target only AudioMedia
             if type is SoundType.AUDIO_MEDIA and self.isType.audioMedia(pool):
                 _audioMedia(pool)
-                
+                continue
+            # unload everything
             if type not in (SoundType.SOUND_EFFECT, SoundType.AUDIO_MEDIA):
-                rich.print(f'type not provided [{type}]: Assume ALL')
-                return
+                if self.isType.soundEffect(pool):
+                    _soundEffect(pool)
+                    continue
+                if self.isType.audioMedia(pool):
+                    _audioMedia(pool)
+                    continue
+        else:
+            rich.print(f'[AudioManager] [red b]Unload Media: [green b]Finished')
     def unloadAudioMediaSlot(self, pool:str, poolIndex:None|int=None):
         if not self._isValidGroup(pool): 
             return rich.print(f'[AudioManager] [red b]Unload AudioMedia Slot:[/red b] ({pool}) [red b]Invalid Group')
@@ -340,7 +350,7 @@ class AudioManager():
         rich.print(f'[green b]OK')
     # testing to best align with AudioMedia()
     def unloadSoundEffectObj(self, pool:str, index:int):
-        rich.print(f"[AudioManager] [red b]Unload SoundEffect:[/red b] ({pool}) [purple]{index}_{self.audioPool[pool][index]}[/purple] ", end='')
+        rich.print(f"[AudioManager] [red b]Unload SoundEffect:[/red b] ({pool}) [purple]{index}.{self.audioPool[pool][index]}[/purple] ", end='')
         if not self.isType.soundEffect(pool):
             return rich.print('[red b] NOT', SoundType.SOUND_EFFECT)
         self.audioPool[pool].pop(index)
