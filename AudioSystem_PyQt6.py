@@ -274,7 +274,7 @@ class AudioManager():
             slot = self.audioPool.get(pool)[poolIndex]
             _setAudioMediaParams(slot, audioPathQUrl)
             rich.print(f'[b]Set [cyan b][Slot {poolIndex}]','[green b]OK[/green b]')
-    ## This block of code is fucking weird
+    # TODO add handling for unloading sfx only and ALL
     def unloadAllMedia(self, type:SoundType|None=None):
         def _audioMedia(pool):
             # rich.print(f"[AudioManager] [red b]Unload All AudioMedia:[/red b] ({pool}) [blue]Slots[/blue] ",end='')
