@@ -30,7 +30,8 @@ AudioSystem = AudioManager(device[1],
                             'sfxMaster':SoundType.MASTER_VOLUME,
                             'sfx.name':SoundType.SOUND_EFFECT,
                             'audio':SoundType.AUDIO_MEDIA,
-                            'audio1':SoundType.AUDIO_MEDIA})
+                            'audio1':SoundType.AUDIO_MEDIA},
+                            100, 7)
 
 respondToMyShitty_CTRL_C_Please = updateTimerQueue()
 AudioSystem.addIndex(SoundType.SOUND_EFFECT,"./SoundFiles/funny sfx/Asterisk.wav")
@@ -64,8 +65,12 @@ AudioSystem.loadAudioMedia('audio1','startup')
 # AudioSystem.stopAll()
 # AudioSystem.unloadAllMedia(SoundType.AUDIO_MEDIA)
 # AudioSystem.unloadAllMedia(SoundType.SOUND_EFFECT)
-AudioSystem.unloadAllMedia()
+# AudioSystem.unloadAllMedia()
 
 # AudioSystem.status()
 AudioSystem.unloadAudioMediaSlot('a',2)
+AudioSystem.status()
+AudioSystem.playSoundEffect("sfx.name", 2, True)
+# AudioSystem.stopSoundEffect("sfx.name", 2)
+
 sys.exit(APP.exec())

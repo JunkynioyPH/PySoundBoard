@@ -279,7 +279,7 @@ class AudioManager():
             for slot in range(0,self.audioPoolSize):
                 self.unloadAudioMediaSlot(pool, slot)
             else:
-                rich.print(f'[AudioManager] [red b]Unload AudioMedia: [/red b]({pool}) [green b]OK')
+                rich.print(f'[AudioManager] [red b]Unload AudioMedia [yellow]Pool: [/red b]({pool}) [green b]OK')
         def _soundEffect(pool):
             for _ in range(len(self.audioPool.get(pool))):
                 self.unloadSoundEffectObj(pool, 0)
@@ -330,7 +330,29 @@ class AudioManager():
         self._audioMediaControlState(pool, slot, AudioPlaybackAction.PAUSE)
     def stopSlot(self, pool:str, slot:int):
         self._audioMediaControlState(pool, slot, AudioPlaybackAction.STOP)
-    ## TODO need rework and testing to best align with AudioMedia()
+    def playSoundEffect(self, pool:str, index:int, looped:bool=False):
+        self._soundEffectControl(pool, index, AudioPlaybackAction.PLAY, looped)
+    def stopSoundEffect(self, pool:str, index:int):
+        self._soundEffectControl(pool, index, AudioPlaybackAction.STOP)
+    def _soundEffectControl(self, pool:str, index:int, state: AudioPlaybackAction, looped:bool=False):
+        if not self._isValidGroup(pool): 
+            return rich.print(f'[red b]Invalid Group')
+        if not self.isType.soundEffect(pool):
+            return rich.print('[red b] NOT', SoundType.SOUND_EFFECT)
+        soundEffectPool = self.audioPool.get(pool)
+        rich.print(f'{soundEffectPool}\n[AudioManager] [b]SoundEffect Control: <{pool}> ', end='')
+        match state:
+            case AudioPlaybackAction.PLAY:
+                soundEffectPool[index].setLoopCount(((2**32)//2)-1) if looped else ''
+                rich.print(f'[cyan b]Play[/cyan b] [b]{soundEffectPool[index]} ', end='')
+                soundEffectPool[index].setVolume((self.settings.get('volume').get(pool))/100)
+                soundEffectPool[index].play()
+            case AudioPlaybackAction.STOP:
+                rich.print(f'[red b]Stop[/red b] [b]{soundEffectPool[index]} ', end='')
+                soundEffectPool[index].stop()
+            case _:
+                rich.print(f'Unknown state {state}', end='')
+        rich.print(f'[green]OK')
     def loadSoundEffectObj(self, pool:str, sound:str):
         rich.print(f"[AudioManager] [blue b]Load SoundEffect:[/blue b] ({pool}) [magenta b]<{sound}>[/magenta b] ", end='')
         if not self._isValidGroup(pool): 
@@ -343,8 +365,7 @@ class AudioManager():
         if not sound:
             rich.print(f'[red b]NOT INDEXED[/red b]')
             return 
-        soundObj = SoundEffect(sound, self.settings.get('device')) # TODO looping?
-        soundObj.setVolume(self.settings['volume'][pool])
+        soundObj = SoundEffect(sound, self.settings.get('device'))
         # add to loaded buffer whatever it's called pooooool
         self.audioPool[pool].append(soundObj)
         rich.print(f'[green b]OK')
