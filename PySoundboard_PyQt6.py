@@ -254,6 +254,9 @@ class MainWindow(QMainWindow):
         self.updaterLoop = updateTimerQueue(self, 125)
         self.updaterLoop.appendToQueue(self._updateTopBarTitle)
         self.setWindowTitle('PySoundboard PyQt6 GUI')
+        AudioSystem.addIndex(PSbHelper.SoundType.SOUND_EFFECT,'./startup.wav')
+        AudioSystem.loadSoundEffectObj('sound','startup')
+        AudioSystem.playSoundEffect('sound',0)
 #         self.setObjectName('baseCanvas')
 #         ## To keep ASPECT_RATIO use:
 #         # background-image: url(image.png);
@@ -318,8 +321,7 @@ class MainWindow(QMainWindow):
             try:
                 UpdateSettings("AudioDevice",self.audioDeviceSelectComboBox.currentText())
                 AudioSystem.setDevice(_getDevice(), True)
-                AudioSystem.loadAudioMedia('audio','startup',0)
-                AudioSystem.playSlot('audio',0)
+                AudioSystem.playSoundEffect('sound',0)
                 splashCli()
                 rich.print(f"[PySoundboard] <{f'Default Device"{Settings["AudioDevice"]}"' if Settings["AudioDevice"] is None else self.audioDeviceSelectComboBox.currentText()}> Found!\n[PySoundboard] Successfully Bound to Device!")
             except Exception as ERR:
@@ -327,8 +329,7 @@ class MainWindow(QMainWindow):
                 rich.print('[PySoundboard] System Defaulting!')
                 UpdateSettings("AudioDevice", None)
                 AudioSystem.setDevice(QMediaDevices.defaultAudioOutput(), True)
-                AudioSystem.loadAudioMedia('audio','startup',0)
-                AudioSystem.playSlot('audio',0)
+                AudioSystem.playSoundEffect('sound',0)
                 rich.print(f"[PySoundboard] [{self.audioDeviceSelectComboBox.currentText()}] : {repr(ERR)}\n[PySoundboard] Restart Soundboard to refresh Dropdown List ") if self.audioDeviceSelectComboBox.currentIndex() != 0 else ''      
         self.audioDeviceSelectComboBox.setFixedSize(435, 42)
         self.audioDeviceSelectComboBox.setPlaceholderText('Defaulting, Select an Output Device...')
@@ -540,7 +541,4 @@ AudioSystem = PSbHelper.InitializeAudioSystem(Settings); AudioSystem.togglePoolR
 # Start Window
 Main = MainWindow(); Main.show(); Main.center_window() if os.name=='nt' else ''
 Main.handHeldMode(Settings['HandHeld'])
-AudioSystem.addIndex(PSbHelper.SoundType.AUDIO_MEDIA,'./startup.wav')
-AudioSystem.loadAudioMedia('audio','startup',0)
-AudioSystem.playSlot('audio',0)
 sys.exit(APP.exec())

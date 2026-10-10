@@ -55,7 +55,6 @@ def InitializeSettings():
         writeNewJSONValues()
         return InitializeSettings()
     return Values
-        
 def InitializeAudioSystem(Settings:dict):
     if Settings['AudioDevice'] is None:
         if os.name == 'nt': rich.print('\n[PySoundboard] VB-Audio VoiceMeeter/VB-Audio Virtual Cable [NOT FOUND]\n[PySoundboard] Using [System Default Output] !\n[PySoundboard] <Settings.json> "AudioDevice":None !\n')     
