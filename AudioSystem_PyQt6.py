@@ -344,12 +344,12 @@ class AudioManager():
     def _soundEffectControl(self, pool:str, index:int, state: AudioPlaybackAction, looped:bool=False):
         rich.print(f'[AudioManager] [b]SoundEffect Control: <{pool}>', end='')
         if not self._isValidGroup(pool): 
-            return rich.print(f'[red b]Invalid Group')
+            return rich.print(f'[red b] Invalid Group')
         if not self.isType.soundEffect(pool):
-            return rich.print('[red b]NOT', SoundType.SOUND_EFFECT)
-        if len(self.audioPool.get('sound')) <= 0:
-            return rich.print('[red b]Empty SoundEffect Pool')
+            return rich.print('[red b] NOT', SoundType.SOUND_EFFECT)
         soundEffectPool = self.audioPool.get(pool)
+        if len(soundEffectPool) <= 0:
+            return rich.print('[red b] Empty SoundEffect Pool')
         match state:
             case AudioPlaybackAction.PLAY:
                 soundEffectPool[index].setLoopCount(((2**32)//2)-1) if looped else ''

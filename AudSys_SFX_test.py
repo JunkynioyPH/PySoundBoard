@@ -70,6 +70,8 @@ AudioSystem.loadAudioMedia('audio1','startup')
 # AudioSystem.status()
 AudioSystem.unloadAudioMediaSlot('a',2)
 AudioSystem.status()
+AudioSystem.addIndex(SoundType.SOUND_EFFECT,'./startup.wav')
+AudioSystem.loadSoundEffectObj('sfx.name', 'startup')
 AudioSystem.playSoundEffect("sfx.name", 2, True)
 # AudioSystem.stopSoundEffect("sfx.name", 2)
 
